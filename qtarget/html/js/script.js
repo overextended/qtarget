@@ -44,9 +44,9 @@ $(document).on('mousedown', (event) => {
 		$('.target-wrapper').hide();
 		switch (event.which) {
 			case 1:
-			$.post('http://qtTarget/selectTarget', JSON.stringify(TargetData));
+			$.post('http://qtarget/selectTarget', JSON.stringify(TargetData));
 			case 3:
-			$.post('http://qtTarget/closeTarget');
+			$.post('http://qtarget/closeTarget');
 			break;
 		}
 	}
@@ -57,7 +57,7 @@ $(document).on('keydown', function() {
 		case 27: // ESC
 			$(".target-label").html("");
 			$('.target-wrapper').hide();
-			$.post('http://qtTarget/closeTarget');
+			$.post('http://qtarget/closeTarget');
 			break;
 	}
 });
