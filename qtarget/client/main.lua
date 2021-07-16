@@ -12,7 +12,7 @@ local RaycastCamera = function(flag)
     local rayHandle, result, hit, endCoords, surfaceNormal, entityHit = StartShapeTestLosProbe(cam, destination, flag, ESX.PlayerData.ped, 0)
 	repeat
 		result, hit, endCoords, surfaceNormal, entityHit = GetShapeTestResult(rayHandle)
-		Citizen.Wait(5)
+		Citizen.Wait(0)
 	until result ~= 1
 	if hit == 0 then Citizen.Wait(50) end
 	return hit, endCoords, entityHit
@@ -27,10 +27,8 @@ local ItemCount = function(item)
 				return v.count
 			end
 		end
-		return 0
-	else 
-		return 0
 	end
+	return 0
 end
 
 local DisableNUI = function()
@@ -121,99 +119,98 @@ function EnableTarget()
 		while targetActive do
 			local plyCoords = GetEntityCoords(ESX.PlayerData.ped)
 			local hit, coords, entity = RaycastCamera(30)
-			local entityType = GetEntityType(entity)
-			if entityType > 0 then
+			if hit then
+				local entityType = GetEntityType(entity)
+				if entityType > 0 then
 
-				-- Owned entity targets
-				if NetworkGetEntityIsNetworked(entity) then 
-					local data = Entities[NetworkGetNetworkIdFromEntity(entity)]
-					if data and #(plyCoords - coords) <= data.distance then
-						CheckEntity(entity, data)
+					-- Owned entity targets
+					if NetworkGetEntityIsNetworked(entity) then 
+						local data = Entities[NetworkGetNetworkIdFromEntity(entity)]
+						if data and #(plyCoords - coords) <= data.distance then
+							CheckEntity(entity, data)
+						end
 					end
-				end
-				
-				-- Ped targets
-				if entityType == 1 then
-					--[[if IsPedAPlayer(entity) then
-						todo: setup player stuff
-					else]]
+					
+					-- Ped targets
+					if entityType == 1 then
+						--[[if IsPedAPlayer(entity) then
+							todo: setup player stuff
+						else]]
+							local data = Models[GetEntityModel(entity)]
+							if data and #(plyCoords - coords) <= data.distance then
+								CheckEntity(entity, data)
+							end
+						--end
+
+					-- Vehicle targets
+					elseif entityType == 2 then
+						local data = Models[GetEntityModel(entity)]
+						if data and #(plyCoords - coords) <= data.distance then
+							-- todo: setup vehicle stuff
+						end
+
+					-- Object targets
+					else
 						local data = Models[GetEntityModel(entity)]
 						if data and #(plyCoords - coords) <= data.distance then
 							CheckEntity(entity, data)
 						end
-					--end
-
-				-- Vehicle targets
-				elseif entityType == 2 then
-					local data = Models[GetEntityModel(entity)]
-					if data and #(plyCoords - coords) <= data.distance then
-						-- todo: setup vehicle stuff
 					end
-
-				-- Object targets
-				else
-					local data = Models[GetEntityModel(entity)]
-					if data and #(plyCoords - coords) <= data.distance then
-						CheckEntity(entity, data)
-					end
-				end
-			end 
-			if not success then 
-				local hit, coords, entity = RaycastCamera(-1)
-				-- Zone targets
-				for _,zone in pairs(Zones) do
-					if zone:isPointInside(coords) and #(plyCoords - zone.center) <= zone.targetoptions.distance then 
-						local options = zone.targetoptions.options
-						local send_options = {}
-						for o, data in pairs(options) do
-							if CheckOptions(data) then
-								local slot = #send_options + 1 
-								send_options[slot] = data
-								send_options[slot].entity = entity
-							end
-						end
-						if #send_options > 0 then
-							sendData = send_options
-							SendNUIMessage({response = "validTarget", data = send_options})
-							while targetActive do
-								local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-								local hit, coords, entity2 = RaycastCamera(-1)
-								if not zone:isPointInside(coords) or #(playerCoords - zone.center) > zone.targetoptions.distance then 
-									if hasFocus then DisableNUI() end
-									break
-								elseif not hasFocus and IsDisabledControlPressed(0, 24) then
-									EnableNUI()
+				end 
+				if not success then 
+					local hit, coords, entity = RaycastCamera(-1)
+					if hit then
+						-- Zone targets
+						for _,zone in pairs(Zones) do
+							if zone:isPointInside(coords) and #(plyCoords - zone.center) <= zone.targetoptions.distance then 
+								local options = zone.targetoptions.options
+								local send_options = {}
+								for o, data in pairs(options) do
+									if CheckOptions(data) then
+										local slot = #send_options + 1 
+										send_options[slot] = data
+										send_options[slot].entity = entity
+									end
 								end
-							end
-							success = false
-							SendNUIMessage({response = "leftTarget"})
-						else
-							repeat
-								Citizen.Wait(50)
-								local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-								local hit, coords, entity2 = RaycastCamera(-1)
-							until zone:isPointInside(coords) or #(playerCoords - zone.center) > zone.targetoptions.distance
-							break
+								if #send_options > 0 then
+									sendData = send_options
+									SendNUIMessage({response = "validTarget", data = send_options})
+									while targetActive do
+										local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
+										local hit, coords, entity2 = RaycastCamera(-1)
+										if not zone:isPointInside(coords) or #(playerCoords - zone.center) > zone.targetoptions.distance then 
+											if hasFocus then DisableNUI() end
+											break
+										elseif not hasFocus and IsDisabledControlPressed(0, 24) then
+											EnableNUI()
+										end
+									end
+									success = false
+									SendNUIMessage({response = "leftTarget"})
+								else
+									repeat
+										Citizen.Wait(50)
+										local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
+										local hit, coords, entity2 = RaycastCamera(-1)
+									until zone:isPointInside(coords) or #(playerCoords - zone.center) > zone.targetoptions.distance
+									break
+								end
+							end 
 						end
-					end 
+					end
 				end
 			end
 			Citizen.Wait(50)
 		end
-		success = false
-		hasFocus = false
-		SendNUIMessage({response = "closeTarget"})
 	end
 end
 
 function DisableTarget()
 	if targetActive then
-		success = false
-		targetActive = false
-		hasFocus = false
-		SendNUIMessage({response = "closeTarget"})
 		SetNuiFocus(false, false)
 		SetNuiFocusKeepInput(false)
+		SendNUIMessage({response = "closeTarget"})
+		targetActive = false
 	end
 end
 
