@@ -30,3 +30,6 @@ With that being said, we're happy to release this resource as it is functional t
 
 ## [» Installation](https://github.com/QuantusRP/qtarget/wiki/Installation)
 ## [» Documentation](https://github.com/QuantusRP/qtarget/wiki)
+
+## Issues
+Please use the GitHub issues system to report issues. 
