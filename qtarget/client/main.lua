@@ -68,6 +68,7 @@ local CheckEntity = function(entity, data)
 	end
 	if #send_options > 0 then
 		sendData = send_options
+		success = true
 		SendNUIMessage({response = "validTarget", data = send_options})
 		while targetActive do
 			local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
@@ -156,7 +157,8 @@ function EnableTarget()
 						CheckEntity(entity, data)
 					end
 				end
-			else
+			end 
+			if not success then 
 				local hit, coords, entity = RaycastCamera(-1)
 				-- Zone targets
 				for _,zone in pairs(Zones) do
@@ -274,7 +276,7 @@ end
 function AddEntityZone(name, entity, options, targetoptions)
 	Zones[name] = EntityZone:Create(entity, options)
 	Zones[name].targetoptions = targetoptions
-	end
+end
 
 function RemoveZone(name)
 	if not Zones[name] then return end
