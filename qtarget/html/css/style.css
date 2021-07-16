@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&display=swap');
+
+
+.target-wrapper {
+	display: none;
+}
+
+.target-eye {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translateY(-50%) translateX(-50%);
+	font-size: 3vh;
+}
+
+.target-label-wrapper {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-left: 2vh;
+	margin-top: -1.5vh;
+}
+
+.target-label {
+	list-style: none;
+	font-size: 1.3vh;
+	font-weight: bold;
+	font-family: 'Oxygen';
+	color: white;
+	text-shadow: 1px 1px rgba(255, 255, 255, 0.1);
+	text-transform: uppercase;
+	user-select: none;
+	white-space: nowrap;
+	vertical-align: middle;
+	padding-left: 4px
+}
+
+.target-icon {
+	color: rgb(124, 74, 206);
+	margin-top: 2px;
+}
+
+.target-item {
+	background: rgb(0,0,0);
+	background: linear-gradient(90deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.6) 66%, rgba(0,0,0,0) 100%);
+	border: 0px;
+	border-left: 4px solid rgb(103, 55, 180);
+	border-radius: 3px;
+	margin-bottom: 6px;
+	width: 280px;
+	padding: 6px;
+	height: 19px;
+}
