@@ -19,7 +19,7 @@ window.addEventListener('message', function(event) {
 		$.each(item.data, function (index, item) {
 			$(".target-label").append("<div class='target-item' id='target-"+index+"'<li><i class='"+item.icon+" fa-fw fa-pull-left target-icon'></i>"+item.label+"</li></div>");
 			$("#target-"+index).hover((e)=> {
-				$("#target-"+index).css("color",e.type === "mouseenter"?"rgb(124, 74, 206)":"white")
+				$("#target-"+index).css("color",e.type === "mouseenter"?"rgb(98, 135, 236)":"white")
 			})
 			
 			$("#target-"+index+"").css("padding-top", "7px");

@@ -27,7 +27,6 @@
 	font-weight: bold;
 	font-family: 'Oxygen';
 	color: white;
-	text-shadow: 1px 1px rgba(255, 255, 255, 0.1);
 	text-transform: uppercase;
 	user-select: none;
 	white-space: nowrap;
@@ -36,16 +35,13 @@
 }
 
 .target-icon {
-	color: rgb(124, 74, 206);
+	color: rgb(98, 135, 236);
 	margin-top: 2px;
 }
 
 .target-item {
-	background: rgb(0,0,0);
-	background: linear-gradient(90deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.6) 66%, rgba(0,0,0,0) 100%);
+	background: rgba(0,0,0,0.7);
 	border: 0px;
-	border-left: 4px solid rgb(103, 55, 180);
-	border-radius: 3px;
 	margin-bottom: 6px;
 	width: 280px;
 	padding: 6px;
