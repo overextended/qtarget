@@ -18,6 +18,21 @@ local RaycastCamera = function(flag)
 	return hit, endCoords, entityHit
 end
 
+local ItemCount = function(item)
+	if Config.InventoryType == 'linden' then 
+		return exports['linden_inventory']:CountItems(item)[item]
+	elseif Config.InventoryType == 'ESX' then
+		for k, v in pairs(ESX.GetPlayerData().inventory) do
+			if v.name == item then
+				return v.count
+			end
+		end
+		return 0
+	else 
+		return 0
+	end
+end
+
 local DisableNUI = function()
 	SetNuiFocus(false, false)
 	SetNuiFocusKeepInput(false)
@@ -36,7 +51,7 @@ end
 local CheckOptions = function(data)
 	if (not data.owner or data.owner == NetworkGetNetworkIdFromEntity(ESX.PlayerData.ped))
 	and (not data.job or data.job == ESX.PlayerData.job.name or (data.job[ESX.PlayerData.job.name] and data.job[ESX.PlayerData.job.name] <= ESX.PlayerData.job.grade))
-	and (not data.required_item or data.required_item and exports['linden_inventory']:CountItems(data.required_item)[data.required_item] > 0)
+	and (not data.required_item or data.required_item and ItemCount(data.required_item) > 0)
 	and (data.canInteract == nil or data.canInteract()) then return true
 	else return false end
 end

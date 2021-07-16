@@ -1,9 +1,6 @@
 Config = {}
 
--- Return an object in the format
--- {
---	 name = job name
--- }
+Config.InventoryType = 'linden' -- Set to 'ESX' if not using linden inventory.
 
 Config.VehicleBones = {
 'chassis',  
