@@ -96,10 +96,7 @@ function EnableTarget()
 		SendNUIMessage({response = "openTarget"})
 		
 		SetInterval(1, 5, function()
-			if not targetActive then
-				Citizen.Wait(200)
-				ClearInterval(1)
-			elseif hasFocus then
+			if hasFocus then
 				DisableControlAction(0, 1, true)
 				DisableControlAction(0, 2, true)
 			end
@@ -202,6 +199,9 @@ function EnableTarget()
 			end
 			Citizen.Wait(50)
 		end
+		hasFocus, success = false, false
+		ClearInterval(1)
+		SendNUIMessage({response = "closeTarget"})
 	end
 end
 
@@ -209,7 +209,6 @@ function DisableTarget()
 	if targetActive then
 		SetNuiFocus(false, false)
 		SetNuiFocusKeepInput(false)
-		SendNUIMessage({response = "closeTarget"})
 		targetActive = false
 	end
 end
