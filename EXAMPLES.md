@@ -136,7 +136,7 @@ end)
 ```
 
 ### EntityZone / Add a qtarget in an event
-This is an example of how you can dynamically create an qtarget in an event, for example, planting a potato plant.
+This is an example of how you can dynamically create a qtarget in an event, for example, planting a potato plant.
 
 ```lua
 AddEventHandler('plantpotato',function()
@@ -154,7 +154,7 @@ AddEventHandler('plantpotato',function()
 
 	-- Logic to handle growth, create a thread and loop, or do something else. Up to you.
 
-	exports['bt-target']:AddEntityZone("potato-growing-"..plant, plant, {
+	exports['qtarget']:AddEntityZone("potato-growing-"..plant, plant, {
 		name = "potato-growing-"..plant,
 		heading=GetEntityHeading(plant),
 		debugPoly=false,
