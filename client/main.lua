@@ -100,7 +100,7 @@ function EnableTarget()
 				DisableControlAction(0, 1, true)
 				DisableControlAction(0, 2, true)
 			end
-			DisablePlayerFiring(PlayerId(), true)
+			DisablePlayerFiring(ESX.PlayerData.ped, true)
 			DisableControlAction(0, 25, true)
 			DisableControlAction(0, 47, true)
 			DisableControlAction(0, 58, true)
