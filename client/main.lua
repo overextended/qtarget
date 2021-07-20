@@ -90,7 +90,7 @@ local CheckEntity = function(entity, data)
 end
 
 function EnableTarget()
-	if success then return end
+	if success or not IsControlEnabled(0, 24) then return end
 	if not targetActive then 
 		targetActive = true
 		SendNUIMessage({response = "openTarget"})
