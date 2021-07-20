@@ -9,7 +9,7 @@ local RaycastCamera = function(flag)
 	local num = math.abs(math.cos(direction.x))
 	direction = vector3((-math.sin(direction.y) * num), (math.cos(direction.y) * num), math.sin(direction.x))
     local destination = vector3(cam.x + direction.x * 30, cam.y + direction.y * 30, cam.z + direction.z * 30)
-    local rayHandle, result, hit, endCoords, surfaceNormal, entityHit = StartShapeTestLosProbe(cam, destination, flag, ESX.PlayerData.ped, 0)
+    local rayHandle, result, hit, endCoords, surfaceNormal, entityHit = StartShapeTestLosProbe(cam, destination, flag or -1, ESX.PlayerData.ped, 0)
 	repeat
 		result, hit, endCoords, surfaceNormal, entityHit = GetShapeTestResult(rayHandle)
 		Citizen.Wait(0)
@@ -17,6 +17,7 @@ local RaycastCamera = function(flag)
 	if hit == 0 then Citizen.Wait(50) end
 	return hit, endCoords, entityHit
 end
+exports("raycast", RaycastCamera)
 
 local ItemCount = function(item)
 	if Config.InventoryType == 'linden' then 
