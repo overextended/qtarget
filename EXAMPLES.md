@@ -63,7 +63,7 @@ exports['qtarget']:AddTargetModel(Config.Peds, {
 			icon = "fas fa-sack-dollar",
 			label = "Rob",
 			canInteract = function()
-				local hit, coords, entity = RaycastCamera(5.0)
+				local hit, coords, entity = RaycastCamera(5)
 				if IsPedAPlayer(entity) then 
 					return Player(GetPlayerServerId(NetworkGetPlayerIndexFromPed(entity))).state.handsup
 				end
