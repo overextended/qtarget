@@ -1,6 +1,6 @@
 Config = {}
 
-Config.InventoryType = 'linden' -- Set to 'ESX' if not using linden inventory.
+Config.LindenInventory = false -- Set to `true` if using linden_inventory.
 
 Config.VehicleBones = {
 'chassis',  

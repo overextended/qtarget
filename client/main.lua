@@ -20,9 +20,8 @@ end
 exports("raycast", RaycastCamera)
 
 local ItemCount = function(item)
-	if Config.InventoryType == 'linden' then 
-		return exports['linden_inventory']:CountItems(item)[item]
-	elseif Config.InventoryType == 'ESX' then
+	if Config.LindenInventory then return exports['linden_inventory']:CountItems(item)[item]
+	else
 		for k, v in pairs(ESX.GetPlayerData().inventory) do
 			if v.name == item then
 				return v.count

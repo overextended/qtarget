@@ -1,4 +1,3 @@
-# qtarget 
 ## Overview
 qTarget is a FiveM interaction / targeting solution that allows you to hold a key to activate a mode that will let players target specific objects or zones to be able to interact with. 
 
@@ -12,6 +11,15 @@ qTarget is a FiveM interaction / targeting solution that allows you to hold a ke
 * Disables combat while the interactive mode is active.
 * Optimised to  an inch of its life - 0.04ms max recorded during testing. 
 
+## Dependencies
+* [ESX Legacy](https://github.com/esx-framework/esx-legacy) by the ESX Team
+* [PolyZone](https://github.com/mkafrin/PolyZone) by mkafrin
+## Recommended
+* [linden_inventory](https://github.com/thelindat/linden_inventory) by Linden
+
+## [» Installation](https://github.com/QuantusRP/qtarget/wiki/Installation)
+## [» Documentation](https://github.com/QuantusRP/qtarget/wiki)
+
 ## Preface 
 This is an actively developed resource. As such, it is to be expected that there are bugs, issues and - heaven forbid - breaking commits, occasionally. We will provide support for this resource, so long as you accept that this is currently a work in progress and not yet intended as a final product. 
 
@@ -22,14 +30,6 @@ With that being said, we're happy to release this resource as it is functional t
 * Inspired by, and based on, including using javascript from: [bt-target](https://github.com/brentN5/bt-target) by [@brentN5](https://github.com/brentN5)
 * Motivation by the entire [Linden's discord](https://discord.gg/4V6VwvBEzQ) communtiy.
 * Made for QuantusRP, our FiveM roleplaying server.
-
-## Dependencies
-* [linden_inventory](https://github.com/thelindat/linden_inventory) by Linden
-* [ESX Legacy](https://github.com/esx-framework/esx-legacy) by the ESX Team
-* [PolyZone](https://github.com/mkafrin/PolyZone) by mkafrin
-
-## [» Installation](https://github.com/QuantusRP/qtarget/wiki/Installation)
-## [» Documentation](https://github.com/QuantusRP/qtarget/wiki)
 
 ## Issues
 Please use the GitHub issues system to report issues. 
