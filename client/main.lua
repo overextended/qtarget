@@ -261,10 +261,9 @@ function EnableTarget()
 					if hit then
 						-- Zone targets
 						for _,zone in pairs(Zones) do
-							if zone:isPointInside(coords) and #(plyCoords - zone.center) <= zone.targetoptions.distance then 
-								local options = zone.targetoptions.options
+							if zone:isPointInside(coords) and #(plyCoords - zone.center) <= zone.targetoptions.distance then
 								local send_options = {}
-								for o, data in pairs(data.options) do
+								for o, data in pairs(zone.targetoptions.options) do
 									if CheckOptions(data) then
 										local slot = #send_options + 1 
 										send_options[slot] = data
