@@ -70,12 +70,6 @@ local CheckEntity = function(entity, data, action)
 		action()
 		success = false
 		SendNUIMessage({response = "leftTarget"})
-	else
-		repeat
-			Citizen.Wait(50)
-			local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-			local hit, coords, entity2 = RaycastCamera(30)
-		until entity ~= entity2 or #(playerCoords - coords) > data.distance
 	end
 end
 
@@ -285,13 +279,6 @@ function EnableTarget()
 									end
 									success = false
 									SendNUIMessage({response = "leftTarget"})
-								else
-									repeat
-										Citizen.Wait(50)
-										local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-										local hit, coords, entity2 = RaycastCamera(-1)
-									until zone:isPointInside(coords) or #(playerCoords - zone.center) > zone.targetoptions.distance
-									break
 								end
 							end 
 						end
