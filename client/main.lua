@@ -1,18 +1,6 @@
 local Config, Players, Entities, Models, Zones, Bones, ItemCount = load(LoadResourceFile(GetCurrentResourceName(), 'config.lua'), 'config.lua')()
 local hasFocus, success, sendData = false, false
 
-local ItemCount = function(item)
-	if Config.LindenInventory then return exports['linden_inventory']:CountItems(item)[item]
-	else
-		for k, v in pairs(ESX.GetPlayerData().inventory) do
-			if v.name == item then
-				return v.count
-			end
-		end
-	end
-	return 0
-end
-
 local RaycastCamera = function(flag)
 	local cam = GetGameplayCamCoord()
 	local direction = GetGameplayCamRot()
@@ -45,30 +33,48 @@ local EnableNUI = function()
 	end
 end
 
-local CheckOptions = function(data, entity)
-	if (data.owner == nil or data.owner == NetworkGetNetworkIdFromEntity(ESX.PlayerData.ped))
+local CheckOptions = function(data, entity, distance)
+	if (distance <= data.distance)
+	and (data.owner == nil or data.owner == NetworkGetNetworkIdFromEntity(ESX.PlayerData.ped))
 	and (data.job == nil or data.job == ESX.PlayerData.job.name or (data.job[ESX.PlayerData.job.name] and data.job[ESX.PlayerData.job.name] <= ESX.PlayerData.job.grade))
 	and (data.required_item == nil or data.required_item and ItemCount(data.required_item) > 0)
 	and (data.canInteract == nil or data.canInteract(entity)) then return true
 	else return false end
 end
 
-local CheckEntity = function(entity, data, action)
+local CheckEntity = function(data, entity, distance)
 	local send_options = {}
-	for o, data in pairs(data.options) do
-		if CheckOptions(data, entity) then 
+	local send_distance = 30
+	for o, data in pairs(data) do
+		if CheckOptions(data, entity, distance) then
 			local slot = #send_options + 1 
 			send_options[slot] = data
 			send_options[slot].entity = entity
-		end
+			if data.distance < send_distance then send_distance = data.distance end
+		elseif data.distance < send_distance then send_distance = data.distance end
 	end
-	if #send_options > 0 then
+	if next(send_options) and distance <= send_distance then
 		sendData = send_options
 		success = true
 		SendNUIMessage({response = "validTarget", data = send_options})
-		action()
+		while targetActive do
+			local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
+			local hit, coords, entity2 = RaycastCamera(30)
+			if entity ~= entity2 or #(playerCoords - coords) > send_distance then 
+				if hasFocus then DisableNUI() end
+				break
+			elseif not hasFocus and IsDisabledControlPressed(0, 24) then
+				EnableNUI()
+			end
+		end
 		success = false
 		SendNUIMessage({response = "leftTarget"})
+	else
+		repeat
+			Citizen.Wait(100)
+			local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
+			local hit, coords, entity2 = RaycastCamera(30)
+		until targetActive == false or entity ~= entity2 or #(playerCoords - coords) <= send_distance
 	end
 end
 
@@ -134,120 +140,58 @@ function EnableTarget()
 					if NetworkGetEntityIsNetworked(entity) then 
 						local data = Entities[NetworkGetNetworkIdFromEntity(entity)]
 						if data and #(plyCoords - coords) <= data.distance then
-							CheckEntity(entity, data, function()
-								while targetActive do
-									local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-									local hit, coords, entity2 = RaycastCamera(30)
-									if entity ~= entity2 or #(playerCoords - coords) > data.distance then 
-										if hasFocus then DisableNUI() end
-										break
-									elseif not hasFocus and IsDisabledControlPressed(0, 24) then
-										EnableNUI()
-									end
-								end
-							end)
+							CheckEntity(entity, data)
 						end
 					end
 					
-					if entityType == 1 then
-						-- Player targets
-						if IsPedAPlayer(entity) and next(Players.options) then
-							if #(plyCoords - coords) <= 2 then
-								CheckEntity(entity, Players, function()
-									while targetActive do
-										local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-										local hit, coords, entity2 = RaycastCamera(30)
-										if entity ~= entity2 or #(playerCoords - coords) > 2 then 
-											if hasFocus then DisableNUI() end
-											break
-										elseif not hasFocus and IsDisabledControlPressed(0, 24) then
-											EnableNUI()
-										end
-									end
-								end)
-							end
-						else
-
-							-- NPC targets
-							local data = Models[GetEntityModel(entity)]
-							if data and #(plyCoords - coords) <= data.distance then
-								CheckEntity(entity, data, function()
-									while targetActive do
-										local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-										local hit, coords, entity2 = RaycastCamera(30)
-										if entity ~= entity2 or #(playerCoords - coords) > data.distance then 
-											if hasFocus then DisableNUI() end
-											break
-										elseif not hasFocus and IsDisabledControlPressed(0, 24) then
-											EnableNUI()
-										end
-									end
-								end)
-							end
+					-- Player targets
+					if entityType == 1 and IsPedAPlayer(entity) then
+						if next(Players.options) and #(plyCoords - coords) <= 2 then
+							CheckEntity(entity, Players)
 						end
 
 					-- Vehicle bones
-					elseif entityType == 2 then
-						if #(plyCoords - coords) <= 1.8 then
-							local min, max = GetModelDimensions(GetEntityModel(entity))
-							local closestBone, closestPos, closestBoneName = CheckBones(coords, entity, min, max, Config.VehicleBones)
-							if closestBone and #(coords - closestPos) <= 1.8 then
-								local data = Bones[closestBoneName]
-								local send_options = {}
-								for o, data in pairs(data.options) do
-									if CheckOptions(data, entity) then 
-										local slot = #send_options + 1 
-										send_options[slot] = data
-										send_options[slot].entity = entity
-									end
+					elseif entityType == 2 and #(plyCoords - coords) <= 1.8 then
+						local min, max = GetModelDimensions(GetEntityModel(entity))
+						local closestBone, closestPos, closestBoneName = CheckBones(coords, entity, min, max, Config.VehicleBones)
+						if closestBone and #(coords - closestPos) <= 1.8 then
+							local data = Bones[closestBoneName]
+							local send_options = {}
+							for o, data in pairs(data.options) do
+								if CheckOptions(data, entity) then 
+									local slot = #send_options + 1 
+									send_options[slot] = data
+									send_options[slot].entity = entity
 								end
-								if #send_options > 0 then
-									sendData = send_options
-									success = true
-									SendNUIMessage({response = "validTarget", data = send_options})
-									while targetActive do
-										local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-										local hit, coords, entity2 = RaycastCamera(30)
-										if hit and entity == entity2 then
-											local closestBone2, closestPos2, closestBoneName2 = CheckBones(coords, entity, min, max, Config.VehicleBones)
-										
-											if closestBone ~= closestBone2 or #(coords - closestPos2) > 1.8 or #(playerCoords - closestPos2) > 1.8 then
-												if hasFocus then DisableNUI() end
-												break
-											elseif not hasFocus and IsDisabledControlPressed(0, 24) then EnableNUI() end
-										else
+							end
+							if #send_options > 0 then
+								sendData = send_options
+								success = true
+								SendNUIMessage({response = "validTarget", data = send_options})
+								while targetActive do
+									local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
+									local hit, coords, entity2 = RaycastCamera(30)
+									if hit and entity == entity2 then
+										local closestBone2, closestPos2, closestBoneName2 = CheckBones(coords, entity, min, max, Config.VehicleBones)
+									
+										if closestBone ~= closestBone2 or #(coords - closestPos2) > 1.8 or #(playerCoords - closestPos2) > 1.8 then
 											if hasFocus then DisableNUI() end
 											break
-										end
+										elseif not hasFocus and IsDisabledControlPressed(0, 24) then EnableNUI() end
+									else
+										if hasFocus then DisableNUI() end
+										break
 									end
 								end
 							end
 						end
 
-						-- Vehicle targets
-						local data = Models[GetEntityModel(entity)]
-						if data and #(plyCoords - coords) <= data.distance then
-							-- todo: setup vehicle stuff
-						end
-
-					-- Object targets
+					-- Entity targets
 					else
 						local data = Models[GetEntityModel(entity)]
-						if data and #(plyCoords - coords) <= data.distance then
-							CheckEntity(entity, data, function()
-								while targetActive do
-									local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-									local hit, coords, entity2 = RaycastCamera(30)
-									if entity ~= entity2 or #(playerCoords - coords) > data.distance then 
-										if hasFocus then DisableNUI() end
-										break
-									elseif not hasFocus and IsDisabledControlPressed(0, 24) then
-										EnableNUI()
-									end
-								end
-							end)
-						end
+						if data then CheckEntity(data, entity, #(plyCoords - coords)) end
 					end
+
 				end
 				if not success then 
 					local hit, coords, entity = RaycastCamera(-1)
@@ -278,6 +222,13 @@ function EnableTarget()
 									end
 									success = false
 									SendNUIMessage({response = "leftTarget"})
+								else
+									repeat
+										Citizen.Wait(50)
+										local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
+										local hit, coords, entity2 = RaycastCamera(-1)
+									until not targetActive or entity ~= entity2 or not zone:isPointInside(coords)
+									break
 								end
 							end 
 						end
@@ -341,8 +292,13 @@ function AddPolyzone(name, points, options, targetoptions)
 end
 
 function AddTargetModel(models, parameters)
+	local distance, options = parameters.distance or 2, parameters.options
 	for _, model in pairs(models) do
-		Models[model] = parameters
+		if not Models[model] then Models[model] = {} end
+		for k, v in pairs(options) do
+			v.distance = distance
+			table.insert(Models[model], v)
+		end
 	end
 end
 
