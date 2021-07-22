@@ -62,8 +62,7 @@ exports['qtarget']:AddTargetModel(Config.Peds, {
 			event = "qrp_interaction:RobPlayer",
 			icon = "fas fa-sack-dollar",
 			label = "Rob",
-			canInteract = function()
-				local hit, coords, entity = exports.qtarget:raycast()
+			canInteract = function(entity)
 				if IsPedAPlayer(entity) then 
 					return Player(GetPlayerServerId(NetworkGetPlayerIndexFromPed(entity))).state.handsup
 				end
@@ -150,8 +149,8 @@ AddEventHandler('plantpotato',function()
 			label = "Harvest potato",
 			plant = plant,
 			job = "farmer",
-			canInteract = function()
-				if Entity(plant).state.growth >= 100 then 
+			canInteract = function(entity)
+				if Entity(entity).state.growth >= 100 then 
 					return true
 				else 
 					return false
