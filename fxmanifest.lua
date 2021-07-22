@@ -16,11 +16,11 @@ client_scripts {
 	'@PolyZone/EntityZone.lua',
 	'@PolyZone/CircleZone.lua',
 	'@PolyZone/ComboZone.lua',
-	'config.lua',
 	'client/main.lua'
 }
 
 files {
+	'config.lua',
 	'html/index.html',
 	'html/css/style.css',
 	'html/js/script.js'

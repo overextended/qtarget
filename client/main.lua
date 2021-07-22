@@ -1,6 +1,5 @@
+local Config, Players, Entities, Models, Zones, Bones, ItemCount = load(LoadResourceFile(GetCurrentResourceName(), 'config.lua'), 'config.lua')()
 local hasFocus, success, sendData = false, false
-local Entities, Models, Zones, Bones = {}, {}, {}, {}, {}, {}
-local Players = {options={}}
 
 local ItemCount = function(item)
 	if Config.LindenInventory then return exports['linden_inventory']:CountItems(item)[item]
