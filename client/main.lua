@@ -46,18 +46,18 @@ local EnableNUI = function()
 	end
 end
 
-local CheckOptions = function(data)
+local CheckOptions = function(data,entity)
 	if (not data.owner or data.owner == NetworkGetNetworkIdFromEntity(ESX.PlayerData.ped))
 	and (not data.job or data.job == ESX.PlayerData.job.name or (data.job[ESX.PlayerData.job.name] and data.job[ESX.PlayerData.job.name] <= ESX.PlayerData.job.grade))
 	and (not data.required_item or data.required_item and ItemCount(data.required_item) > 0)
-	and (data.canInteract == nil or data.canInteract()) then return true
+	and (data.canInteract == nil or data.canInteract(entity)) then return true
 	else return false end
 end
 
 local CheckEntity = function(entity, data, action)
 	local send_options = {}
 	for o, data in pairs(data.options) do
-		if CheckOptions(data) then 
+		if CheckOptions(data,entity) then 
 			local slot = #send_options + 1 
 			send_options[slot] = data
 			send_options[slot].entity = entity
@@ -202,7 +202,7 @@ function EnableTarget()
 								local data = Bones[closestBoneName]
 								local send_options = {}
 								for o, data in pairs(data.options) do
-									if CheckOptions(data) then 
+									if CheckOptions(data,entity) then 
 										local slot = #send_options + 1 
 										send_options[slot] = data
 										send_options[slot].entity = entity
@@ -264,7 +264,7 @@ function EnableTarget()
 							if zone:isPointInside(coords) and #(plyCoords - zone.center) <= zone.targetoptions.distance then
 								local send_options = {}
 								for o, data in pairs(zone.targetoptions.options) do
-									if CheckOptions(data) then
+									if CheckOptions(data,entity) then
 										local slot = #send_options + 1 
 										send_options[slot] = data
 										send_options[slot].entity = entity
