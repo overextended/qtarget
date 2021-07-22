@@ -1,6 +1,6 @@
-local hasFocus, success = false, false
-local sendData = nil
+local hasFocus, success, sendData = false, false
 local Entities, Models, Zones, Bones = {}, {}, {}, {}, {}, {}
+local Players = {options={}}
 
 local ItemCount = function(item)
 	if Config.LindenInventory then return exports['linden_inventory']:CountItems(item)[item]
@@ -15,13 +15,13 @@ local ItemCount = function(item)
 end
 
 local RaycastCamera = function(flag)
-    local cam = GetGameplayCamCoord()
-    local direction = GetGameplayCamRot()
-    direction = vector2(direction.x * math.pi / 180.0, direction.z * math.pi / 180.0)
+	local cam = GetGameplayCamCoord()
+	local direction = GetGameplayCamRot()
+	direction = vector2(direction.x * math.pi / 180.0, direction.z * math.pi / 180.0)
 	local num = math.abs(math.cos(direction.x))
 	direction = vector3((-math.sin(direction.y) * num), (math.cos(direction.y) * num), math.sin(direction.x))
-    local destination = vector3(cam.x + direction.x * 30, cam.y + direction.y * 30, cam.z + direction.z * 30)
-    local rayHandle, result, hit, endCoords, surfaceNormal, entityHit = StartShapeTestLosProbe(cam, destination, flag or -1, ESX.PlayerData.ped, 0)
+	local destination = vector3(cam.x + direction.x * 30, cam.y + direction.y * 30, cam.z + direction.z * 30)
+	local rayHandle, result, hit, endCoords, surfaceNormal, entityHit = StartShapeTestLosProbe(cam, destination, flag or -1, ESX.PlayerData.ped, 0)
 	repeat
 		result, hit, endCoords, surfaceNormal, entityHit = GetShapeTestResult(rayHandle)
 		Citizen.Wait(0)
@@ -46,10 +46,10 @@ local EnableNUI = function()
 	end
 end
 
-local CheckOptions = function(data,entity)
-	if (not data.owner or data.owner == NetworkGetNetworkIdFromEntity(ESX.PlayerData.ped))
-	and (not data.job or data.job == ESX.PlayerData.job.name or (data.job[ESX.PlayerData.job.name] and data.job[ESX.PlayerData.job.name] <= ESX.PlayerData.job.grade))
-	and (not data.required_item or data.required_item and ItemCount(data.required_item) > 0)
+local CheckOptions = function(data, entity)
+	if (data.owner == nil or data.owner == NetworkGetNetworkIdFromEntity(ESX.PlayerData.ped))
+	and (data.job == nil or data.job == ESX.PlayerData.job.name or (data.job[ESX.PlayerData.job.name] and data.job[ESX.PlayerData.job.name] <= ESX.PlayerData.job.grade))
+	and (data.required_item == nil or data.required_item and ItemCount(data.required_item) > 0)
 	and (data.canInteract == nil or data.canInteract(entity)) then return true
 	else return false end
 end
@@ -57,7 +57,7 @@ end
 local CheckEntity = function(entity, data, action)
 	local send_options = {}
 	for o, data in pairs(data.options) do
-		if CheckOptions(data,entity) then 
+		if CheckOptions(data, entity) then 
 			local slot = #send_options + 1 
 			send_options[slot] = data
 			send_options[slot].entity = entity
@@ -158,13 +158,13 @@ function EnableTarget()
 					
 					if entityType == 1 then
 						-- Player targets
-						if IsPedAPlayer(entity) and next(Players) then
-							if data and #(plyCoords - coords) <= data.distance then
-								CheckEntity(entity, data, function()
+						if IsPedAPlayer(entity) and next(Players.options) then
+							if #(plyCoords - coords) <= 2 then
+								CheckEntity(entity, Players, function()
 									while targetActive do
 										local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
 										local hit, coords, entity2 = RaycastCamera(30)
-										if entity ~= entity2 or #(playerCoords - coords) > data.distance then 
+										if entity ~= entity2 or #(playerCoords - coords) > 2 then 
 											if hasFocus then DisableNUI() end
 											break
 										elseif not hasFocus and IsDisabledControlPressed(0, 24) then
@@ -202,7 +202,7 @@ function EnableTarget()
 								local data = Bones[closestBoneName]
 								local send_options = {}
 								for o, data in pairs(data.options) do
-									if CheckOptions(data,entity) then 
+									if CheckOptions(data, entity) then 
 										local slot = #send_options + 1 
 										send_options[slot] = data
 										send_options[slot].entity = entity
@@ -264,7 +264,7 @@ function EnableTarget()
 							if zone:isPointInside(coords) and #(plyCoords - zone.center) <= zone.targetoptions.distance then
 								local send_options = {}
 								for o, data in pairs(zone.targetoptions.options) do
-									if CheckOptions(data,entity) then
+									if CheckOptions(data, entity) then
 										local slot = #send_options + 1 
 										send_options[slot] = data
 										send_options[slot].entity = entity
@@ -332,7 +332,7 @@ RegisterNUICallback('closeTarget', function(data, cb)
 	hasFocus = false
 end)
 
-RegisterKeyMapping("+playerTarget", "Enable targeting~", "keyboard", "LMENU")
+RegisterKeyMapping("+playerTarget", "[qtarget] Enable targeting~", "keyboard", "LMENU")
 RegisterCommand('+playerTarget', EnableTarget, false)
 RegisterCommand('-playerTarget', DisableTarget, false)
 TriggerEvent("chat:removeSuggestion", "/+playerTarget")
@@ -384,6 +384,12 @@ function RemoveZone(name)
 	Zones[name] = nil
 end
 
+function AddPlayer(options)
+	for k, v in pairs(options) do
+		table.insert(Players.options, v)
+	end
+end
+
 exports("AddCircleZone", AddCircleZone)
 exports("AddBoxZone", AddBoxZone)
 exports("AddPolyzone", AddPolyzone)
@@ -392,3 +398,4 @@ exports("AddTargetEntity", AddTargetEntity)
 exports("AddTargetBone", AddTargetBone)
 exports("RemoveZone", RemoveZone)
 exports("AddEntityZone", AddEntityZone)
+exports("Player", AddPlayer)
