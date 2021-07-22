@@ -297,7 +297,7 @@ function AddTargetModel(models, parameters)
 		if not Models[model] then Models[model] = {} end
 		for k, v in pairs(options) do
 			v.distance = distance
-			table.insert(Models[model], v)
+			Models[model][v.event] = v
 		end
 	end
 end

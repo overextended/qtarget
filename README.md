@@ -1,6 +1,10 @@
 # Expermiental build
-###### I am trying to keep compatibility with bt-target as much as possible. Current changes have only been tested with the dumpsters from linden_inventory.
-###### This code allows for additive options to targets, rather than replacement. I need to find the best solution to prevent multiple options of the same type from existing.
+##### I am trying to keep compatibility with bt-target as much as possible. Current changes have only been tested with the dumpsters from linden_inventory.
+###### This code allows for additive options to targets, rather than replacing all available options. You can redefine an option based on the event name.
+```lua
+Models[682791951]['linden_inventory:openDumpster'] = nil
+-- Doing this locally allows you to remove the event option from a model after the fact, pending a proper function/export to handle this
+```
 
 ## Overview
 qTarget is a FiveM interaction / targeting solution that allows you to hold a key to activate a mode that will let players target specific objects or zones to be able to interact with. 
