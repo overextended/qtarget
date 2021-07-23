@@ -13,7 +13,7 @@ local RaycastCamera = function(flag)
 		result, hit, endCoords, surfaceNormal, entityHit = GetShapeTestResult(rayHandle)
 		Citizen.Wait(0)
 	until result ~= 1
-	if hit == 0 then Citizen.Wait(20) elseif flag == 30 then
+	if hit == 1 then
 		local entityType = GetEntityType(entityHit)
 		if entityType > 0 then return hit, endCoords, entityHit, entityType
 		else rayHandle = StartShapeTestLosProbe(cam, destination, -1, ESX.PlayerData.ped, 0)
@@ -24,7 +24,8 @@ local RaycastCamera = function(flag)
 			if hit == 0 then Citizen.Wait(20) else entityType = GetEntityType(entityHit) end
 			return hit, endCoords, entityHit, entityType
 		end
-	else return hit, endCoords, entityHit end
+	else Citizen.Wait(20) end
+	return hit, endCoords, entityHit
 end
 exports("raycast", RaycastCamera)
 
@@ -144,7 +145,7 @@ function EnableTarget()
 			local sleep = 10
 			local plyCoords = GetEntityCoords(ESX.PlayerData.ped)
 			local hit, coords, entity, entityType = RaycastCamera(30)
-			if hit then
+			if hit == 1 then
 				if entityType > 0 then
 
 					-- Owned entity targets
