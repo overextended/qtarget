@@ -8,24 +8,23 @@ local RaycastCamera = function(flag)
 	local num = math.abs(math.cos(direction.x))
 	direction = vector3((-math.sin(direction.y) * num), (math.cos(direction.y) * num), math.sin(direction.x))
 	local destination = vector3(cam.x + direction.x * 30, cam.y + direction.y * 30, cam.z + direction.z * 30)
-	local rayHandle, result, hit, endCoords, surfaceNormal, entityHit = StartShapeTestLosProbe(cam, destination, flag or 30, ESX.PlayerData.ped, 0)
+	local rayHandle, result, hit, endCoords, surfaceNormal, entityHit = StartShapeTestLosProbe(cam, destination, flag or -1, ESX.PlayerData.ped, 0)
 	repeat
 		result, hit, endCoords, surfaceNormal, entityHit = GetShapeTestResult(rayHandle)
 		Citizen.Wait(0)
 	until result ~= 1
-	if hit == 1 then
-		local entityType = GetEntityType(entityHit)
-		if entityType > 0 then return hit, endCoords, entityHit, entityType
-		else rayHandle = StartShapeTestLosProbe(cam, destination, -1, ESX.PlayerData.ped, 0)
-			repeat
-				result, hit, endCoords, surfaceNormal, entityHit = GetShapeTestResult(rayHandle)
-				Citizen.Wait(0)
-			until result ~= 1
-			if hit == 0 then Citizen.Wait(20) else entityType = GetEntityType(entityHit) end
-			return hit, endCoords, entityHit, entityType
-		end
-	else Citizen.Wait(20) end
-	return hit, endCoords, entityHit
+	local entityType = GetEntityType(entityHit)
+	if hit == 0 or entityType == 0 then
+		rayHandle = StartShapeTestLosProbe(cam, destination, 30, ESX.PlayerData.ped, 0)
+		repeat
+			result, hit, endCoords, surfaceNormal, entityHit = GetShapeTestResult(rayHandle)
+			Citizen.Wait(0)
+		until result ~= 1
+		if hit == 0 then Citizen.Wait(20) else entityType = GetEntityType(entityHit) end
+		return hit, endCoords, entityHit, entityType
+	else
+		return hit, endCoords, entityHit, entityType
+	end
 end
 exports("raycast", RaycastCamera)
 
@@ -144,7 +143,7 @@ function EnableTarget()
 		while targetActive do
 			local sleep = 10
 			local plyCoords = GetEntityCoords(ESX.PlayerData.ped)
-			local hit, coords, entity, entityType = RaycastCamera(30)
+			local hit, coords, entity, entityType = RaycastCamera()
 			if hit == 1 then
 				if entityType > 0 then
 
@@ -225,7 +224,7 @@ function EnableTarget()
 								SendNUIMessage({response = "validTarget", data = send_options})
 								while targetActive do
 									local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-									local hit, coords, entity2 = RaycastCamera(-1)
+									local hit, coords, entity2 = RaycastCamera()
 									if not zone:isPointInside(coords) or #(playerCoords - zone.center) > zone.targetoptions.distance then 
 										if hasFocus then DisableNUI() end
 										break
@@ -239,7 +238,7 @@ function EnableTarget()
 								repeat
 									Citizen.Wait(50)
 									local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-									local hit, coords, entity2 = RaycastCamera(-1)
+									local hit, coords, entity2 = RaycastCamera()
 								until not targetActive or entity ~= entity2 or not zone:isPointInside(coords)
 								break
 							end
