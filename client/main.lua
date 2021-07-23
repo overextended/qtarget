@@ -34,7 +34,7 @@ local EnableNUI = function()
 end
 
 local CheckOptions = function(data, entity, distance)
-	if (distance <= data.distance)
+	if (data.distance == nil or distance <= data.distance)
 	and (data.owner == nil or data.owner == NetworkGetNetworkIdFromEntity(ESX.PlayerData.ped))
 	and (data.job == nil or data.job == ESX.PlayerData.job.name or (data.job[ESX.PlayerData.job.name] and data.job[ESX.PlayerData.job.name] <= ESX.PlayerData.job.grade))
 	and (data.required_item == nil or data.required_item and ItemCount(data.required_item) > 0)
@@ -198,10 +198,11 @@ function EnableTarget()
 					if hit then
 						-- Zone targets
 						for _,zone in pairs(Zones) do
-							if zone:isPointInside(coords) and #(plyCoords - zone.center) <= zone.targetoptions.distance then
+							local distance = #(plyCoords - zone.center)
+							if zone:isPointInside(coords) and distance <= zone.targetoptions.distance then
 								local send_options = {}
 								for o, data in pairs(zone.targetoptions.options) do
-									if CheckOptions(data, entity) then
+									if CheckOptions(data, entity, distance) then
 										local slot = #send_options + 1 
 										send_options[slot] = data
 										send_options[slot].entity = entity
@@ -294,9 +295,10 @@ end
 function AddTargetModel(models, parameters)
 	local distance, options = parameters.distance or 2, parameters.options
 	for _, model in pairs(models) do
+		if type(model) == 'string' then model = GetHashKey(model) end
 		if not Models[model] then Models[model] = {} end
 		for k, v in pairs(options) do
-			v.distance = distance
+			if not v.distance then v.distance = distance end
 			Models[model][v.event] = v
 		end
 	end
