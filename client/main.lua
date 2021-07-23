@@ -8,13 +8,23 @@ local RaycastCamera = function(flag)
 	local num = math.abs(math.cos(direction.x))
 	direction = vector3((-math.sin(direction.y) * num), (math.cos(direction.y) * num), math.sin(direction.x))
 	local destination = vector3(cam.x + direction.x * 30, cam.y + direction.y * 30, cam.z + direction.z * 30)
-	local rayHandle, result, hit, endCoords, surfaceNormal, entityHit = StartShapeTestLosProbe(cam, destination, flag or -1, ESX.PlayerData.ped, 0)
+	local rayHandle, result, hit, endCoords, surfaceNormal, entityHit = StartShapeTestLosProbe(cam, destination, flag or 30, ESX.PlayerData.ped, 0)
 	repeat
 		result, hit, endCoords, surfaceNormal, entityHit = GetShapeTestResult(rayHandle)
 		Citizen.Wait(0)
 	until result ~= 1
-	if hit == 0 then Citizen.Wait(20) end
-	return hit, endCoords, entityHit
+	if hit == 0 then Citizen.Wait(20) elseif flag == 30 then
+		local entityType = GetEntityType(entityHit)
+		if entityType > 0 then return hit, endCoords, entityHit, entityType
+		else rayHandle = StartShapeTestLosProbe(cam, destination, -1, ESX.PlayerData.ped, 0)
+			repeat
+				result, hit, endCoords, surfaceNormal, entityHit = GetShapeTestResult(rayHandle)
+				Citizen.Wait(0)
+			until result ~= 1
+			if hit == 0 then Citizen.Wait(20) else entityType = GetEntityType(entityHit) end
+			return hit, endCoords, entityHit, entityType
+		end
+	else return hit, endCoords, entityHit end
 end
 exports("raycast", RaycastCamera)
 
@@ -59,13 +69,14 @@ local CheckEntity = function(data, entity, distance)
 		SendNUIMessage({response = "validTarget", data = send_options})
 		while targetActive do
 			local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-			local hit, coords, entity2 = RaycastCamera(30)
+			local hit, coords, entity2 = RaycastCamera()
 			if entity ~= entity2 or #(playerCoords - coords) > send_distance then 
 				if hasFocus then DisableNUI() end
 				break
 			elseif not hasFocus and IsDisabledControlPressed(0, 24) then
 				EnableNUI()
 			end
+			Citizen.Wait(10)
 		end
 		success = false
 		SendNUIMessage({response = "leftTarget"})
@@ -73,7 +84,7 @@ local CheckEntity = function(data, entity, distance)
 		repeat
 			Citizen.Wait(100)
 			local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-			local hit, coords, entity2 = RaycastCamera(30)
+			local hit, coords, entity2 = RaycastCamera()
 		until targetActive == false or entity ~= entity2 or #(playerCoords - coords) <= send_distance
 	end
 end
@@ -130,10 +141,10 @@ function EnableTarget()
 		end)
 
 		while targetActive do
+			local sleep = 10
 			local plyCoords = GetEntityCoords(ESX.PlayerData.ped)
-			local hit, coords, entity = RaycastCamera(30)
+			local hit, coords, entity, entityType = RaycastCamera(30)
 			if hit then
-				local entityType = GetEntityType(entity)
 				if entityType > 0 then
 
 					-- Owned entity targets
@@ -170,11 +181,11 @@ function EnableTarget()
 								SendNUIMessage({response = "validTarget", data = send_options})
 								while targetActive do
 									local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-									local hit, coords, entity2 = RaycastCamera(30)
+									local hit, coords, entity2 = RaycastCamera()
 									if hit and entity == entity2 then
 										local closestBone2, closestPos2, closestBoneName2 = CheckBones(coords, entity, min, max, Config.VehicleBones)
 									
-										if closestBone ~= closestBone2 or #(coords - closestPos2) > 1.8 or #(playerCoords - closestPos2) > 1.8 then
+										if closestBone ~= closestBone2 or #(coords - closestPos2) > 1.8 or #(playerCoords - coords) > 1.8 then
 											if hasFocus then DisableNUI() end
 											break
 										elseif not hasFocus and IsDisabledControlPressed(0, 24) then EnableNUI() end
@@ -182,6 +193,7 @@ function EnableTarget()
 										if hasFocus then DisableNUI() end
 										break
 									end
+									Citizen.Wait(10)
 								end
 							end
 						end
@@ -193,50 +205,48 @@ function EnableTarget()
 					end
 
 				end
-				if not success then 
-					local hit, coords, entity = RaycastCamera(-1)
-					if hit then
-						-- Zone targets
-						for _,zone in pairs(Zones) do
-							local distance = #(plyCoords - zone.center)
-							if zone:isPointInside(coords) and distance <= zone.targetoptions.distance then
-								local send_options = {}
-								for o, data in pairs(zone.targetoptions.options) do
-									if CheckOptions(data, entity, distance) then
-										local slot = #send_options + 1 
-										send_options[slot] = data
-										send_options[slot].entity = entity
+				if not success then
+					sleep = sleep + 10
+					-- Zone targets
+					for _,zone in pairs(Zones) do
+						local distance = #(plyCoords - zone.center)
+						if zone:isPointInside(coords) and distance <= zone.targetoptions.distance then
+							local send_options = {}
+							for o, data in pairs(zone.targetoptions.options) do
+								if CheckOptions(data, entity, distance) then
+									local slot = #send_options + 1 
+									send_options[slot] = data
+									send_options[slot].entity = entity
+								end
+							end
+							if #send_options > 0 then
+								sendData = send_options
+								SendNUIMessage({response = "validTarget", data = send_options})
+								while targetActive do
+									local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
+									local hit, coords, entity2 = RaycastCamera(-1)
+									if not zone:isPointInside(coords) or #(playerCoords - zone.center) > zone.targetoptions.distance then 
+										if hasFocus then DisableNUI() end
+										break
+									elseif not hasFocus and IsDisabledControlPressed(0, 24) then
+										EnableNUI()
 									end
 								end
-								if #send_options > 0 then
-									sendData = send_options
-									SendNUIMessage({response = "validTarget", data = send_options})
-									while targetActive do
-										local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-										local hit, coords, entity2 = RaycastCamera(-1)
-										if not zone:isPointInside(coords) or #(playerCoords - zone.center) > zone.targetoptions.distance then 
-											if hasFocus then DisableNUI() end
-											break
-										elseif not hasFocus and IsDisabledControlPressed(0, 24) then
-											EnableNUI()
-										end
-									end
-									success = false
-									SendNUIMessage({response = "leftTarget"})
-								else
-									repeat
-										Citizen.Wait(50)
-										local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-										local hit, coords, entity2 = RaycastCamera(-1)
-									until not targetActive or entity ~= entity2 or not zone:isPointInside(coords)
-									break
-								end
-							end 
-						end
+								success = false
+								SendNUIMessage({response = "leftTarget"})
+							else
+								repeat
+									Citizen.Wait(50)
+									local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
+									local hit, coords, entity2 = RaycastCamera(-1)
+								until not targetActive or entity ~= entity2 or not zone:isPointInside(coords)
+								break
+							end
+						end 
 					end
 				else success = false SendNUIMessage({response = "leftTarget"}) end
-			end
-			Citizen.Wait(0)
+			else sleep = sleep + 10 end
+			Citizen.Wait(sleep)
 		end
 		hasFocus, success = false, false
 		ClearInterval(1)
