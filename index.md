@@ -9,7 +9,8 @@
 | label | string | 'Revive target' |
 | event | string | 'qtarget:reviveTarget' |
 | action | function | function(entity) ReviveTarget(entity) end |
-###### Note: You should define event *OR* action for your option
+
+##### Note: You should define event *OR* action for your option
 
 ## Optional Parameters
 | Key | Data Type | Default | Example |
