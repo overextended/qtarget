@@ -1,4 +1,4 @@
-local Config, Players, Types, Entities, Models, Zones, Bones, ItemCount = load(LoadResourceFile(GetCurrentResourceName(), 'config.lua'))()
+local Config, Players, Types, Entities, Models, Zones, Bones, M = load(LoadResourceFile(GetCurrentResourceName(), 'config.lua'))()
 local hasFocus, success, sendData = false, false
 
 local RaycastCamera = function(flag)
@@ -47,7 +47,7 @@ local CheckOptions = function(data, entity, distance)
 	if (data.distance == nil or distance <= data.distance)
 	and (data.owner == nil or data.owner == NetworkGetNetworkIdFromEntity(ESX.PlayerData.ped))
 	and (data.job == nil or data.job == ESX.PlayerData.job.name or (data.job[ESX.PlayerData.job.name] and data.job[ESX.PlayerData.job.name] <= ESX.PlayerData.job.grade))
-	and (data.required_item == nil or data.required_item and ItemCount(data.required_item) > 0)
+	and (data.required_item == nil or data.required_item and M.ItemCount(data.required_item) > 0)
 	and (data.canInteract == nil or data.canInteract(entity)) then return true
 	else return false end
 end
@@ -71,8 +71,10 @@ CheckEntity = function(data, entity, distance)
 			send_distance[data.distance] = true
 		else send_distance[data.distance] = false end
 	end
+	sendData = send_options
 	if next(send_options) then
-		sendData = send_options
+		local send_options = ESX.Table.Clone(sendData)
+		for k,v in pairs(send_options) do v.action = nil end
 		success = true
 		SendNUIMessage({response = "validTarget", data = send_options})
 		while targetActive do
@@ -169,8 +171,10 @@ function EnableTarget()
 									send_options[slot].entity = entity
 								end
 							end
-							if #send_options > 0 then
-								sendData = send_options
+							sendData = send_options
+							if next(send_options) then
+								local send_options = ESX.Table.Clone(sendData)
+								for k,v in pairs(send_options) do v.action = nil end
 								success = true
 								SendNUIMessage({response = "validTarget", data = send_options})
 								while targetActive do
@@ -215,8 +219,11 @@ function EnableTarget()
 									send_options[slot].entity = entity
 								end
 							end
-							if #send_options > 0 then
-								sendData = send_options
+							sendData = send_options
+							if next(send_options) then
+								local send_options = ESX.Table.Clone(sendData)
+								for k,v in pairs(send_options) do v.action = nil end
+								success = true
 								SendNUIMessage({response = "validTarget", data = send_options})
 								while targetActive do
 									local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
@@ -258,16 +265,18 @@ function DisableTarget()
 	end
 end
 
-RegisterNUICallback('selectTarget', function(data, cb)
+RegisterNUICallback('selectTarget', function(option, cb)
 	hasFocus = false
-	for k,v in pairs(sendData) do
-		if data.event == v.event then
-			Citizen.CreateThread(function()
-				Citizen.Wait(50)
-				TriggerEvent(data.event, data)
-			end)
+	local data = sendData[option]
+	Citizen.CreateThread(function()
+		Citizen.Wait(50)
+		if data.event then
+			TriggerEvent(data.event, data)
+		else
+			data.action(data.entity)
 		end
-	end
+	end)
+
 	sendData = nil
 end)
 
