@@ -15,7 +15,9 @@ body {
 
 .sidebar {
   position: fixed;
-  left: 25%;
+  left: 50%;
+  width: 25%;
+  margin-right: 26%;
   background: rgba(10,10,10,0.2);
   box-shadow: 0 1px 1px 1px rgba(20,20,20,0.2) inset;
   border-collapse: revert;
