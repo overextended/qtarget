@@ -101,16 +101,6 @@ local CheckBones = function(coords, entity, min, max, bonelist)
 		if Bones[v] then
 			local boneId = GetEntityBoneIndexByName(entity, v)
 			local bonePos = GetWorldPositionOfEntityBone(entity, boneId)
-			if v:find('bonnet') then
-				local offset = GetOffsetFromEntityInWorldCoords(entity, 0, (max.y-min.y), 0)
-				local y = coords.y + (coords.y - offset.y) / 3
-				coords = vector3(coords.x, y, coords.z+0.1)
-			else
-				local offset = GetOffsetFromEntityInWorldCoords(entity, 0, (max.y-min.y), 0)
-				local y = coords.y - (coords.y - offset.y) / 10
-				coords = vector3(coords.x, y, coords.z)
-			end
-
 			local distance = #(coords - bonePos)
 			if closestBone == -1 or distance < closestDistance then
 				closestBone, closestDistance, closestPos, closestBoneName = boneId, distance, bonePos, v
@@ -166,11 +156,11 @@ function EnableTarget()
 						CheckEntity(Players, entity, #(plyCoords - coords))
 
 					-- Vehicle bones
-					elseif entityType == 2 and #(plyCoords - coords) <= 1.8 then
+					elseif entityType == 2 and #(plyCoords - coords) <= 1.1 then
 						local min, max = GetModelDimensions(GetEntityModel(entity))
 						local closestBone, closestPos, closestBoneName = CheckBones(coords, entity, min, max, Config.VehicleBones)
-						if closestBone and #(coords - closestPos) <= 1.8 then
-							local data = Bones[closestBoneName]
+						local data = Bones[closestBoneName]
+						if closestBone and #(coords - closestPos) <= data.distance then
 							local send_options = {}
 							for o, data in pairs(data.options) do
 								if CheckOptions(data, entity) then 
@@ -189,7 +179,7 @@ function EnableTarget()
 									if hit and entity == entity2 then
 										local closestBone2, closestPos2, closestBoneName2 = CheckBones(coords, entity, min, max, Config.VehicleBones)
 									
-										if closestBone ~= closestBone2 or #(coords - closestPos2) > 1.8 or #(playerCoords - coords) > 1.8 then
+										if closestBone ~= closestBone2 or #(coords - closestPos2) > data.distance or #(playerCoords - coords) > 1.1 then
 											if hasFocus then DisableNUI() end
 											break
 										elseif not hasFocus and IsDisabledControlPressed(0, 24) then EnableNUI() end
