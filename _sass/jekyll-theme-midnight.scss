@@ -15,10 +15,11 @@ body {
 
 .sidebar {
   position: fixed;
-  width: 5vw;
+  width: 10vw;
   left: 0;
   margin: 0;
-  margin-left: 10%;
+  top: 5vw;
+  margin-left: 5vw;
   background: rgba(10,10,10,0.2);
   box-shadow: 0 1px 1px 1px rgba(20,20,20,0.2) inset;
   border-collapse: revert;
