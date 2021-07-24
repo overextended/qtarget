@@ -1,9 +1,10 @@
 # Expermiental build
 ##### I am trying to keep compatibility with bt-target as much as possible. Current changes have only been tested with the dumpsters from linden_inventory.
-###### This code allows for additive options to targets, rather than replacing all available options. You can redefine an option based on the event name.
+###### This code allows for additive options to targets, rather than replacing all available options. You can also remove an option based on the model and event name.
 ```lua
-Models[682791951]['linden_inventory:openDumpster'] = nil
--- Doing this locally allows you to remove the event option from a model after the fact, pending a proper function/export to handle this
+exports['qtarget']:RemoveTargetModel(Config.Dumpsters}, {
+	'linden_inventory:openDumpster'
+})
 ```
 
 ## Overview

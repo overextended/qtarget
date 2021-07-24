@@ -305,18 +305,6 @@ local AddPolyzone = function(name, points, options, targetoptions)
 	Zones[name].targetoptions = targetoptions
 end
 
-local AddTargetModel = function(models, parameters)
-	local distance, options = parameters.distance or 2, parameters.options
-	for _, model in pairs(models) do
-		if type(model) == 'string' then model = GetHashKey(model) end
-		if not Models[model] then Models[model] = {} end
-		for k, v in pairs(options) do
-			if not v.distance then v.distance = distance end
-			Models[model][v.event] = v
-		end
-	end
-end
-
 local AddTargetEntity = function(entity, parameters)
 	Entities[entity] = parameters
 end
@@ -332,12 +320,16 @@ local AddEntityZone = function(name, entity, options, targetoptions)
 	Zones[name].targetoptions = targetoptions
 end
 
-local RemoveZone = function(name)
-	if not Zones[name] then return end
-	if Zones[name].destroy then
-		Zones[name]:destroy()
+local AddTargetModel = function(models, parameters)
+	local distance, options = parameters.distance or 2, parameters.options
+	for _, model in pairs(models) do
+		if type(model) == 'string' then model = GetHashKey(model) end
+		if not Models[model] then Models[model] = {} end
+		for k, v in pairs(options) do
+			if not v.distance then v.distance = distance end
+			Models[model][v.event] = v
+		end
 	end
-	Zones[name] = nil
 end
 
 exports("AddCircleZone", AddCircleZone)
@@ -346,8 +338,30 @@ exports("AddPolyzone", AddPolyzone)
 exports("AddTargetModel", AddTargetModel)
 exports("AddTargetEntity", AddTargetEntity)
 exports("AddTargetBone", AddTargetBone)
-exports("RemoveZone", RemoveZone)
 exports("AddEntityZone", AddEntityZone)
+exports("AddTargetModel", AddTargetModel)
+
+local RemoveZone = function(name)
+	if not Zones[name] then return end
+	if Zones[name].destroy then
+		Zones[name]:destroy()
+	end
+	Zones[name] = nil
+end
+
+local RemoveTargetModel = function(models, events)
+	for _, model in pairs(models) do
+		if type(model) == 'string' then model = GetHashKey(model) end
+		for k, v in pairs(events) do
+			if Models[model] then
+				Models[model][v] = nil
+			end
+		end
+	end
+end
+
+exports("RemoveTargetModel", RemoveTargetModel)
+exports("RemoveZone", RemoveZone)
 
 local AddType = function(type, parameters)
 	local distance, options = parameters.distance or 2, parameters.options
