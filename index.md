@@ -8,7 +8,7 @@
 |-----|-----------|---------|
 | label | string | 'Revive target' |
 | event | string | 'qtarget:reviveTarget' |
-| action | function | function(entity) ReviveTarget(entity) end |
+| action | function | function(entity) ReviveTarget(entity) end |  
 
 ##### Note: You should define event *OR* action for your option
 
@@ -20,7 +20,7 @@
 | required_item | string | - | 'water' |
 | job | string | - | 'police' |
 | job | table | - | {['police'] = 0, ['ambulance'] = 0} |
-| canInteract | function | - | function(entity) return IsEntityDead(entity) end |
+| canInteract | function | - | function(entity) return IsEntityDead(entity) end |  
 
 ## Custom Parameters
 ##### You can pass any information that you desire through the export. Once the event or function is triggered it will receive all parameters as data.
