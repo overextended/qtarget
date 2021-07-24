@@ -27,3 +27,4 @@ Options can be removed by calling the remove export, with all event names as ent
 exports.qtarget:RemoveObject({
 	'eventname1', 'eventname2'
 })
+```
