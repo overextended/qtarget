@@ -1,35 +1,37 @@
 ## Overview
-qTarget is a FiveM interaction / targeting solution that allows you to hold a key to activate a mode that will let players target specific objects or zones to be able to interact with. 
+##### qTarget is a high performance targeting solution that allows interaction with any predefined entity, model, entity type, or polyzone. At the mere cost of 0.04~0.06 while activated you can easily and safely replace markers and distance checking, instead relying on intuitive design to improve player experiences.
 
 ### Features 
-* Support for Objects, PolyZones, EntityZones, and Entities
-  * Future support planned for: Players, Peds, Vehicles, VehicleBones
-* Passes data through to the event that is executed
-* Utilizes `canInteract()`, a function you can define for each individual option to determine whether or not that option should be visible. 
-* Utilizes `required_item`, which hooks into linden_inventory to check if you have an item before showing the option. 
-* Utilizes a multi-functional `job` check per option, which can be a string or a table defining minimum grade to see an option.
-* Disables combat while the interactive mode is active.
-* Optimised to  an inch of its life - 0.04ms max recorded during testing. 
+- Maintains compatibility with bt-target while providing improved utility and performance
+- Optimised and improved raycasting function allows interaction with a wider range of entities
+- Add generic options to apply for all players, peds, vehicles, or objects
+- Trigger an event or function after clicking an option, with the ability to pass any data through
+- Define distance on a per-option or overall basis when triggering qtarget function exports
+- Ability to redefine or remove options, and add new options without replacing old ones
+- Update option list when moving towards or away from a target with variable distances on their options
+- Support for entity bones, with builtin tables for opening doors
+- Support checking for job, items, or specific entities
+- Utilise the `canInteract` function for advanced checks to show or hide an option based on any trigger
+- Improved support when using `linden_inventory`
 
-## Dependencies
-* [ESX Legacy](https://github.com/esx-framework/esx-legacy) by the ESX Team
-* [PolyZone](https://github.com/mkafrin/PolyZone) by mkafrin
-## Recommended
-* [linden_inventory](https://github.com/thelindat/linden_inventory) by Linden
 
 ## [» Installation](https://github.com/QuantusRP/qtarget/wiki/Installation)
-## [» Documentation](https://github.com/QuantusRP/qtarget/wiki)
+### Dependencies
+#### [» ESX Legacy](https://github.com/esx-framework/esx-legacy)
+#### [» PolyZone](https://github.com/mkafrin/PolyZone)
+### Recommended
+#### [» linden_inventory](https://github.com/thelindat/linden_inventory)
+## [» Documentation](https://quantusrp.github.io/qtarget/)
 
-## Preface 
-This is an actively developed resource. As such, it is to be expected that there are bugs, issues and - heaven forbid - breaking commits, occasionally. We will provide support for this resource, so long as you accept that this is currently a work in progress and not yet intended as a final product. 
 
-With that being said, we're happy to release this resource as it is functional to a point matching or exceeding functionality to our previous forked versions of bt-target, which this resource is heavily based on, and uses the javascript from. 
+## Preface
+##### This resource is being actively developed and, as such, it is expected that there will be bugs, issues, and on occasion breaking commits. So long as you accept that this is a work in progress and not yet intended as a final product then we will provide support.
 
 ## Credits
-* Primary development by [@thelindat](https://github.com/thelindat) and [@OfficialNoms](https://github.com/OfficialNoms)
-* Inspired by, and based on, including using javascript from: [bt-target](https://github.com/brentN5/bt-target) by [@brentN5](https://github.com/brentN5)
-* Motivation by the entire [Linden's discord](https://discord.gg/4V6VwvBEzQ) communtiy.
-* Made for QuantusRP, our FiveM roleplaying server.
+- Primary development by [@thelindat](https://github.com/thelindat) and [@OfficialNoms](https://github.com/OfficialNoms)
+- Inspired by, and based on, including using javascript from: [bt-target](https://github.com/brentN5/bt-target) by [@brentN5](https://github.com/brentN5)
+- Motivation by the entire [Linden's discord](https://discord.gg/4V6VwvBEzQ) communtiy.
+- Made for QuantusRP, our FiveM roleplaying server.
 
 ## Issues
 Please use the GitHub issues system to report issues. 
