@@ -1,4 +1,4 @@
-local Config, Players, Entities, Models, Zones, Bones, ItemCount = load(LoadResourceFile(GetCurrentResourceName(), 'config.lua'), 'config.lua')()
+local Config, Players, Types, Entities, Models, Zones, Bones, ItemCount = load(LoadResourceFile(GetCurrentResourceName(), 'config.lua'))()
 local hasFocus, success, sendData = false, false
 
 local RaycastCamera = function(flag)
@@ -155,9 +155,10 @@ function EnableTarget()
 						end
 					end
 					
+
 					-- Player targets
 					if entityType == 1 and IsPedAPlayer(entity) then
-						if next(Players.options) and #(plyCoords - coords) <= 2 then
+						if next(Players) and #(plyCoords - coords) <= 2 then
 							CheckEntity(entity, Players)
 						end
 
@@ -203,10 +204,12 @@ function EnableTarget()
 						local data = Models[GetEntityModel(entity)]
 						if data then CheckEntity(data, entity, #(plyCoords - coords)) end
 					end
-
 				end
 				if not success then
-					sleep = sleep + 10
+					-- Generic targets
+					local data = Types[entityType]
+					if data then CheckEntity(data, entity, #(plyCoords - coords)) end
+
 					-- Zone targets
 					for _,zone in pairs(Zones) do
 						local distance = #(plyCoords - zone.center)
@@ -287,22 +290,22 @@ TriggerEvent("chat:removeSuggestion", "/+playerTarget")
 TriggerEvent("chat:removeSuggestion", "/-playerTarget")
 
 --Exports
-function AddCircleZone(name, center, radius, options, targetoptions)
+local AddCircleZone = function(name, center, radius, options, targetoptions)
 	Zones[name] = CircleZone:Create(center, radius, options)
 	Zones[name].targetoptions = targetoptions
 end
 
-function AddBoxZone(name, center, length, width, options, targetoptions)
+local AddBoxZone = function(name, center, length, width, options, targetoptions)
 	Zones[name] = BoxZone:Create(center, length, width, options)
 	Zones[name].targetoptions = targetoptions
 end
 
-function AddPolyzone(name, points, options, targetoptions)
+local AddPolyzone = function(name, points, options, targetoptions)
 	Zones[name] = PolyZone:Create(points, options)
 	Zones[name].targetoptions = targetoptions
 end
 
-function AddTargetModel(models, parameters)
+local AddTargetModel = function(models, parameters)
 	local distance, options = parameters.distance or 2, parameters.options
 	for _, model in pairs(models) do
 		if type(model) == 'string' then model = GetHashKey(model) end
@@ -314,34 +317,27 @@ function AddTargetModel(models, parameters)
 	end
 end
 
-function AddTargetEntity(entity, parameters)
+local AddTargetEntity = function(entity, parameters)
 	Entities[entity] = parameters
 end
 
-function AddTargetBone(bones, parameters)
+local AddTargetBone = function(bones, parameters)
 	for _, bone in pairs(bones) do
 		Bones[bone] = parameters
 	end
 end
 
-function AddEntityZone(name, entity, options, targetoptions)
+local AddEntityZone = function(name, entity, options, targetoptions)
 	Zones[name] = EntityZone:Create(entity, options)
 	Zones[name].targetoptions = targetoptions
 end
 
-function RemoveZone(name)
+local RemoveZone = function(name)
 	if not Zones[name] then return end
 	if Zones[name].destroy then
 		Zones[name]:destroy()
 	end
-
 	Zones[name] = nil
-end
-
-function AddPlayer(options)
-	for k, v in pairs(options) do
-		table.insert(Players.options, v)
-	end
 end
 
 exports("AddCircleZone", AddCircleZone)
@@ -352,4 +348,49 @@ exports("AddTargetEntity", AddTargetEntity)
 exports("AddTargetBone", AddTargetBone)
 exports("RemoveZone", RemoveZone)
 exports("AddEntityZone", AddEntityZone)
+
+local AddType = function(type, parameters)
+	local distance, options = parameters.distance or 2, parameters.options
+	for k, v in pairs(options) do
+		if not v.distance then v.distance = distance end
+		Types[type][v.event] = v
+	end
+end
+
+local RemoveType = function(type, events)
+	for k, v in pairs(events) do
+		Types[type][v] = nil
+	end
+end
+
+local RemovePlayer = function(type, events)
+	for k, v in pairs(events) do
+		Players[v.event] = nil
+	end
+end
+
+local AddPlayer = function(parameters)
+	local distance, options = parameters.distance or 2, parameters.options
+	for k, v in pairs(options) do
+		if not v.distance then v.distance = distance end
+		Players[v.event] = v
+	end
+end
+
+local AddPed = function(parameters) AddType(1, parameters) end
+local AddVehicle = function(parameters) AddType(2, parameters) end
+local AddObject = function(parameters) AddType(3, parameters) end
+local AddPlayer = function(parameters) AddPlayer(parameters) end
+exports("Ped", AddPed)
+exports("Vehicle", AddVehicle)
+exports("Object", AddObject)
 exports("Player", AddPlayer)
+
+local RemovePed = function(events) RemoveType(1, events) end
+local RemoveVehicle = function(events) RemoveType(2, events) end
+local RemoveObject = function(events) RemoveType(3, events) end
+local RemovePlayer = function(events) RemoveType(1, events) end
+exports("RemovePed", RemovePed)
+exports("RemoveVehicle", RemoveVehicle)
+exports("RemoveObject", RemoveObject)
+exports("RemovePlayer", RemovePlayer)
