@@ -52,40 +52,45 @@ local CheckOptions = function(data, entity, distance)
 	else return false end
 end
 
-local CheckEntity = function(data, entity, distance)
+local CheckRange = function(range, distance)
+	for k, v in pairs(range) do
+		if v == false and distance < k then return true
+		elseif v == true and distance > k then return true end
+	end
+	return false
+end
+
+CheckEntity = function(data, entity, distance)
 	local send_options = {}
-	local send_distance = 30
+	local send_distance = {}
 	for o, data in pairs(data) do
 		if CheckOptions(data, entity, distance) then
 			local slot = #send_options + 1 
 			send_options[slot] = data
 			send_options[slot].entity = entity
-			if data.distance < send_distance then send_distance = data.distance end
-		elseif data.distance < send_distance then send_distance = data.distance end
+			send_distance[data.distance] = true
+		else send_distance[data.distance] = false end
 	end
-	if next(send_options) and distance <= send_distance then
+	if next(send_options) then
 		sendData = send_options
 		success = true
 		SendNUIMessage({response = "validTarget", data = send_options})
 		while targetActive do
 			local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
 			local hit, coords, entity2 = RaycastCamera()
-			if entity ~= entity2 or #(playerCoords - coords) > send_distance then 
+			local distance = #(playerCoords - coords)
+			if entity ~= entity2 then 
 				if hasFocus then DisableNUI() end
 				break
 			elseif not hasFocus and IsDisabledControlPressed(0, 24) then
 				EnableNUI()
+			elseif CheckRange(send_distance, distance) then
+				CheckEntity(data, entity, distance)
 			end
-			Citizen.Wait(10)
+			Citizen.Wait(5)
 		end
 		success = false
 		SendNUIMessage({response = "leftTarget"})
-	else
-		repeat
-			Citizen.Wait(100)
-			local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-			local hit, coords, entity2 = RaycastCamera()
-		until targetActive == false or entity ~= entity2 or #(playerCoords - coords) <= send_distance
 	end
 end
 
@@ -158,9 +163,7 @@ function EnableTarget()
 
 					-- Player targets
 					if entityType == 1 and IsPedAPlayer(entity) then
-						if next(Players) and #(plyCoords - coords) <= 2 then
-							CheckEntity(entity, Players)
-						end
+						CheckEntity(Players, entity, #(plyCoords - coords))
 
 					-- Vehicle bones
 					elseif entityType == 2 and #(plyCoords - coords) <= 1.8 then
@@ -194,7 +197,7 @@ function EnableTarget()
 										if hasFocus then DisableNUI() end
 										break
 									end
-									Citizen.Wait(10)
+									Citizen.Wait(5)
 								end
 							end
 						end
