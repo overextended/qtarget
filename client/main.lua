@@ -1,3 +1,5 @@
+if ESX == nil or SetInterval == nil then SetTimeout(500, function() print('\n» Unable to start qTarget! Refer to the installation guide\n') end) end
+
 local Config, Players, Types, Entities, Models, Zones, Bones, M = load(LoadResourceFile(GetCurrentResourceName(), 'config.lua'))()
 local hasFocus, success, sendData = false, false
 
