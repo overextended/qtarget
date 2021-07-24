@@ -37,27 +37,25 @@ window.addEventListener('message', function(event) {
 
 $(document).on('mousedown', (event) => {
 	let element = event.target;
+	let split = element.id.split("-")
 	
-	if (element.id.split("-")[0] === 'target') {
-		let TargetData = $("#"+element.id).data('TargetData');
+	if (split[0] === 'target') {
 		$(".target-label").html("");
 		$('.target-wrapper').hide();
 		switch (event.which) {
 			case 1:
-			$.post('http://qtarget/selectTarget', JSON.stringify(TargetData));
+				$.post('http://qtarget/selectTarget', JSON.stringify(Number(split[1] + 1)));
 			case 3:
-			$.post('http://qtarget/closeTarget');
+				$.post('http://qtarget/closeTarget');
 			break;
 		}
 	}
 });
 
-$(document).on('keydown', function() {
-	switch(event.keyCode) {
-		case 27: // ESC
-			$(".target-label").html("");
-			$('.target-wrapper').hide();
-			$.post('http://qtarget/closeTarget');
-			break;
+$(document).on('keydown', function(e) {
+	if (e.key == 'Escape') {
+		$(".target-label").html("");
+		$('.target-wrapper').hide();
+		$.post('http://qtarget/closeTarget');
 	}
 });
