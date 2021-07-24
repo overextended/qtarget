@@ -10,7 +10,9 @@ Config.LindenInventory = true
 
 --------------------------------------------------------------------------------------------
 
-local ItemCount = function(item)
+local M = {}
+
+M.ItemCount = function(item)
 	if Config.LindenInventory then return exports['linden_inventory']:CountItems(item)[item]
 	else
 		for k, v in pairs(ESX.GetPlayerData().inventory) do
@@ -22,4 +24,95 @@ local ItemCount = function(item)
 	return 0
 end
 
-return Config, Players, Types, Entities, Models, Zones, Bones, ItemCount
+M.ToggleDoor = function(vehicle, door)
+	if GetVehicleDoorLockStatus(vehicle) ~= 2 then 
+		if GetVehicleDoorAngleRatio(vehicle, door) > 0.0 then
+			SetVehicleDoorShut(vehicle, door, false)
+		else
+			SetVehicleDoorOpen(vehicle, door, false)
+		end
+	end
+end
+
+Bones['seat_dside_f'] = {
+	options = {
+		{
+			icon = "fa-duotone fa-door-open",
+			label = "Toggle front Door",
+			action = function(entity)
+				M.ToggleDoor(entity, 0)
+			end
+		},
+	},
+	distance = 1.2
+}
+
+Bones['seat_pside_f'] = {
+	options = {
+		{
+			icon = "fa-duotone fa-door-open",
+			label = "Toggle front Door",
+			action = function(entity)
+				M.ToggleDoor(entity, 1)
+			end
+		},
+	},
+	distance = 1.2
+}
+
+Bones['seat_dside_r'] = {
+	options = {
+		{
+			icon = "fa-duotone fa-door-open",
+			label = "Toggle rear Door",
+			action = function(entity)
+				M.ToggleDoor(entity, 2)
+			end
+		},
+	},
+	distance = 1.2
+}
+
+Bones['seat_pside_r'] = {
+	options = {
+		{
+			icon = "fa-duotone fa-door-open",
+			label = "Toggle rear Door",
+			action = function(entity)
+				M.ToggleDoor(entity, 3)
+			end
+		},
+	},
+	distance = 1.2
+}
+
+Bones['bonnet'] = {
+	options = {
+		{
+			icon = "fa-duotone fa-engine",
+			label = "Toggle Hood",
+			action = function(entity)
+				M.ToggleDoor(entity, 4)
+			end
+		},
+	},
+	distance = 0.9
+}
+
+if Config.LindenInventory then
+	Bones['boot'] = {
+		options = {
+			{
+				icon = "fa-duotone fa-box-open-full",
+				label = "Access Trunk",
+				action = function()
+					ExecuteCommand('inv2')
+				end
+			},
+		},
+		distance = 0.35
+	}
+end
+
+
+return Config, Players, Types, Entities, Models, Zones, Bones, M
