@@ -8,7 +8,7 @@ body {
   font:14px/1.5 "OpenSansRegular", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color:#f0e7d5;
   font-weight: normal;
-  background: #252525;
+  background: #301030;
   background-attachment: fixed !important;
   background: linear-gradient(#2a2a29, #1c1c1c);
 }
@@ -16,7 +16,7 @@ body {
 .sidebar {
   position: fixed;
   right: 85%;
-  background: #f2f2f2;
+  background: rgba(10,10,10,0.2);
   box-shadow: 0 1px 1px 1px rgba(20,20,20,0.2) inset;
   border-collapse: revert;
   padding: 3px;
