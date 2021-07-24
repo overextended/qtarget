@@ -42,3 +42,4 @@ AddEventHandler('coffee:buy',function(data)
     ESX.ShowNotification("You purchased a " .. data.item .. " for $" .. data.price .. ". Enjoy!")
     -- server event to buy the item here
 end)
+```
