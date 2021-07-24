@@ -1,3 +1,12 @@
+# Expermiental build
+##### I am trying to keep compatibility with bt-target as much as possible. Current changes have only been tested with the dumpsters from linden_inventory.
+###### This code allows for additive options to targets, rather than replacing all available options. You can also remove an option based on the model and event name.
+```lua
+exports['qtarget']:RemoveTargetModel(Config.Dumpsters}, {
+	'linden_inventory:openDumpster'
+})
+```
+
 ## Overview
 ##### qTarget is a high performance targeting solution that allows interaction with any predefined entity, model, entity type, or polyzone. At the mere cost of 0.04~0.06 while activated you can easily and safely replace markers and distance checking, instead relying on intuitive design to improve player experiences.
 

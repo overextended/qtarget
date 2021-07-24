@@ -1,18 +1,7 @@
-local hasFocus, success, sendData = false, false
-local Entities, Models, Zones, Bones = {}, {}, {}, {}, {}, {}
-local Players = {options={}}
+if ESX == nil or SetInterval == nil then SetTimeout(500, function() print('\n» Unable to start qTarget! Refer to the installation guide\n') end) end
 
-local ItemCount = function(item)
-	if Config.LindenInventory then return exports['linden_inventory']:CountItems(item)[item]
-	else
-		for k, v in pairs(ESX.GetPlayerData().inventory) do
-			if v.name == item then
-				return v.count
-			end
-		end
-	end
-	return 0
-end
+local Config, Players, Types, Entities, Models, Zones, Bones, M = load(LoadResourceFile(GetCurrentResourceName(), 'config.lua'))()
+local hasFocus, success, sendData = false, false
 
 local RaycastCamera = function(flag)
 	local cam = GetGameplayCamCoord()
@@ -26,8 +15,18 @@ local RaycastCamera = function(flag)
 		result, hit, endCoords, surfaceNormal, entityHit = GetShapeTestResult(rayHandle)
 		Citizen.Wait(0)
 	until result ~= 1
-	if hit == 0 then Citizen.Wait(20) end
-	return hit, endCoords, entityHit
+	local entityType = GetEntityType(entityHit)
+	if hit == 0 or entityType == 0 then
+		rayHandle = StartShapeTestLosProbe(cam, destination, 30, ESX.PlayerData.ped, 0)
+		repeat
+			result, hit, endCoords, surfaceNormal, entityHit = GetShapeTestResult(rayHandle)
+			Citizen.Wait(0)
+		until result ~= 1
+		if hit == 0 then Citizen.Wait(20) else entityType = GetEntityType(entityHit) end
+		return hit, endCoords, entityHit, entityType
+	else
+		return hit, endCoords, entityHit, entityType
+	end
 end
 exports("raycast", RaycastCamera)
 
@@ -46,28 +45,54 @@ local EnableNUI = function()
 	end
 end
 
-local CheckOptions = function(data, entity)
-	if (data.owner == nil or data.owner == NetworkGetNetworkIdFromEntity(ESX.PlayerData.ped))
+local CheckOptions = function(data, entity, distance)
+	if (data.distance == nil or distance <= data.distance)
+	and (data.owner == nil or data.owner == NetworkGetNetworkIdFromEntity(ESX.PlayerData.ped))
 	and (data.job == nil or data.job == ESX.PlayerData.job.name or (data.job[ESX.PlayerData.job.name] and data.job[ESX.PlayerData.job.name] <= ESX.PlayerData.job.grade))
-	and (data.required_item == nil or data.required_item and ItemCount(data.required_item) > 0)
+	and (data.required_item == nil or data.required_item and M.ItemCount(data.required_item) > 0)
 	and (data.canInteract == nil or data.canInteract(entity)) then return true
 	else return false end
 end
 
-local CheckEntity = function(entity, data, action)
+local CheckRange = function(range, distance)
+	for k, v in pairs(range) do
+		if v == false and distance < k then return true
+		elseif v == true and distance > k then return true end
+	end
+	return false
+end
+
+CheckEntity = function(data, entity, distance)
 	local send_options = {}
-	for o, data in pairs(data.options) do
-		if CheckOptions(data, entity) then 
+	local send_distance = {}
+	for o, data in pairs(data) do
+		if CheckOptions(data, entity, distance) then
 			local slot = #send_options + 1 
 			send_options[slot] = data
 			send_options[slot].entity = entity
-		end
+			send_distance[data.distance] = true
+		else send_distance[data.distance] = false end
 	end
-	if #send_options > 0 then
-		sendData = send_options
+	sendData = send_options
+	if next(send_options) then
+		local send_options = ESX.Table.Clone(sendData)
+		for k,v in pairs(send_options) do v.action = nil end
 		success = true
 		SendNUIMessage({response = "validTarget", data = send_options})
-		action()
+		while targetActive do
+			local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
+			local hit, coords, entity2 = RaycastCamera()
+			local distance = #(playerCoords - coords)
+			if entity ~= entity2 then 
+				if hasFocus then DisableNUI() end
+				break
+			elseif not hasFocus and IsDisabledControlPressed(0, 24) then
+				EnableNUI()
+			elseif CheckRange(send_distance, distance) then
+				CheckEntity(data, entity, distance)
+			end
+			Citizen.Wait(5)
+		end
 		success = false
 		SendNUIMessage({response = "leftTarget"})
 	end
@@ -80,16 +105,6 @@ local CheckBones = function(coords, entity, min, max, bonelist)
 		if Bones[v] then
 			local boneId = GetEntityBoneIndexByName(entity, v)
 			local bonePos = GetWorldPositionOfEntityBone(entity, boneId)
-			if v:find('bonnet') then
-				local offset = GetOffsetFromEntityInWorldCoords(entity, 0, (max.y-min.y), 0)
-				local y = coords.y + (coords.y - offset.y) / 3
-				coords = vector3(coords.x, y, coords.z+0.1)
-			else
-				local offset = GetOffsetFromEntityInWorldCoords(entity, 0, (max.y-min.y), 0)
-				local y = coords.y - (coords.y - offset.y) / 10
-				coords = vector3(coords.x, y, coords.z)
-			end
-
 			local distance = #(coords - bonePos)
 			if closestBone == -1 or distance < closestDistance then
 				closestBone, closestDistance, closestPos, closestBoneName = boneId, distance, bonePos, v
@@ -125,167 +140,118 @@ function EnableTarget()
 		end)
 
 		while targetActive do
+			local sleep = 10
 			local plyCoords = GetEntityCoords(ESX.PlayerData.ped)
-			local hit, coords, entity = RaycastCamera(30)
-			if hit then
-				local entityType = GetEntityType(entity)
+			local hit, coords, entity, entityType = RaycastCamera()
+			if hit == 1 then
 				if entityType > 0 then
 
 					-- Owned entity targets
 					if NetworkGetEntityIsNetworked(entity) then 
 						local data = Entities[NetworkGetNetworkIdFromEntity(entity)]
 						if data and #(plyCoords - coords) <= data.distance then
-							CheckEntity(entity, data, function()
-								while targetActive do
-									local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-									local hit, coords, entity2 = RaycastCamera(30)
-									if entity ~= entity2 or #(playerCoords - coords) > data.distance then 
-										if hasFocus then DisableNUI() end
-										break
-									elseif not hasFocus and IsDisabledControlPressed(0, 24) then
-										EnableNUI()
-									end
-								end
-							end)
+							CheckEntity(entity, data)
 						end
 					end
 					
-					if entityType == 1 then
-						-- Player targets
-						if IsPedAPlayer(entity) and next(Players.options) then
-							if #(plyCoords - coords) <= 2 then
-								CheckEntity(entity, Players, function()
-									while targetActive do
-										local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-										local hit, coords, entity2 = RaycastCamera(30)
-										if entity ~= entity2 or #(playerCoords - coords) > 2 then 
-											if hasFocus then DisableNUI() end
-											break
-										elseif not hasFocus and IsDisabledControlPressed(0, 24) then
-											EnableNUI()
-										end
-									end
-								end)
-							end
-						else
 
-							-- NPC targets
-							local data = Models[GetEntityModel(entity)]
-							if data and #(plyCoords - coords) <= data.distance then
-								CheckEntity(entity, data, function()
-									while targetActive do
-										local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-										local hit, coords, entity2 = RaycastCamera(30)
-										if entity ~= entity2 or #(playerCoords - coords) > data.distance then 
-											if hasFocus then DisableNUI() end
-											break
-										elseif not hasFocus and IsDisabledControlPressed(0, 24) then
-											EnableNUI()
-										end
-									end
-								end)
-							end
-						end
+					-- Player targets
+					if entityType == 1 and IsPedAPlayer(entity) then
+						CheckEntity(Players, entity, #(plyCoords - coords))
 
 					-- Vehicle bones
-					elseif entityType == 2 then
-						if #(plyCoords - coords) <= 1.8 then
-							local min, max = GetModelDimensions(GetEntityModel(entity))
-							local closestBone, closestPos, closestBoneName = CheckBones(coords, entity, min, max, Config.VehicleBones)
-							if closestBone and #(coords - closestPos) <= 1.8 then
-								local data = Bones[closestBoneName]
-								local send_options = {}
-								for o, data in pairs(data.options) do
-									if CheckOptions(data, entity) then 
-										local slot = #send_options + 1 
-										send_options[slot] = data
-										send_options[slot].entity = entity
-									end
+					elseif entityType == 2 and #(plyCoords - coords) <= 1.1 then
+						local min, max = GetModelDimensions(GetEntityModel(entity))
+						local closestBone, closestPos, closestBoneName = CheckBones(coords, entity, min, max, Config.VehicleBones)
+						local data = Bones[closestBoneName]
+						if closestBone and #(coords - closestPos) <= data.distance then
+							local send_options = {}
+							for o, data in pairs(data.options) do
+								if CheckOptions(data, entity) then 
+									local slot = #send_options + 1 
+									send_options[slot] = data
+									send_options[slot].entity = entity
 								end
-								if #send_options > 0 then
-									sendData = send_options
-									success = true
-									SendNUIMessage({response = "validTarget", data = send_options})
-									while targetActive do
-										local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-										local hit, coords, entity2 = RaycastCamera(30)
-										if hit and entity == entity2 then
-											local closestBone2, closestPos2, closestBoneName2 = CheckBones(coords, entity, min, max, Config.VehicleBones)
-										
-											if closestBone ~= closestBone2 or #(coords - closestPos2) > 1.8 or #(playerCoords - closestPos2) > 1.8 then
-												if hasFocus then DisableNUI() end
-												break
-											elseif not hasFocus and IsDisabledControlPressed(0, 24) then EnableNUI() end
-										else
+							end
+							sendData = send_options
+							if next(send_options) then
+								local send_options = ESX.Table.Clone(sendData)
+								for k,v in pairs(send_options) do v.action = nil end
+								success = true
+								SendNUIMessage({response = "validTarget", data = send_options})
+								while targetActive do
+									local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
+									local hit, coords, entity2 = RaycastCamera()
+									if hit and entity == entity2 then
+										local closestBone2, closestPos2, closestBoneName2 = CheckBones(coords, entity, min, max, Config.VehicleBones)
+									
+										if closestBone ~= closestBone2 or #(coords - closestPos2) > data.distance or #(playerCoords - coords) > 1.1 then
 											if hasFocus then DisableNUI() end
 											break
-										end
+										elseif not hasFocus and IsDisabledControlPressed(0, 24) then EnableNUI() end
+									else
+										if hasFocus then DisableNUI() end
+										break
 									end
+									Citizen.Wait(5)
 								end
 							end
 						end
 
-						-- Vehicle targets
-						local data = Models[GetEntityModel(entity)]
-						if data and #(plyCoords - coords) <= data.distance then
-							-- todo: setup vehicle stuff
-						end
-
-					-- Object targets
+					-- Entity targets
 					else
 						local data = Models[GetEntityModel(entity)]
-						if data and #(plyCoords - coords) <= data.distance then
-							CheckEntity(entity, data, function()
+						if data then CheckEntity(data, entity, #(plyCoords - coords)) end
+					end
+				end
+				if not success then
+					-- Generic targets
+					local data = Types[entityType]
+					if data then CheckEntity(data, entity, #(plyCoords - coords)) end
+
+					-- Zone targets
+					for _,zone in pairs(Zones) do
+						local distance = #(plyCoords - zone.center)
+						if zone:isPointInside(coords) and distance <= zone.targetoptions.distance then
+							local send_options = {}
+							for o, data in pairs(zone.targetoptions.options) do
+								if CheckOptions(data, entity, distance) then
+									local slot = #send_options + 1 
+									send_options[slot] = data
+									send_options[slot].entity = entity
+								end
+							end
+							sendData = send_options
+							if next(send_options) then
+								local send_options = ESX.Table.Clone(sendData)
+								for k,v in pairs(send_options) do v.action = nil end
+								success = true
+								SendNUIMessage({response = "validTarget", data = send_options})
 								while targetActive do
 									local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-									local hit, coords, entity2 = RaycastCamera(30)
-									if entity ~= entity2 or #(playerCoords - coords) > data.distance then 
+									local hit, coords, entity2 = RaycastCamera()
+									if not zone:isPointInside(coords) or #(playerCoords - zone.center) > zone.targetoptions.distance then 
 										if hasFocus then DisableNUI() end
 										break
 									elseif not hasFocus and IsDisabledControlPressed(0, 24) then
 										EnableNUI()
 									end
 								end
-							end)
-						end
-					end
-				end
-				if not success then 
-					local hit, coords, entity = RaycastCamera(-1)
-					if hit then
-						-- Zone targets
-						for _,zone in pairs(Zones) do
-							if zone:isPointInside(coords) and #(plyCoords - zone.center) <= zone.targetoptions.distance then
-								local send_options = {}
-								for o, data in pairs(zone.targetoptions.options) do
-									if CheckOptions(data, entity) then
-										local slot = #send_options + 1 
-										send_options[slot] = data
-										send_options[slot].entity = entity
-									end
-								end
-								if #send_options > 0 then
-									sendData = send_options
-									SendNUIMessage({response = "validTarget", data = send_options})
-									while targetActive do
-										local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
-										local hit, coords, entity2 = RaycastCamera(-1)
-										if not zone:isPointInside(coords) or #(playerCoords - zone.center) > zone.targetoptions.distance then 
-											if hasFocus then DisableNUI() end
-											break
-										elseif not hasFocus and IsDisabledControlPressed(0, 24) then
-											EnableNUI()
-										end
-									end
-									success = false
-									SendNUIMessage({response = "leftTarget"})
-								end
-							end 
-						end
+								success = false
+								SendNUIMessage({response = "leftTarget"})
+							else
+								repeat
+									Citizen.Wait(50)
+									local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
+									local hit, coords, entity2 = RaycastCamera()
+								until not targetActive or entity ~= entity2 or not zone:isPointInside(coords)
+								break
+							end
+						end 
 					end
 				else success = false SendNUIMessage({response = "leftTarget"}) end
-			end
-			Citizen.Wait(0)
+			else sleep = sleep + 10 end
+			Citizen.Wait(sleep)
 		end
 		hasFocus, success = false, false
 		ClearInterval(1)
@@ -301,16 +267,18 @@ function DisableTarget()
 	end
 end
 
-RegisterNUICallback('selectTarget', function(data, cb)
+RegisterNUICallback('selectTarget', function(option, cb)
 	hasFocus = false
-	for k,v in pairs(sendData) do
-		if data.event == v.event then
-			Citizen.CreateThread(function()
-				Citizen.Wait(50)
-				TriggerEvent(data.event, data)
-			end)
+	local data = sendData[option]
+	Citizen.CreateThread(function()
+		Citizen.Wait(50)
+		if data.event then
+			TriggerEvent(data.event, data)
+		else
+			data.action(data.entity)
 		end
-	end
+	end)
+
 	sendData = nil
 end)
 
@@ -326,54 +294,45 @@ TriggerEvent("chat:removeSuggestion", "/+playerTarget")
 TriggerEvent("chat:removeSuggestion", "/-playerTarget")
 
 --Exports
-function AddCircleZone(name, center, radius, options, targetoptions)
+local AddCircleZone = function(name, center, radius, options, targetoptions)
 	Zones[name] = CircleZone:Create(center, radius, options)
 	Zones[name].targetoptions = targetoptions
 end
 
-function AddBoxZone(name, center, length, width, options, targetoptions)
+local AddBoxZone = function(name, center, length, width, options, targetoptions)
 	Zones[name] = BoxZone:Create(center, length, width, options)
 	Zones[name].targetoptions = targetoptions
 end
 
-function AddPolyzone(name, points, options, targetoptions)
+local AddPolyzone = function(name, points, options, targetoptions)
 	Zones[name] = PolyZone:Create(points, options)
 	Zones[name].targetoptions = targetoptions
 end
 
-function AddTargetModel(models, parameters)
-	for _, model in pairs(models) do
-		Models[model] = parameters
-	end
-end
-
-function AddTargetEntity(entity, parameters)
+local AddTargetEntity = function(entity, parameters)
 	Entities[entity] = parameters
 end
 
-function AddTargetBone(bones, parameters)
+local AddTargetBone = function(bones, parameters)
 	for _, bone in pairs(bones) do
 		Bones[bone] = parameters
 	end
 end
 
-function AddEntityZone(name, entity, options, targetoptions)
+local AddEntityZone = function(name, entity, options, targetoptions)
 	Zones[name] = EntityZone:Create(entity, options)
 	Zones[name].targetoptions = targetoptions
 end
 
-function RemoveZone(name)
-	if not Zones[name] then return end
-	if Zones[name].destroy then
-		Zones[name]:destroy()
-	end
-
-	Zones[name] = nil
-end
-
-function AddPlayer(options)
-	for k, v in pairs(options) do
-		table.insert(Players.options, v)
+local AddTargetModel = function(models, parameters)
+	local distance, options = parameters.distance or 2, parameters.options
+	for _, model in pairs(models) do
+		if type(model) == 'string' then model = GetHashKey(model) end
+		if not Models[model] then Models[model] = {} end
+		for k, v in pairs(options) do
+			if not v.distance then v.distance = distance end
+			Models[model][v.event] = v
+		end
 	end
 end
 
@@ -383,6 +342,73 @@ exports("AddPolyzone", AddPolyzone)
 exports("AddTargetModel", AddTargetModel)
 exports("AddTargetEntity", AddTargetEntity)
 exports("AddTargetBone", AddTargetBone)
-exports("RemoveZone", RemoveZone)
 exports("AddEntityZone", AddEntityZone)
+exports("AddTargetModel", AddTargetModel)
+
+local RemoveZone = function(name)
+	if not Zones[name] then return end
+	if Zones[name].destroy then
+		Zones[name]:destroy()
+	end
+	Zones[name] = nil
+end
+
+local RemoveTargetModel = function(models, events)
+	for _, model in pairs(models) do
+		if type(model) == 'string' then model = GetHashKey(model) end
+		for k, v in pairs(events) do
+			if Models[model] then
+				Models[model][v] = nil
+			end
+		end
+	end
+end
+
+exports("RemoveTargetModel", RemoveTargetModel)
+exports("RemoveZone", RemoveZone)
+
+local AddType = function(type, parameters)
+	local distance, options = parameters.distance or 2, parameters.options
+	for k, v in pairs(options) do
+		if not v.distance then v.distance = distance end
+		Types[type][v.event] = v
+	end
+end
+
+local RemoveType = function(type, events)
+	for k, v in pairs(events) do
+		Types[type][v] = nil
+	end
+end
+
+local RemovePlayer = function(type, events)
+	for k, v in pairs(events) do
+		Players[v.event] = nil
+	end
+end
+
+local AddPlayer = function(parameters)
+	local distance, options = parameters.distance or 2, parameters.options
+	for k, v in pairs(options) do
+		if not v.distance then v.distance = distance end
+		Players[v.event] = v
+	end
+end
+
+local AddPed = function(parameters) AddType(1, parameters) end
+local AddVehicle = function(parameters) AddType(2, parameters) end
+local AddObject = function(parameters) AddType(3, parameters) end
+local AddPlayer = function(parameters) AddPlayer(parameters) end
+exports("Ped", AddPed)
+exports("Vehicle", AddVehicle)
+exports("Object", AddObject)
 exports("Player", AddPlayer)
+
+local RemovePed = function(events) RemoveType(1, events) end
+local RemoveVehicle = function(events) RemoveType(2, events) end
+local RemoveObject = function(events) RemoveType(3, events) end
+local RemovePlayer = function(events) RemoveType(1, events) end
+exports("RemovePed", RemovePed)
+exports("RemoveVehicle", RemoveVehicle)
+exports("RemoveObject", RemoveObject)
+exports("RemovePlayer", RemovePlayer)
