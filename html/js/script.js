@@ -44,7 +44,7 @@ $(document).on('mousedown', (event) => {
 		$('.target-wrapper').hide();
 		switch (event.which) {
 			case 1:
-				$.post('http://qtarget/selectTarget', JSON.stringify(Number(split[1] + 1)));
+				$.post('http://qtarget/selectTarget', JSON.stringify(Number(split[1]) + 1));
 			case 3:
 				$.post('http://qtarget/closeTarget');
 			break;
