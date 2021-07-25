@@ -7,16 +7,16 @@ Registers the defined options to display on all players.
 
 ```lua
 exports.qtarget:Player({
- 	options = {
-		event = 'eventname',
-		label = 'Perform action'
-		icon = 'fas fa-leaf',
-		job = 'police',
-		canInteract = function(entity)
-			if GetEntityHealth ~= 0 then
-				return true
-			else return false end
-		end
+	options = {
+		{
+			event = 'eventname',
+			label = 'Perform action',
+			icon = 'fas fa-leaf',
+			job = 'police',
+			canInteract = function(entity)
+				return GetEntityHealth(entity) ~= 0
+			end
+		}
 	},
 	distance = 2.5
 })
