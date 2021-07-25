@@ -18,11 +18,11 @@
 | Key | Data Type | Default | Example |
 | --- | --- | --- | --- |
 | distance | float | 2.0 | 4.0 |
-| icon | string |   | 'fas fa-leaf' |
+| icon | string | - | 'fas fa-leaf' |
 | required_item | string | - | 'water' |
-| job | string |   | 'police' |
-| job | table |   | {['police'] = 0, ['ambulance'] = 0} |
-| canInteract | function |   | function(entity) return IsEntityDead(entity) end |  
+| job | string | - | 'police' |
+| job | table | - | {['police'] = 0, ['ambulance'] = 0} |
+| canInteract | function | - | function(entity) return IsEntityDead(entity) end |  
 
 ## Custom Parameters
 ##### You can pass any information that you desire through the export. Once the event or function is triggered it will receive all parameters as data.
