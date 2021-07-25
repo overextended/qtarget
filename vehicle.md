@@ -7,16 +7,16 @@ Registers the defined options to display on all vehicles.
 
 ```lua
 exports.qtarget:Vehicle({
- 	options = {
-		event = 'eventname',
-		label = 'Perform action'
-		icon = 'fas fa-leaf',
-		job = 'police',
-		canInteract = function(entity)
-			if IsVehicleStopped(entity) then
-				return true
-			else return false end
-		end
+	options = {
+		{
+			event = 'eventname',
+			label = 'Perform action',
+			icon = 'fas fa-leaf',
+			job = 'police',
+			canInteract = function(entity)
+				return IsVehicleStopped(entity)
+			end
+		}
 	},
 	distance = 2.5
 })
