@@ -6,17 +6,17 @@ exports.qtarget:RemoveObject(events)
 Registers the defined options to display on all objects.
 
 ```lua
-exports.qtarget:Vehicle({
- 	options = {
-		event = 'eventname',
-		label = 'Perform action'
-		icon = 'fas fa-leaf',
-		job = 'police',
-		canInteract = function(entity)
-			if IsEntityAMissionEntity(entity) then
-				return true
-			else return false end
-		end
+exports.qtarget:Object({
+	options = {
+		{
+			event = 'eventname',
+			label = 'Perform action',
+			icon = 'fas fa-leaf',
+			job = 'police',
+			canInteract = function(entity)
+				return IsEntityAMissionEntity(entity)
+			end
+		}
 	},
 	distance = 2.5
 })
