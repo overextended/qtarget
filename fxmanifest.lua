@@ -4,7 +4,7 @@ game 'gta5'
 author 'Linden, Noms'
 description 'Optimised rewrite of bt-target'
 repository 'https://github.com/QuantusRP/qtarget'
-version '1.0.0'
+version '1.0.1'
 
 dependencies {
 	"es_extended",
