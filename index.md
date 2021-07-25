@@ -4,6 +4,7 @@
 - Replace `es_extended/imports.lua` with [this file](https://github.com/thelindat/es_extended/blob/linden/imports.lua) to add Interval support
 
 ## Parameters
+
 | Key | Data Type | Example |
 | --- | --- | --- |
 | label | string | 'Revive target' |
@@ -13,14 +14,15 @@
 ##### Note: You should define event *OR* action for your option
 
 ## Optional Parameters
+
 | Key | Data Type | Default | Example |
 | --- | --- | --- | --- |
 | distance | float | 2.0 | 4.0 |
-| icon | string | - | 'fas fa-leaf' |
+| icon | string |   | 'fas fa-leaf' |
 | required_item | string | - | 'water' |
-| job | string | - | 'police' |
-| job | table | - | {['police'] = 0, ['ambulance'] = 0} |
-| canInteract | function | - | function(entity) return IsEntityDead(entity) end |  
+| job | string |   | 'police' |
+| job | table |   | {['police'] = 0, ['ambulance'] = 0} |
+| canInteract | function |   | function(entity) return IsEntityDead(entity) end |  
 
 ## Custom Parameters
 ##### You can pass any information that you desire through the export. Once the event or function is triggered it will receive all parameters as data.
