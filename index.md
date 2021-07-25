@@ -1,7 +1,7 @@
 ## Installation
 - [ESX Legacy](https://github.com/esx-framework/esx-legacy) is required for receiving the ESX shared object and keeping PlayerData updated
 - [PolyZone](https://github.com/mkafrin/PolyZone) is required for zone checks
-- Replace `es_extended/imports.lua` with [this file](https://github.com/thelindat/es_extended/blob/linden/imports.lua) to add Interval support
+- Replace 'es_extended/imports.lua' with [this file](https://github.com/thelindat/es_extended/blob/linden/imports.lua) to add Interval support
 
 ## Parameters
 
