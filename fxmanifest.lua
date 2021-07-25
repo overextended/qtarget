@@ -1,6 +1,10 @@
 fx_version 'adamant'
-
 game 'gta5'
+
+author 'Linden, Noms'
+description 'Optimised rewrite of bt-target'
+repository 'https://github.com/QuantusRP/qtarget'
+version '1.0.0'
 
 dependencies {
 	"es_extended",
