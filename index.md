@@ -12,21 +12,21 @@ title: Documentation
 | Key | Data Type | Example |
 | --- | --- | --- |
 | label | string | 'Revive target' |
-| event | string | 'qtarget:reviveTarget' |
-| action | function | function(entity) ReviveTarget(entity) end |  
+| event | string | 'qtarget:reviveTarget' | 
 
-##### Note: You should define event *OR* action for your option
+##### Note: Event can either be an event to trigger, or if using the optional action parameter just use a unique name
 
 ## Optional Parameters
 
 | Key | Data Type | Default | Example |
 | --- | --- | --- | --- |
-| distance | float | 2.0 | 4.0 |
+| action | function | - | function(entity) ReviveTarget(entity) end | 
+| canInteract | function | - | function(entity) return IsEntityDead(entity) end |
 | icon | string | - | 'fas fa-leaf' |
 | required_item | string | - | 'water' |
 | job | string | - | 'police' |
 | job | table | - | {['police'] = 0, ['ambulance'] = 0} |
-| canInteract | function | - | function(entity) return IsEntityDead(entity) end |  
+| distance | float | 2.0 | 4.0 |
 
 ## Custom Parameters
 ##### You can pass any information that you desire through the export. Once the event or function is triggered it will receive all parameters as data.
