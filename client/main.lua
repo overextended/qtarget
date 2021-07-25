@@ -272,10 +272,10 @@ RegisterNUICallback('selectTarget', function(option, cb)
 	local data = sendData[option]
 	Citizen.CreateThread(function()
 		Citizen.Wait(50)
-		if data.event then
-			TriggerEvent(data.event, data)
-		else
+		if data.action ~= nil then
 			data.action(data.entity)
+		else
+			TriggerEvent(data.event, data)
 		end
 	end)
 
