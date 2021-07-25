@@ -5,7 +5,7 @@
 
 ## Parameters
 | Key | Data Type | Example |
-|-----|-----------|---------|
+| --- | --- | --- |
 | label | string | 'Revive target' |
 | event | string | 'qtarget:reviveTarget' |
 | action | function | function(entity) ReviveTarget(entity) end |  
@@ -14,7 +14,7 @@
 
 ## Optional Parameters
 | Key | Data Type | Default | Example |
-|-----|-----------|---------|---------|
+| --- | --- | --- | --- |
 | distance | float | 2.0 | 4.0 |
 | icon | string | - | 'fas fa-leaf' |
 | required_item | string | - | 'water' |
@@ -25,7 +25,7 @@
 ## Custom Parameters
 ##### You can pass any information that you desire through the export. Once the event or function is triggered it will receive all parameters as data.
 ```lua
-exports['qtarget']:AddTargetModel(690372739, {
+exports['qtarget']:AddTargetModel({690372739}, {
     options = {
         {
             event = "coffee:buy",
