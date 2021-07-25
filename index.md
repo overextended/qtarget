@@ -1,3 +1,7 @@
+---
+title: Documentation
+---
+
 ## Installation
 - [ESX Legacy](https://github.com/esx-framework/esx-legacy) is required for receiving the ESX shared object and keeping PlayerData updated
 - [PolyZone](https://github.com/mkafrin/PolyZone) is required for zone checks
