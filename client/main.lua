@@ -38,11 +38,11 @@ end
 
 local CheckOptions = function(data, entity, distance)
 	if (data.distance == nil or distance <= data.distance)
-	and (data.owner == nil or data.owner == NetworkGetNetworkIdFromEntity(ESX.PlayerData.ped))
 	and (data.job == nil or data.job == ESX.PlayerData.job.name or (data.job[ESX.PlayerData.job.name] and data.job[ESX.PlayerData.job.name] <= ESX.PlayerData.job.grade))
 	and (data.required_item == nil or data.required_item and M.ItemCount(data.required_item) > 0)
 	and (data.canInteract == nil or data.canInteract(entity)) then return true
-	else return false end
+	end
+	return false
 end
 
 local CheckRange = function(range, distance)
@@ -134,6 +134,9 @@ function EnableTarget()
 			DisableControlAction(0, 263, true)
 			DisableControlAction(0, 264, true)
 			DisableControlAction(0, 257, true)
+			if Config.Debug then
+				DrawSphere(GetEntityCoords(PlayerPedId()), 7.0, 255, 255, 0, 0.15)
+			end
 		end)
 
 		while targetActive do
@@ -409,3 +412,63 @@ exports("RemovePed", RemovePed)
 exports("RemoveVehicle", RemoveVehicle)
 exports("RemoveObject", RemoveObject)
 exports("RemovePlayer", RemovePlayer)
+
+if Config.Debug then
+	RegisterNetEvent('qtarget:debug')
+	AddEventHandler('qtarget:debug', function(data)
+		print( 'Flag: '..curFlag..'', 'Entity: '..data.entity..'', 'Type: '..GetEntityType(data.entity)..'' )
+
+		local objId = NetworkGetNetworkIdFromEntity(data.entity)
+
+		exports['qtarget']:AddTargetEntity(NetworkGetNetworkIdFromEntity(data.entity), {
+			options = {
+				{
+					event = "dummy-event",
+					icon = "fas fa-box-circle-check",
+					label = "HelloWorld",
+					job = "unemployed"
+				},
+			},
+			distance = 3.0
+		})
+
+
+	end)
+
+	exports['qtarget']:Ped({
+		options = {
+			{
+				event = "qtarget:debug",
+				icon = "fas fa-male",
+				label = "(Debug) Ped",
+			},
+		},
+		distance = Config.MaxDistance
+	})
+
+	exports['qtarget']:Vehicle({
+		options = {
+			{
+				event = "qtarget:debug",
+				icon = "fas fa-car",
+				label = "(Debug) Vehicle",
+			},
+		},
+		distance = Config.MaxDistance
+	})
+
+	exports['qtarget']:Object({
+		options = {
+			{
+				event = "qtarget:debug",
+				icon = "fas fa-cube",
+				label = "(Debug) Object",
+				job = 'police',
+				canInteract = function(entity)
+					return IsEntityAnObject(entity)
+				end
+			},
+		},
+		distance = Config.MaxDistance
+	})
+end
