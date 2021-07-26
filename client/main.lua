@@ -148,8 +148,8 @@ function EnableTarget()
 				-- Owned entity targets
 				if NetworkGetEntityIsNetworked(entity) then 
 					local data = Entities[NetworkGetNetworkIdFromEntity(entity)]
-					if data and #(plyCoords - coords) <= data.distance then
-						CheckEntity(hit, entity, data)
+					if data then
+						CheckEntity(hit, data, entity, #(plyCoords - coords))
 					end
 				end
 				
@@ -309,13 +309,18 @@ local AddPolyzone = function(name, points, options, targetoptions)
 	Zones[name].targetoptions = targetoptions
 end
 
-local AddTargetEntity = function(entity, parameters)
-	Entities[entity] = parameters
-end
-
 local AddTargetBone = function(bones, parameters)
 	for _, bone in pairs(bones) do
 		Bones[bone] = parameters
+	end
+end
+
+local AddTargetEntity = function(netid, parameters)
+	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
+	if not Entities[netid] then Entities[netid] = {} end
+	for k, v in pairs(options) do
+		if not v.distance or v.distance > distance then v.distance = distance end
+		Entities[netid][v.event] = v
 	end
 end
 
@@ -325,12 +330,12 @@ local AddEntityZone = function(name, entity, options, targetoptions)
 end
 
 local AddTargetModel = function(models, parameters)
-	local distance, options = parameters.distance or 2, parameters.options
+	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 	for _, model in pairs(models) do
 		if type(model) == 'string' then model = GetHashKey(model) end
 		if not Models[model] then Models[model] = {} end
 		for k, v in pairs(options) do
-			if not v.distance then v.distance = distance end
+			if not v.distance or v.distance > distance then v.distance = distance end
 			Models[model][v.event] = v
 		end
 	end
@@ -368,9 +373,9 @@ exports("RemoveTargetModel", RemoveTargetModel)
 exports("RemoveZone", RemoveZone)
 
 local AddType = function(type, parameters)
-	local distance, options = parameters.distance or 2, parameters.options
+	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 	for k, v in pairs(options) do
-		if not v.distance then v.distance = distance end
+		if not v.distance or v.distance > distance then v.distance = distance end
 		Types[type][v.event] = v
 	end
 end
@@ -388,9 +393,9 @@ local RemovePlayer = function(type, events)
 end
 
 local AddPlayer = function(parameters)
-	local distance, options = parameters.distance or 2, parameters.options
+	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 	for k, v in pairs(options) do
-		if not v.distance then v.distance = distance end
+		if not v.distance or v.distance > distance then v.distance = distance end
 		Players[v.event] = v
 	end
 end
