@@ -5,6 +5,12 @@ Config.VehicleBones = {'chassis', 'windscreen', 'seat_pside_r', 'seat_dside_r', 
 --------------------------------------------------------------------------------------------
 -- Settings
 --------------------------------------------------------------------------------------------
+-- It's possible to interact with entities through walls so this should be low
+Config.MaxDistance = 7.0
+
+-- Enable debug options and distance preview
+Config.Debug = false
+
 -- Support when using linden_inventory
 Config.LindenInventory = true
 
@@ -37,8 +43,11 @@ end
 Bones['seat_dside_f'] = {
 	options = {
 		{
-			icon = "fa-duotone fa-door-open",
+			icon = "fas fa-door-open",
 			label = "Toggle front Door",
+			canInteract = function(entity)
+				return GetEntityBoneIndexByName(entity, 'door_dside_f') ~= -1
+			end,
 			action = function(entity)
 				M.ToggleDoor(entity, 0)
 			end
@@ -50,8 +59,11 @@ Bones['seat_dside_f'] = {
 Bones['seat_pside_f'] = {
 	options = {
 		{
-			icon = "fa-duotone fa-door-open",
+			icon = "fas fa-door-open",
 			label = "Toggle front Door",
+			canInteract = function(entity)
+				return GetEntityBoneIndexByName(entity, 'door_pside_f') ~= -1
+			end,
 			action = function(entity)
 				M.ToggleDoor(entity, 1)
 			end
@@ -63,8 +75,11 @@ Bones['seat_pside_f'] = {
 Bones['seat_dside_r'] = {
 	options = {
 		{
-			icon = "fa-duotone fa-door-open",
+			icon = "fas fa-door-open",
 			label = "Toggle rear Door",
+			canInteract = function(entity)
+				return GetEntityBoneIndexByName(entity, 'door_dside_r') ~= -1
+			end,
 			action = function(entity)
 				M.ToggleDoor(entity, 2)
 			end
@@ -76,8 +91,11 @@ Bones['seat_dside_r'] = {
 Bones['seat_pside_r'] = {
 	options = {
 		{
-			icon = "fa-duotone fa-door-open",
+			icon = "fas fa-door-open",
 			label = "Toggle rear Door",
+			canInteract = function(entity)
+				return GetEntityBoneIndexByName(entity, 'door_pside_r') ~= -1
+			end,
 			action = function(entity)
 				M.ToggleDoor(entity, 3)
 			end
