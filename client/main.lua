@@ -428,6 +428,10 @@ RemovePlayer = function(type, labels)
 end
 exports("RemovePlayer", RemovePlayer)
 
+RegisterNetEvent('esx:playerLoaded')
+AddEventHandler('esx:playerLoaded', function(xPlayer)
+	ESX.PlayerData = xPlayer
+end)
 
 if Config.Debug then
 	RegisterNetEvent('qtarget:debug')
