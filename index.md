@@ -13,14 +13,14 @@ title: Documentation
 | --- | --- | --- |
 | label | string | 'Revive target' |
 | event | string | 'qtarget:reviveTarget' | 
+| action | function | function(entity) ReviveTarget(entity) end | 
 
-##### Note: Event can either be an event to trigger, or if using the optional action parameter just use a unique name
+##### Only define an event or an action. If action is defined it will always trigger instead of event.
 
 ## Optional Parameters
 
 | Key | Data Type | Default | Example |
 | --- | --- | --- | --- |
-| action | function | - | function(entity) ReviveTarget(entity) end | 
 | canInteract | function | - | function(entity) return IsEntityDead(entity) end |
 | icon | string | - | 'fas fa-leaf' |
 | required_item | string | - | 'water' |
