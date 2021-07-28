@@ -422,10 +422,7 @@ if Config.Debug then
 	RegisterNetEvent('qtarget:debug')
 	AddEventHandler('qtarget:debug', function(data)
 		print( 'Flag: '..curFlag..'', 'Entity: '..data.entity..'', 'Type: '..GetEntityType(data.entity)..'' )
-
-		local objId = NetworkGetNetworkIdFromEntity(data.entity)
-
-		exports['qtarget']:AddTargetEntity(NetworkGetNetworkIdFromEntity(data.entity), {
+		AddTargetEntity(data.entity, {
 			options = {
 				{
 					event = "dummy-event",
@@ -440,7 +437,7 @@ if Config.Debug then
 
 	end)
 
-	exports['qtarget']:Ped({
+	AddPed({
 		options = {
 			{
 				event = "qtarget:debug",
@@ -451,7 +448,7 @@ if Config.Debug then
 		distance = Config.MaxDistance
 	})
 
-	exports['qtarget']:Vehicle({
+	AddVehicle({
 		options = {
 			{
 				event = "qtarget:debug",
@@ -462,7 +459,7 @@ if Config.Debug then
 		distance = Config.MaxDistance
 	})
 
-	exports['qtarget']:Object({
+	AddObject({
 		options = {
 			{
 				event = "qtarget:debug",
