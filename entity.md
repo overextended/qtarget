@@ -29,7 +29,7 @@ exports.qtarget:AddTargetEntity(entity), {
 })
 ```
 
-Options can be removed by calling the remove export, with all option labels as entries in an array.
+Options can be removed by calling the remove export, with all labels as entries in an array.
 ```lua
 exports.qtarget:RemoveTargetEntity({
 	'action 1', 'action 2'
