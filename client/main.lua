@@ -38,7 +38,7 @@ end
 
 local CheckOptions = function(data, entity, distance)
 	if (data.distance == nil or distance <= data.distance)
-	and (data.job == nil or data.job == ESX.PlayerData.job.name or (data.job[ESX.PlayerData.job.name] and data.job[ESX.PlayerData.job.name] <= ESX.PlayerData.job.grade))
+	and (data.job == nil or (data.job == ESX.PlayerData.job.name or data.job[ESX.PlayerData.job.name] and data.job[ESX.PlayerData.job.name] <= ESX.PlayerData.job.grade))
 	and (data.required_item == nil or data.required_item and M.ItemCount(data.required_item) > 0)
 	and (data.canInteract == nil or data.canInteract(entity)) then return true
 	end
@@ -315,12 +315,15 @@ AddTargetBone = function(bones, parameters)
 	end
 end
 
-AddTargetEntity = function(netid, parameters)
-	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
-	if not Entities[netid] then Entities[netid] = {} end
-	for k, v in pairs(options) do
-		if not v.distance or v.distance > distance then v.distance = distance end
-		Entities[netid][v.event] = v
+AddTargetEntity = function(entity, parameters)
+	local entity = NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity) or false
+	if entity then
+		local distance, options = parameters.distance or Config.MaxDistance, parameters.options
+		if not Entities[entity] then Entities[entity] = {} end
+		for k, v in pairs(options) do
+			if not v.distance or v.distance > distance then v.distance = distance end
+			Entities[entity][v.event] = v
+		end
 	end
 end
 
@@ -428,7 +431,6 @@ if Config.Debug then
 					event = "dummy-event",
 					icon = "fas fa-box-circle-check",
 					label = "HelloWorld",
-					job = "unemployed"
 				},
 			},
 			distance = 3.0
