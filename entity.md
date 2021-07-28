@@ -1,16 +1,15 @@
 # Entity options
 ```lua
 exports.qtarget:AddTargetEntity(entity, parameters)
-exports.qtarget:RemoveTargetEntity(entity, labels)
 ```
-Registers the defined options to display on a specific entity. Only works if the entity is networked.
+##### Registers the defined options to display on a specific entity. Only works if the entity is networked.
 
 ```lua
 AddEventHandler('eventname', function(data)
 	print(data.label, data.num, data.entity)
 end
 
-exports.qtarget:AddTargetEntity(entity), {
+exports.qtarget:AddTargetEntity({
 	options = {
 		{
 			event = "eventname",
@@ -25,11 +24,11 @@ exports.qtarget:AddTargetEntity(entity), {
 			num = 2
 		},
 	},
-	distance = 1.5
+	distance = 2
 })
 ```
 
-Options can be removed by calling the remove export, with all labels as entries in an array.
+##### Options can be removed by calling the remove export, with all labels as entries in an array.
 ```lua
 exports.qtarget:RemoveTargetEntity({
 	'action 1', 'action 2'
