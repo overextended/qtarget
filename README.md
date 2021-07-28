@@ -1,7 +1,8 @@
+## [» Documentation](https://quantusrp.github.io/qtarget/)
 ## Overview
-##### qTarget is a high performance targeting solution that allows interaction with any predefined entity, model, entity type, or polyzone. At the mere cost of 0.04~0.06 while activated you can easily and safely replace markers and distance checking, instead relying on intuitive design to improve player experiences.
+##### qTarget is a high performance targeting solution that allows interaction with any predefined entity, model, entity type, or polyzone. At the mere cost of ~0.04ms while activated you can easily and safely replace markers and distance checking, instead relying on intuitive design to improve player experiences.
 
-### Features 
+## Features 
 - Maintains compatibility with bt-target while providing improved utility and performance
 - Optimised and improved raycasting function allows interaction with a wider range of entities
 - Add generic options to apply for all players, peds, vehicles, or objects
@@ -21,7 +22,6 @@
 #### [» PolyZone](https://github.com/mkafrin/PolyZone)
 ### Recommended
 #### [» linden_inventory](https://github.com/thelindat/linden_inventory)
-## [» Documentation](https://quantusrp.github.io/qtarget/)
 
 
 ## Preface
