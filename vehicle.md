@@ -1,30 +1,36 @@
 # Vehicle options
 ```lua
 exports.qtarget:Vehicle(parameters)
-exports.qtarget:RemoveVehicle(events)
 ```
-Registers the defined options to display on all vehicles.
+##### Registers the defined options to display on all non-player peds.
 
 ```lua
-exports.qtarget:Vehicle({
+AddEventHandler('eventname', function(data)
+	print(data.label, data.num, data.entity)
+end
+
+exports.qtarget:Ped({
 	options = {
 		{
-			event = 'eventname',
-			label = 'Perform action',
-			icon = 'fas fa-leaf',
-			job = 'police',
-			canInteract = function(entity)
-				return IsVehicleStopped(entity)
-			end
-		}
+			event = "eventname",
+			icon = "fas fa-box-circle-check",
+			label = "action 1",
+			num = 1
+		},
+		{
+			event = "eventname",
+			icon = "fas fa-box-circle-check",
+			label = "action 2"
+			num = 2
+		},
 	},
-	distance = 2.5
+	distance = 2
 })
 ```
 
-Options can be removed by calling the remove export, with all event names as entries in an array.
+##### Options can be removed by calling the remove export, with all labels as entries in an array.
 ```lua
 exports.qtarget:RemoveVehicle({
-	'eventname1', 'eventname2'
+	'action 1', 'action 2'
 })
 ```
