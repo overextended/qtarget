@@ -9,7 +9,7 @@ title: Installation
 
 ## Intervals
 - **Recommended:** Replace 'es_extended/imports.lua' with the file linked above
-- **Not recommended:** Place the snippet below into 'qtarget/client/main.lua'
+- **Not recommended:** Paste the following snippet into 'qtarget/client/main.lua', at the very top
 
 ```lua
 local CreateThread = CreateThread
