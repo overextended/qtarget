@@ -1,28 +1,36 @@
-# Model options
+# Entity options
 ```lua
-exports.qtarget:AddTargetModel(models, parameters)
-exports.qtarget:RemoveTargetModel(models, events)
+exports.qtarget:AddTargetModel(entity, parameters)
 ```
-Registers the defined options to display on all entities with the provided model hash.
+##### Registers the defined options to display on all entities with the provided model hash.
 
 ```lua
-local atms = {`prop_atm_01`, `prop_atm_02`, `prop_atm_03`, `prop_fleeca_atm`}
-exports.qtarget:AddTargetModel(atms, {
+AddEventHandler('eventname', function(data)
+	print(data.label, data.num, data.entity)
+end
+
+exports.qtarget:AddTargetModel({
 	options = {
 		{
 			event = "eventname",
-			icon = "fas fa-credit-card",
-			label = "Access ATM"
+			icon = "fas fa-box-circle-check",
+			label = "action 1",
+			num = 1
+		},
+		{
+			event = "eventname",
+			icon = "fas fa-box-circle-check",
+			label = "action 2"
+			num = 2
 		},
 	},
-	distance = 1.5
+	distance = 2
 })
-
 ```
 
-Options can be removed by calling the remove export, with all models and event names as entries in arrays.
+##### Options can be removed by calling the remove export, with all labels as entries in an array.
 ```lua
-exports.qtarget:AddTargetModel(atms, {
-	'eventname1', 'eventname2'
+exports.qtarget:RemoveTargetModel({
+	'action 1', 'action 2'
 })
 ```
