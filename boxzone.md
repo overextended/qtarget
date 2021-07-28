@@ -2,7 +2,7 @@
 ```lua
 exports.qtarget:AddBoxZone(name, center, length, width, options, targetoptions)
 ```
-Registers the defined options to display when targetting a surface inside the defined box.
+##### Registers the defined options to display when targetting a surface inside the defined box.
 
 ```lua
 exports.qtarget:AddBoxZone("MissionRowDutyClipboard", vector3(441.7989, -982.0529, 30.67834), 0.45, 0.35, {
