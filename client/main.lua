@@ -294,28 +294,28 @@ TriggerEvent("chat:removeSuggestion", "/+playerTarget")
 TriggerEvent("chat:removeSuggestion", "/-playerTarget")
 
 --Exports
-local AddCircleZone = function(name, center, radius, options, targetoptions)
+AddCircleZone = function(name, center, radius, options, targetoptions)
 	Zones[name] = CircleZone:Create(center, radius, options)
 	Zones[name].targetoptions = targetoptions
 end
 
-local AddBoxZone = function(name, center, length, width, options, targetoptions)
+AddBoxZone = function(name, center, length, width, options, targetoptions)
 	Zones[name] = BoxZone:Create(center, length, width, options)
 	Zones[name].targetoptions = targetoptions
 end
 
-local AddPolyzone = function(name, points, options, targetoptions)
+AddPolyzone = function(name, points, options, targetoptions)
 	Zones[name] = PolyZone:Create(points, options)
 	Zones[name].targetoptions = targetoptions
 end
 
-local AddTargetBone = function(bones, parameters)
+AddTargetBone = function(bones, parameters)
 	for _, bone in pairs(bones) do
 		Bones[bone] = parameters
 	end
 end
 
-local AddTargetEntity = function(netid, parameters)
+AddTargetEntity = function(netid, parameters)
 	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 	if not Entities[netid] then Entities[netid] = {} end
 	for k, v in pairs(options) do
@@ -324,12 +324,12 @@ local AddTargetEntity = function(netid, parameters)
 	end
 end
 
-local AddEntityZone = function(name, entity, options, targetoptions)
+AddEntityZone = function(name, entity, options, targetoptions)
 	Zones[name] = EntityZone:Create(entity, options)
 	Zones[name].targetoptions = targetoptions
 end
 
-local AddTargetModel = function(models, parameters)
+AddTargetModel = function(models, parameters)
 	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 	for _, model in pairs(models) do
 		if type(model) == 'string' then model = GetHashKey(model) end
@@ -350,7 +350,7 @@ exports("AddTargetBone", AddTargetBone)
 exports("AddEntityZone", AddEntityZone)
 exports("AddTargetModel", AddTargetModel)
 
-local RemoveZone = function(name)
+RemoveZone = function(name)
 	if not Zones[name] then return end
 	if Zones[name].destroy then
 		Zones[name]:destroy()
@@ -358,7 +358,7 @@ local RemoveZone = function(name)
 	Zones[name] = nil
 end
 
-local RemoveTargetModel = function(models, events)
+RemoveTargetModel = function(models, events)
 	for _, model in pairs(models) do
 		if type(model) == 'string' then model = GetHashKey(model) end
 		for k, v in pairs(events) do
@@ -386,13 +386,13 @@ local RemoveType = function(type, events)
 	end
 end
 
-local RemovePlayer = function(type, events)
+RemovePlayer = function(type, events)
 	for k, v in pairs(events) do
 		Players[v.event] = nil
 	end
 end
 
-local AddPlayer = function(parameters)
+AddPlayer = function(parameters)
 	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 	for k, v in pairs(options) do
 		if not v.distance or v.distance > distance then v.distance = distance end
@@ -400,19 +400,19 @@ local AddPlayer = function(parameters)
 	end
 end
 
-local AddPed = function(parameters) AddType(1, parameters) end
-local AddVehicle = function(parameters) AddType(2, parameters) end
-local AddObject = function(parameters) AddType(3, parameters) end
-local AddPlayer = function(parameters) AddPlayer(parameters) end
+AddPed = function(parameters) AddType(1, parameters) end
+AddVehicle = function(parameters) AddType(2, parameters) end
+AddObject = function(parameters) AddType(3, parameters) end
+AddPlayer = function(parameters) AddPlayer(parameters) end
 exports("Ped", AddPed)
 exports("Vehicle", AddVehicle)
 exports("Object", AddObject)
 exports("Player", AddPlayer)
 
-local RemovePed = function(events) RemoveType(1, events) end
-local RemoveVehicle = function(events) RemoveType(2, events) end
-local RemoveObject = function(events) RemoveType(3, events) end
-local RemovePlayer = function(events) RemoveType(1, events) end
+RemovePed = function(events) RemoveType(1, events) end
+RemoveVehicle = function(events) RemoveType(2, events) end
+RemoveObject = function(events) RemoveType(3, events) end
+RemovePlayer = function(events) RemoveType(1, events) end
 exports("RemovePed", RemovePed)
 exports("RemoveVehicle", RemoveVehicle)
 exports("RemoveObject", RemoveObject)
