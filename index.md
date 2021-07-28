@@ -14,14 +14,25 @@ title: Documentation
 
 ## Optional Parameters
 
-| Key | Data Type | Default | Example |
-| --- | --- | --- | --- |
-| canInteract | function | - | function(entity) return IsEntityDead(entity) end |
-| icon | string | - | 'fas fa-leaf' |
-| required_item | string | - | 'water' |
-| job | string | - | 'police' |
-| job | table | - | {['police'] = 0, ['ambulance'] = 0} |
-| distance | float | 2.0 | 4.0 |
+| Key | Data Type | Example |
+| --- | --- | --- |
+| icon | string | 'fas fa-leaf' |
+| job | string | 'police' |
+| job | table | {['police'] = 0, ['ambulance'] = 0} |
+| distance | float | 4.0 |
+| required_item | string | 'water' |
+| canInteract | function | function(entity) return DoesEntityExist(entity) end |
+
+## canInteract
+##### Allows for more advanced checks beyond the scope of built-in parameters. Always receives the current entity as an argument.
+```lua
+    function(entity)
+        if IsPedFatallyInjured(entity) and IsPedArmed(ESX.PlayerData.ped, 2 | 4) then
+            return true
+        end
+        return false
+    end
+```
 
 ## Custom Parameters
 ##### You can pass any information that you desire through the export. Once the event or function is triggered it will receive all parameters as data.
