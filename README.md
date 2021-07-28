@@ -1,6 +1,8 @@
-## [» Documentation](https://quantusrp.github.io/qtarget/)
+<h2 align='center'><a href='https://quantusrp.github.io/qtarget/'>» Installation and Documentation «</a></h2>
+
 ## Overview
 ##### qTarget is a high performance targeting solution that allows interaction with any predefined entity, model, entity type, or polyzone. At the mere cost of ~0.04ms while activated you can easily and safely replace markers and distance checking, instead relying on intuitive design to improve player experiences.
+
 
 ## Features 
 - Maintains compatibility with bt-target while providing improved utility and performance
@@ -14,15 +16,6 @@
 - Support checking for job, items, or specific entities
 - Utilise the `canInteract` function for advanced checks to show or hide an option based on any trigger
 - Improved support when using `linden_inventory`
-
-
-## [» Installation](https://github.com/QuantusRP/qtarget/wiki/Installation)
-### Dependencies
-#### [» ESX Legacy](https://github.com/esx-framework/esx-legacy)
-#### [» PolyZone](https://github.com/mkafrin/PolyZone)
-### Recommended
-#### [» linden_inventory](https://github.com/thelindat/linden_inventory)
-
 
 ## Preface
 ##### This resource is being actively developed and, as such, it is expected that there will be bugs, issues, and on occasion breaking commits. So long as you accept that this is a work in progress and not yet intended as a final product then we will provide support.
