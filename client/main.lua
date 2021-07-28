@@ -392,6 +392,13 @@ local AddType = function(type, parameters)
 	end
 end
 
+AddPed = function(parameters) AddType(1, parameters) end
+exports("Ped", AddPed)
+AddVehicle = function(parameters) AddType(2, parameters) end
+exports("Vehicle", AddVehicle)
+AddObject = function(parameters) AddType(3, parameters) end
+exports("Object", AddObject)
+
 AddPlayer = function(parameters)
 	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 	for k, v in pairs(options) do
@@ -399,25 +406,11 @@ AddPlayer = function(parameters)
 		Players[v.label] = v
 	end
 end
-
-AddPed = function(parameters) AddType(1, parameters) end
-exports("Ped", AddPed)
-AddVehicle = function(parameters) AddType(2, parameters) end
-exports("Vehicle", AddVehicle)
-AddObject = function(parameters) AddType(3, parameters) end
-exports("Object", AddObject)
-AddPlayer = function(parameters) AddPlayer(parameters) end
 exports("Player", AddPlayer)
 
 local RemoveType = function(type, labels)
 	for k, v in pairs(labels) do
 		Types[type][v] = nil
-	end
-end
-
-RemovePlayer = function(type, labels)
-	for k, v in pairs(labels) do
-		Players[v.label] = nil
 	end
 end
 
@@ -427,7 +420,12 @@ RemoveVehicle = function(labels) RemoveType(2, labels) end
 exports("RemoveVehicle", RemoveVehicle)
 RemoveObject = function(labels) RemoveType(3, labels) end
 exports("RemoveObject", RemoveObject)
-RemovePlayer = function(labels) RemoveType(1, labels) end
+
+RemovePlayer = function(type, labels)
+	for k, v in pairs(labels) do
+		Players[v.label] = nil
+	end
+end
 exports("RemovePlayer", RemovePlayer)
 
 
@@ -484,12 +482,20 @@ if Config.Debug then
 				event = "qtarget:debug",
 				icon = "fas fa-cube",
 				label = "(Debug) Object",
-				job = 'police',
-				canInteract = function(entity)
-					return IsEntityAnObject(entity)
-				end
 			},
 		},
 		distance = Config.MaxDistance
 	})
+
+	AddPlayer({
+		options = {
+			{
+				event = "qtarget:debug",
+				icon = "fas fa-cube",
+				label = "(Debug) Player",
+			},
+		},
+		distance = Config.MaxDistance
+	})
+
 end
