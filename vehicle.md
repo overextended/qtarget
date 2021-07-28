@@ -9,7 +9,7 @@ AddEventHandler('eventname', function(data)
 	print(data.label, data.num, data.entity)
 end
 
-exports.qtarget:Ped({
+exports.qtarget:Vehicle({
 	options = {
 		{
 			event = "eventname",
