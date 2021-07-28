@@ -1,9 +1,8 @@
 # NPC options
 ```lua
 exports.qtarget:Ped(parameters)
-exports.qtarget:RemovePed(events)
 ```
-Registers the defined options to display on all non-player peds.
+##### Registers the defined options to display on all non-player peds.
 
 ```lua
 AddEventHandler('eventname', function(data)
@@ -29,7 +28,7 @@ exports.qtarget:Ped({
 })
 ```
 
-Options can be removed by calling the remove export, with all labels as entries in an array.
+##### Options can be removed by calling the remove export, with all labels as entries in an array.
 ```lua
 exports.qtarget:RemovePed({
 	'action 1', 'action 2'
