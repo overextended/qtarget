@@ -298,22 +298,26 @@ AddCircleZone = function(name, center, radius, options, targetoptions)
 	Zones[name] = CircleZone:Create(center, radius, options)
 	Zones[name].targetoptions = targetoptions
 end
+exports("AddCircleZone", AddCircleZone)
 
 AddBoxZone = function(name, center, length, width, options, targetoptions)
 	Zones[name] = BoxZone:Create(center, length, width, options)
 	Zones[name].targetoptions = targetoptions
 end
+exports("AddBoxZone", AddBoxZone)
 
 AddPolyzone = function(name, points, options, targetoptions)
 	Zones[name] = PolyZone:Create(points, options)
 	Zones[name].targetoptions = targetoptions
 end
+exports("AddPolyzone", AddPolyzone)
 
 AddTargetBone = function(bones, parameters)
 	for _, bone in pairs(bones) do
 		Bones[bone] = parameters
 	end
 end
+exports("AddTargetBone", AddTargetBone)
 
 AddTargetEntity = function(entity, parameters)
 	local entity = NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity) or false
@@ -322,15 +326,17 @@ AddTargetEntity = function(entity, parameters)
 		if not Entities[entity] then Entities[entity] = {} end
 		for k, v in pairs(options) do
 			if not v.distance or v.distance > distance then v.distance = distance end
-			Entities[entity][v.event] = v
+			Entities[entity][v.label] = v
 		end
 	end
 end
+exports("AddTargetEntity", AddTargetEntity)
 
 AddEntityZone = function(name, entity, options, targetoptions)
 	Zones[name] = EntityZone:Create(entity, options)
 	Zones[name].targetoptions = targetoptions
 end
+exports("AddEntityZone", AddEntityZone)
 
 AddTargetModel = function(models, parameters)
 	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
@@ -339,18 +345,10 @@ AddTargetModel = function(models, parameters)
 		if not Models[model] then Models[model] = {} end
 		for k, v in pairs(options) do
 			if not v.distance or v.distance > distance then v.distance = distance end
-			Models[model][v.event] = v
+			Models[model][v.label] = v
 		end
 	end
 end
-
-exports("AddCircleZone", AddCircleZone)
-exports("AddBoxZone", AddBoxZone)
-exports("AddPolyzone", AddPolyzone)
-exports("AddTargetModel", AddTargetModel)
-exports("AddTargetEntity", AddTargetEntity)
-exports("AddTargetBone", AddTargetBone)
-exports("AddEntityZone", AddEntityZone)
 exports("AddTargetModel", AddTargetModel)
 
 RemoveZone = function(name)
@@ -360,38 +358,37 @@ RemoveZone = function(name)
 	end
 	Zones[name] = nil
 end
+exports("RemoveZone", RemoveZone)
 
-RemoveTargetModel = function(models, events)
+RemoveTargetModel = function(models, labels)
 	for _, model in pairs(models) do
 		if type(model) == 'string' then model = GetHashKey(model) end
-		for k, v in pairs(events) do
+		for k, v in pairs(labels) do
 			if Models[model] then
 				Models[model][v] = nil
 			end
 		end
 	end
 end
-
 exports("RemoveTargetModel", RemoveTargetModel)
-exports("RemoveZone", RemoveZone)
+
+RemoveTargetEntity = function(entity, labels)
+	local entity = NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity) or false
+	if entity then
+		for k, v in pairs(labels) do
+			if Entities[entity] then
+				Entities[entity][v] = nil
+			end
+		end
+	end
+end
+exports("RemoveTargetEntity", RemoveTargetEntity)
 
 local AddType = function(type, parameters)
 	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 	for k, v in pairs(options) do
 		if not v.distance or v.distance > distance then v.distance = distance end
-		Types[type][v.event] = v
-	end
-end
-
-local RemoveType = function(type, events)
-	for k, v in pairs(events) do
-		Types[type][v] = nil
-	end
-end
-
-RemovePlayer = function(type, events)
-	for k, v in pairs(events) do
-		Players[v.event] = nil
+		Types[type][v.label] = v
 	end
 end
 
@@ -399,42 +396,62 @@ AddPlayer = function(parameters)
 	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 	for k, v in pairs(options) do
 		if not v.distance or v.distance > distance then v.distance = distance end
-		Players[v.event] = v
+		Players[v.label] = v
 	end
 end
 
 AddPed = function(parameters) AddType(1, parameters) end
-AddVehicle = function(parameters) AddType(2, parameters) end
-AddObject = function(parameters) AddType(3, parameters) end
-AddPlayer = function(parameters) AddPlayer(parameters) end
 exports("Ped", AddPed)
+AddVehicle = function(parameters) AddType(2, parameters) end
 exports("Vehicle", AddVehicle)
+AddObject = function(parameters) AddType(3, parameters) end
 exports("Object", AddObject)
+AddPlayer = function(parameters) AddPlayer(parameters) end
 exports("Player", AddPlayer)
 
-RemovePed = function(events) RemoveType(1, events) end
-RemoveVehicle = function(events) RemoveType(2, events) end
-RemoveObject = function(events) RemoveType(3, events) end
-RemovePlayer = function(events) RemoveType(1, events) end
+local RemoveType = function(type, labels)
+	for k, v in pairs(labels) do
+		Types[type][v] = nil
+	end
+end
+
+RemovePlayer = function(type, labels)
+	for k, v in pairs(labels) do
+		Players[v.label] = nil
+	end
+end
+
+RemovePed = function(labels) RemoveType(1, labels) end
 exports("RemovePed", RemovePed)
+RemoveVehicle = function(labels) RemoveType(2, labels) end
 exports("RemoveVehicle", RemoveVehicle)
+RemoveObject = function(labels) RemoveType(3, labels) end
 exports("RemoveObject", RemoveObject)
+RemovePlayer = function(labels) RemoveType(1, labels) end
 exports("RemovePlayer", RemovePlayer)
+
 
 if Config.Debug then
 	RegisterNetEvent('qtarget:debug')
 	AddEventHandler('qtarget:debug', function(data)
 		print( 'Flag: '..curFlag..'', 'Entity: '..data.entity..'', 'Type: '..GetEntityType(data.entity)..'' )
-		AddTargetEntity(data.entity, {
-			options = {
-				{
-					event = "dummy-event",
-					icon = "fas fa-box-circle-check",
-					label = "HelloWorld",
+		if data.remove then
+			RemoveTargetEntity(data.entity, {
+				'HelloWorld'
+			})
+		else
+			AddTargetEntity(data.entity, {
+				options = {
+					{
+						event = "qtarget:debug",
+						icon = "fas fa-box-circle-check",
+						label = "HelloWorld",
+						remove = true
+					},
 				},
-			},
-			distance = 3.0
-		})
+				distance = 3.0
+			})
+		end
 
 
 	end)
