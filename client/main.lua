@@ -1,7 +1,21 @@
-if ESX == nil or SetInterval == nil then SetTimeout(500, function() print('\n» Unable to start qTarget! Refer to the installation guide\n') end) end
-
 local Config, Players, Types, Entities, Models, Zones, Bones, M = load(LoadResourceFile(GetCurrentResourceName(), 'config.lua'))()
-local hasFocus, success, sendData = false, false
+local playerPed, hasFocus, success, sendData = PlayerPedId(), false, false
+
+if not Config.Standalone then
+	ESX = exports['es_extended']:getSharedObject()
+	
+	RegisterNetEvent('esx:playerLoaded')
+	AddEventHandler('esx:playerLoaded', function(xPlayer)
+		ESX.PlayerData = xPlayer
+	end)
+
+	AddEventHandler('esx:setPlayerData', function(key, val, last)
+		if GetInvokingResource() == 'es_extended' then
+			ESX.PlayerData[key] = val
+			if key == 'ped' then playerPed == ESX.PlayerData.ped end
+		end
+	end)
+end
 
 local RaycastCamera = function(flag)
 	local cam = GetGameplayCamCoord()
@@ -38,15 +52,6 @@ local EnableNUI = function()
 	end
 end
 
-local CheckOptions = function(data, entity, distance)
-	if (data.distance == nil or distance <= data.distance)
-	and (data.job == nil or (data.job == ESX.PlayerData.job.name or data.job[ESX.PlayerData.job.name] and data.job[ESX.PlayerData.job.name] <= ESX.PlayerData.job.grade))
-	and (data.required_item == nil or data.required_item and M.ItemCount(data.required_item) > 0)
-	and (data.canInteract == nil or data.canInteract(entity)) then return true
-	end
-	return false
-end
-
 local CheckRange = function(range, distance)
 	for k, v in pairs(range) do
 		if v == false and distance < k then return true
@@ -59,7 +64,7 @@ CheckEntity = function(hit, data, entity, distance)
 	local send_options = {}
 	local send_distance = {}
 	for o, data in pairs(data) do
-		if CheckOptions(data, entity, distance) then
+		if M.CheckOptions(data, entity, distance) then
 			local slot = #send_options + 1 
 			send_options[slot] = data
 			send_options[slot].entity = entity
@@ -68,12 +73,13 @@ CheckEntity = function(hit, data, entity, distance)
 	end
 	sendData = send_options
 	if next(send_options) then
-		local send_options = ESX.Table.Clone(sendData)
-		for k,v in pairs(send_options) do v.action = nil end
+		for k,v in pairs(M.CloneTable(sendData)) do
+			for k,v in pairs(v) do print(k,v) end
+		end
 		success = true
-		SendNUIMessage({response = "validTarget", data = send_options})
+		SendNUIMessage({response = "validTarget", data = M.CloneTable(sendData)})
 		while targetActive do
-			local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
+			local playerCoords = GetEntityCoords(playerPed)
 			local _, coords, entity2 = RaycastCamera(hit)
 			local distance = #(playerCoords - coords)
 			if entity ~= entity2 then 
@@ -84,7 +90,7 @@ CheckEntity = function(hit, data, entity, distance)
 			elseif CheckRange(send_distance, distance) then
 				CheckEntity(hit, data, entity, distance)
 			end
-			Citizen.Wait(5)
+			Wait(5)
 		end
 		success = false
 		SendNUIMessage({response = "leftTarget"})
@@ -120,30 +126,23 @@ function EnableTarget()
 		targetActive = true
 		SendNUIMessage({response = "openTarget"})
 		
-		SetInterval(1, 5, function()
-			if hasFocus then
-				DisableControlAction(0, 1, true)
-				DisableControlAction(0, 2, true)
-			end
-			DisablePlayerFiring(PlayerId(), true)
-			DisableControlAction(0, 25, true)
-			DisableControlAction(0, 47, true)
-			DisableControlAction(0, 58, true)
-			DisableControlAction(0, 140, true)
-			DisableControlAction(0, 141, true)
-			DisableControlAction(0, 142, true)
-			DisableControlAction(0, 143, true)
-			DisableControlAction(0, 263, true)
-			DisableControlAction(0, 264, true)
-			DisableControlAction(0, 257, true)
-			if Config.Debug then
-				DrawSphere(GetEntityCoords(PlayerPedId()), 7.0, 255, 255, 0, 0.15)
-			end
+		Citizen.CreateThread(function()
+			repeat
+				if hasFocus then
+					DisableControlAction(0, 1, true)
+					DisableControlAction(0, 2, true)
+				end
+				DisablePlayerFiring(PlayerId(), true)
+				DisableControlAction(0, 25, true)
+				DisableControlAction(0, 37, true)
+				Wait(5)
+			until targetActive == false
 		end)
+		playerPed = PlayerPedId()
 
 		while targetActive do
 			local sleep = 10
-			local plyCoords = GetEntityCoords(ESX.PlayerData.ped)
+			local plyCoords = GetEntityCoords(playerPed)
 			local hit, coords, entity, entityType = RaycastCamera(switch())
 			if entityType > 0 then
 
@@ -168,7 +167,7 @@ function EnableTarget()
 					if closestBone and #(coords - closestPos) <= data.distance then
 						local send_options = {}
 						for o, data in pairs(data.options) do
-							if CheckOptions(data, entity) then 
+							if M.CheckOptions(data, entity) then 
 								local slot = #send_options + 1 
 								send_options[slot] = data
 								send_options[slot].entity = entity
@@ -176,12 +175,10 @@ function EnableTarget()
 						end
 						sendData = send_options
 						if next(send_options) then
-							local send_options = ESX.Table.Clone(sendData)
-							for k,v in pairs(send_options) do v.action = nil end
 							success = true
-							SendNUIMessage({response = "validTarget", data = send_options})
+							SendNUIMessage({response = "validTarget", data = M.CloneTable(sendData)})
 							while targetActive do
-								local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
+								local playerCoords = GetEntityCoords(playerPed)
 								local _, coords, entity2 = RaycastCamera(hit)
 								if hit and entity == entity2 then
 									local closestBone2, closestPos2, closestBoneName2 = CheckBones(coords, entity, min, max, Config.VehicleBones)
@@ -194,7 +191,7 @@ function EnableTarget()
 									if hasFocus then DisableNUI() end
 									break
 								end
-								Citizen.Wait(5)
+								Wait(5)
 							end
 						end
 					end
@@ -218,7 +215,7 @@ function EnableTarget()
 					if zone:isPointInside(coords) and distance <= zone.targetoptions.distance then
 						local send_options = {}
 						for o, data in pairs(zone.targetoptions.options) do
-							if CheckOptions(data, entity, distance) then
+							if M.CheckOptions(data, entity, distance) then
 								local slot = #send_options + 1 
 								send_options[slot] = data
 								send_options[slot].entity = entity
@@ -226,12 +223,10 @@ function EnableTarget()
 						end
 						sendData = send_options
 						if next(send_options) then
-							local send_options = ESX.Table.Clone(sendData)
-							for k,v in pairs(send_options) do v.action = nil end
 							success = true
-							SendNUIMessage({response = "validTarget", data = send_options})
+							SendNUIMessage({response = "validTarget", data = M.CloneTable(sendData)})
 							while targetActive do
-								local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
+								local playerCoords = GetEntityCoords(playerPed)
 								local _, coords, entity2 = RaycastCamera(hit)
 								if not zone:isPointInside(coords) or #(playerCoords - zone.center) > zone.targetoptions.distance then 
 									if hasFocus then DisableNUI() end
@@ -244,8 +239,8 @@ function EnableTarget()
 							SendNUIMessage({response = "leftTarget"})
 						else
 							repeat
-								Citizen.Wait(50)
-								local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
+								Wait(50)
+								local playerCoords = GetEntityCoords(playerPed)
 								local _, coords, entity2 = RaycastCamera(hit)
 							until not targetActive or entity ~= entity2 or not zone:isPointInside(coords)
 							break
@@ -253,10 +248,9 @@ function EnableTarget()
 					end 
 				end
 			else success = false SendNUIMessage({response = "leftTarget"}) end
-			Citizen.Wait(sleep)
+			Wait(sleep)
 		end
 		hasFocus, success = false, false
-		ClearInterval(1)
 		SendNUIMessage({response = "closeTarget"})
 	end
 end
@@ -272,8 +266,8 @@ end
 RegisterNUICallback('selectTarget', function(option, cb)
 	hasFocus = false
 	local data = sendData[option]
-	Citizen.CreateThread(function()
-		Citizen.Wait(50)
+	CreateThread(function()
+		Wait(50)
 		if data.action ~= nil then
 			data.action(data.entity)
 		else
@@ -430,13 +424,7 @@ RemovePlayer = function(type, labels)
 end
 exports("RemovePlayer", RemovePlayer)
 
-RegisterNetEvent('esx:playerLoaded')
-AddEventHandler('esx:playerLoaded', function(xPlayer)
-	ESX.PlayerData = xPlayer
-end)
-
 if Config.Debug then
-	RegisterNetEvent('qtarget:debug')
 	AddEventHandler('qtarget:debug', function(data)
 		print( 'Flag: '..curFlag..'', 'Entity: '..data.entity..'', 'Type: '..GetEntityType(data.entity)..'' )
 		if data.remove then
