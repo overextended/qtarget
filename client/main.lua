@@ -73,9 +73,6 @@ CheckEntity = function(hit, data, entity, distance)
 	end
 	sendData = send_options
 	if next(send_options) then
-		for k,v in pairs(M.CloneTable(sendData)) do
-			for k,v in pairs(v) do print(k,v) end
-		end
 		success = true
 		SendNUIMessage({response = "validTarget", data = M.CloneTable(sendData)})
 		while targetActive do
