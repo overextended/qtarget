@@ -12,7 +12,7 @@ if not Config.Standalone then
 	AddEventHandler('esx:setPlayerData', function(key, val, last)
 		if GetInvokingResource() == 'es_extended' then
 			ESX.PlayerData[key] = val
-			if key == 'ped' then playerPed == ESX.PlayerData.ped end
+			if key == 'ped' then playerPed = ESX.PlayerData.ped end
 		end
 	end)
 end
