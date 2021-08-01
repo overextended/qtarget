@@ -6,18 +6,20 @@ local hasFocus, success, sendData = false, false
 local RaycastCamera = function(flag)
 	local cam = GetGameplayCamCoord()
 	local direction = GetGameplayCamRot()
-	direction = vector2(direction.x * math.pi / 180.0, direction.z * math.pi / 180.0)
+	direction = vec2(math.rad(direction.x), math.rad(direction.z))
 	local num = math.abs(math.cos(direction.x))
-	direction = vector3((-math.sin(direction.y) * num), (math.cos(direction.y) * num), math.sin(direction.x))
-	local destination = vector3(cam.x + direction.x * 30, cam.y + direction.y * 30, cam.z + direction.z * 30)
-	local rayHandle, result, hit, endCoords, surfaceNormal, entityHit = StartShapeTestLosProbe(cam, destination, flag or -1, ESX.PlayerData.ped, 0)
-	repeat
-		result, hit, endCoords, surfaceNormal, entityHit = GetShapeTestResult(rayHandle)
-		Citizen.Wait(0)
-	until result ~= 1
-	local entityType
-	if entityHit then entityType = GetEntityType(entityHit) end
-	return flag, endCoords, entityHit, entityType or 0
+	direction = vec3((-math.sin(direction.y) * num), (math.cos(direction.y) * num), math.sin(direction.x))
+	local destination = vec3(cam.x + direction.x * 30, cam.y + direction.y * 30, cam.z + direction.z * 30)
+	local rayHandle = StartShapeTestLosProbe(cam, destination, flag or -1, playerPed or PlayerPedId(), 0)
+	while true do
+		Wait(0)
+		local result, _, endCoords, _, materialHash, entityHit = GetShapeTestResultIncludingMaterial(rayHandle)
+		if result ~= 1 then
+			local entityType
+			if entityHit then entityType = GetEntityType(entityHit) end
+			return flag, endCoords, entityHit, entityType or 0
+		end
+	end
 end
 exports("raycast", RaycastCamera)
 
