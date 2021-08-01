@@ -1,6 +1,6 @@
 # Entity options
 ```lua
-exports.qtarget:AddTargetModel(entity, parameters)
+exports.qtarget:AddTargetModel(models, parameters)
 ```
 ##### Registers the defined options to display on all entities with the provided model hash.
 
@@ -9,7 +9,7 @@ AddEventHandler('eventname', function(data)
 	print(data.label, data.num, data.entity)
 end
 
-exports.qtarget:AddTargetModel({
+exports.qtarget:AddTargetModel({218085040, 666561306}, {
 	options = {
 		{
 			event = "eventname",
