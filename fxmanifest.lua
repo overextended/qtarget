@@ -7,14 +7,12 @@ repository 'https://github.com/QuantusRP/qtarget'
 version '1.2.0'
 
 dependencies {
-	"es_extended",
 	"PolyZone"
 }
 
 ui_page 'html/index.html'
 
 client_scripts {
-	'@es_extended/imports.lua',
 	'@PolyZone/client.lua',
 	'@PolyZone/BoxZone.lua',
 	'@PolyZone/EntityZone.lua',
