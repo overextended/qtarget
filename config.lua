@@ -11,23 +11,58 @@ Config.MaxDistance = 7.0
 -- Enable debug options and distance preview
 Config.Debug = false
 
+-- Support when not using ESX Legacy
+Config.Standalone = false
+
 -- Support when using linden_inventory
-Config.LindenInventory = true
+Config.LindenInventory = false
 
 -------------------------------------------------------------------------------
 -- Functions
 -------------------------------------------------------------------------------
 local M = {}
-M.ItemCount = function(item)
-	if Config.LindenInventory then return exports['linden_inventory']:CountItems(item)[item]
-	else
-		for k, v in pairs(ESX.GetPlayerData().inventory) do
-			if v.name == item then
-				return v.count
+if not Config.Standalone then
+	M.ItemCount = function(item)
+		if Config.LindenInventory then
+			return exports['linden_inventory']:CountItems(item)[item]
+		else
+			for k, v in pairs(ESX.GetPlayerData().inventory) do
+				if v.name == item then
+					return v.count
+				end
 			end
 		end
+		return 0
 	end
-	return 0
+
+	M.CheckOptions = function(data, entity, distance)
+		if (data.distance == nil or distance <= data.distance)
+		and (data.job == nil or (data.job == ESX.PlayerData.job.name or data.job[ESX.PlayerData.job.name] and data.job[ESX.PlayerData.job.name] <= ESX.PlayerData.job.grade))
+		and (data.required_item == nil or data.required_item and M.ItemCount(data.required_item) > 0)
+		and (data.canInteract == nil or data.canInteract(entity)) then return true
+		end
+		return false
+	end
+else
+	M.CheckOptions = function(data, entity, distance)
+		if (data.distance == nil or distance <= data.distance)
+		and (data.canInteract == nil or data.canInteract(entity)) then return true
+		end
+		return false
+	end
+end
+
+M.CloneTable = function(table)
+	local copy = {}
+	for k,v in pairs(table) do
+		if type(v) == 'table' then
+			copy[k] = M.CloneTable(v)
+		else
+			if type(v) == 'function' then v = nil end
+			copy[k] = v
+		end
+	end
+	return copy
 end
 
 M.ToggleDoor = function(vehicle, door)
