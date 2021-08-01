@@ -9,7 +9,7 @@ AddEventHandler('eventname', function(data)
 	print(data.label, data.num, data.entity)
 end
 
-exports.qtarget:AddTargetEntity({
+exports.qtarget:AddTargetEntity(entity, {
 	options = {
 		{
 			event = "eventname",
