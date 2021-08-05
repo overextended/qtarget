@@ -52,7 +52,7 @@ local EnableNUI = function()
 	end
 end
 
-local CheckEntity = function(hit, data, entity, distance)
+CheckEntity = function(hit, data, entity, distance)
 	local send_options = {}
 	local send_distance = {}
 	for o, data in pairs(data) do
@@ -78,7 +78,7 @@ local CheckEntity = function(hit, data, entity, distance)
 				EnableNUI()
 			else
 				for k, v in pairs(send_distance) do
-					if (v == false and distance < k) or v == true and distance > k then
+					if (v == false and distance < k) or (v == true and distance > k) then
 						return CheckEntity(hit, data, entity, distance)
 					end
 				end
