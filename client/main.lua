@@ -26,7 +26,7 @@ local RaycastCamera = function(flag)
 	local destination = vec3(cam.x + direction.x * 30, cam.y + direction.y * 30, cam.z + direction.z * 30)
 	local rayHandle = StartShapeTestLosProbe(cam, destination, flag or -1, playerPed or PlayerPedId(), 0)
 	while true do
-		Wait(0)
+		Wait(5)
 		local result, _, endCoords, _, materialHash, entityHit = GetShapeTestResultIncludingMaterial(rayHandle)
 		if result ~= 1 then
 			local entityType
@@ -52,15 +52,7 @@ local EnableNUI = function()
 	end
 end
 
-local CheckRange = function(range, distance)
-	for k, v in pairs(range) do
-		if v == false and distance < k then return true
-		elseif v == true and distance > k then return true end
-	end
-	return false
-end
-
-CheckEntity = function(hit, data, entity, distance)
+local CheckEntity = function(hit, data, entity, distance)
 	local send_options = {}
 	local send_distance = {}
 	for o, data in pairs(data) do
@@ -84,8 +76,12 @@ CheckEntity = function(hit, data, entity, distance)
 				break
 			elseif not hasFocus and IsDisabledControlPressed(0, 24) then
 				EnableNUI()
-			elseif CheckRange(send_distance, distance) then
-				CheckEntity(hit, data, entity, distance)
+			else
+				for k, v in pairs(send_distance) do
+					if (v == false and distance < k) or v == true and distance > k then
+						return CheckEntity(hit, data, entity, distance)
+					end
+				end
 			end
 			Wait(5)
 		end
@@ -123,7 +119,7 @@ function EnableTarget()
 		targetActive = true
 		SendNUIMessage({response = "openTarget"})
 		
-		Citizen.CreateThread(function()
+		CreateThread(function()
 			repeat
 				if hasFocus then
 					DisableControlAction(0, 1, true)
