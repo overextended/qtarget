@@ -18,7 +18,7 @@
 	top: 50%;
 	left: 50%;
 	margin-left: 2vh;
-	margin-top: -1.4vh;
+	margin-top: -1.35vh;
 }
 
 .target-label {
@@ -29,13 +29,12 @@
 	text-transform: uppercase;
 	user-select: none;
 	white-space: nowrap;
-	vertical-align: middle;
+	line-height: 1.3vh;
 	padding-left: 0.2vh;
 }
 
 .target-icon {
 	color: #355c83;
-	margin-top: 0.2vh;
 }
 
 .target-item {
@@ -43,8 +42,8 @@
 	border: 0px;
 	border-left: 0.2vh solid #355c83;
 	border-radius: 0.2vh;
-	margin-bottom: 0.3vh;
+	margin-bottom: 0.2vh;
 	width: 25vh;
 	padding-left: 1vh;
-	height: 2.15vh;
+	height: 2.16vh;
 }

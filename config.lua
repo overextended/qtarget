@@ -14,19 +14,24 @@ Config.Debug = false
 -- Support when not using ESX Legacy
 Config.Standalone = false
 
--- Support when using linden_inventory
-Config.LindenInventory = false
+-- Support when using ox_inventory
+Config.OxInventory = false
 
 -------------------------------------------------------------------------------
 -- Functions
 -------------------------------------------------------------------------------
-local M = {}
-if not Config.Standalone then
-	M.ItemCount = function(item)
-		if Config.LindenInventory then
-			return exports['linden_inventory']:CountItems(item)[item]
+local ESX, CheckOptions = not Config.Standalone and exports['es_extended']:getSharedObject()
+if ESX then
+
+	RegisterNetEvent('esx:playerLoaded', function(xPlayer)
+		ESX.PlayerData = xPlayer
+	end)
+
+	local ItemCount = function(item)
+		if Config.OxInventory then
+			return exports.ox_inventory:InventorySearch(2, item)
 		else
-			for k, v in pairs(ESX.GetPlayerData().inventory) do
+			for _, v in pairs(ESX.GetPlayerData().inventory) do
 				if v.name == item then
 					return v.count
 				end
@@ -35,16 +40,16 @@ if not Config.Standalone then
 		return 0
 	end
 
-	M.CheckOptions = function(data, entity, distance)
+	CheckOptions = function(data, entity, distance)
 		if (data.distance == nil or distance <= data.distance)
 		and (data.job == nil or (data.job == ESX.PlayerData.job.name or data.job[ESX.PlayerData.job.name] and data.job[ESX.PlayerData.job.name] <= ESX.PlayerData.job.grade))
-		and (data.required_item == nil or data.required_item and M.ItemCount(data.required_item) > 0)
+		and (data.required_item == nil or data.required_item and ItemCount(data.required_item) > 0)
 		and (data.canInteract == nil or data.canInteract(entity)) then return true
 		end
 		return false
 	end
 else
-	M.CheckOptions = function(data, entity, distance)
+	CheckOptions = function(data, entity, distance)
 		if (data.distance == nil or distance <= data.distance)
 		and (data.canInteract == nil or data.canInteract(entity)) then return true
 		end
@@ -52,20 +57,7 @@ else
 	end
 end
 
-M.CloneTable = function(table)
-	local copy = {}
-	for k,v in pairs(table) do
-		if type(v) == 'table' then
-			copy[k] = M.CloneTable(v)
-		else
-			if type(v) == 'function' then v = nil end
-			copy[k] = v
-		end
-	end
-	return copy
-end
-
-M.ToggleDoor = function(vehicle, door)
+local ToggleDoor = function(vehicle, door)
 	if GetVehicleDoorLockStatus(vehicle) ~= 2 then 
 		if GetVehicleDoorAngleRatio(vehicle, door) > 0.0 then
 			SetVehicleDoorShut(vehicle, door, false)
@@ -87,7 +79,7 @@ Bones['seat_dside_f'] = {
 				return GetEntityBoneIndexByName(entity, 'door_dside_f') ~= -1
 			end,
 			action = function(entity)
-				M.ToggleDoor(entity, 0)
+				ToggleDoor(entity, 0)
 			end
 		},
 	},
@@ -103,7 +95,7 @@ Bones['seat_pside_f'] = {
 				return GetEntityBoneIndexByName(entity, 'door_pside_f') ~= -1
 			end,
 			action = function(entity)
-				M.ToggleDoor(entity, 1)
+				ToggleDoor(entity, 1)
 			end
 		},
 	},
@@ -119,7 +111,7 @@ Bones['seat_dside_r'] = {
 				return GetEntityBoneIndexByName(entity, 'door_dside_r') ~= -1
 			end,
 			action = function(entity)
-				M.ToggleDoor(entity, 2)
+				ToggleDoor(entity, 2)
 			end
 		},
 	},
@@ -135,7 +127,7 @@ Bones['seat_pside_r'] = {
 				return GetEntityBoneIndexByName(entity, 'door_pside_r') ~= -1
 			end,
 			action = function(entity)
-				M.ToggleDoor(entity, 3)
+				ToggleDoor(entity, 3)
 			end
 		},
 	},
@@ -148,7 +140,7 @@ Bones['bonnet'] = {
 			icon = "fa-duotone fa-engine",
 			label = "Toggle Hood",
 			action = function(entity)
-				M.ToggleDoor(entity, 4)
+				ToggleDoor(entity, 4)
 			end
 		},
 	},
@@ -156,5 +148,5 @@ Bones['bonnet'] = {
 }
 
 -------------------------------------------------------------------------------
-return Config, Players, Types, Entities, Models, Zones, Bones, M
+return Config, Players, Types, Entities, Models, Zones, Bones, CheckOptions
 -------------------------------------------------------------------------------
