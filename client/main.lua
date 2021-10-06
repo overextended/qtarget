@@ -392,9 +392,9 @@ exports("RemoveVehicle", RemoveVehicle)
 RemoveObject = function(labels) RemoveType(3, labels) end
 exports("RemoveObject", RemoveObject)
 
-RemovePlayer = function(type, labels)
+RemovePlayer = function(labels)
 	for k, v in pairs(labels) do
-		Players[v.label] = nil
+		Players[v] = nil
 	end
 end
 exports("RemovePlayer", RemovePlayer)
