@@ -36,10 +36,12 @@ if not Config.Standalone then
 	end
 
 	M.CheckOptions = function(data, entity, distance)
-		if (data.distance == nil or distance <= data.distance)
-		and (data.job == nil or (data.job == ESX.PlayerData.job.name or data.job[ESX.PlayerData.job.name] and data.job[ESX.PlayerData.job.name] <= ESX.PlayerData.job.grade))
-		and (data.required_item == nil or data.required_item and M.ItemCount(data.required_item) > 0)
-		and (data.canInteract == nil or data.canInteract(entity)) then return true
+		for k,v in pairs(data.job) do
+			if (data.distance == nil or distance <= data.distance)
+			and (v == nil or (v == ESX.PlayerData.job.name or v[ESX.PlayerData.job.name] and v[ESX.PlayerData.job.name] <= ESX.PlayerData.job.grade))
+			and (data.required_item == nil or data.required_item and M.ItemCount(data.required_item) > 0)
+			and (data.canInteract == nil or data.canInteract(entity)) then return true
+			end
 		end
 		return false
 	end
