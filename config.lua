@@ -29,7 +29,7 @@ if ESX then
 
 	local ItemCount = function(item)
 		if Config.OxInventory then
-			return exports.ox_inventory:InventorySearch(2, item)
+			return exports.ox_inventory:Search(2, item)
 		else
 			for _, v in pairs(ESX.GetPlayerData().inventory) do
 				if v.name == item then
