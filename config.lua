@@ -26,6 +26,10 @@ if ESX then
 	RegisterNetEvent('esx:playerLoaded', function(xPlayer)
 		ESX.PlayerData = xPlayer
 	end)
+	
+	RegisterNetEvent('esx:setJob', function(job)
+		ESX.PlayerData.job = job
+	end)
 
 	local ItemCount = function(item)
 		if Config.OxInventory then
