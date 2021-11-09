@@ -24,10 +24,10 @@ local DisableNUI = function()
 	SetNuiFocus(false, false)
 	SetNuiFocusKeepInput(false)
 	hasFocus = false
-end 
+end
 
 local EnableNUI = function()
-	if targetActive and not hasFocus then 
+	if targetActive and not hasFocus then
 		SetCursorLocation(0.5, 0.5)
 		SetNuiFocus(true, true)
 		SetNuiFocusKeepInput(true)
@@ -40,7 +40,7 @@ CheckEntity = function(hit, data, entity, distance)
 	local send_distance = {}
 	for _, data in pairs(data) do
 		if CheckOptions(data, entity, distance) then
-			local slot = #send_options + 1 
+			local slot = #send_options + 1
 			send_options[slot] = data
 			send_options[slot].entity = entity
 			send_distance[data.distance] = true
@@ -54,7 +54,7 @@ CheckEntity = function(hit, data, entity, distance)
 			local playerCoords = GetEntityCoords(playerPed)
 			local _, coords, entity2 = RaycastCamera(hit)
 			local distance = #(playerCoords - coords)
-			if entity ~= entity2 then 
+			if entity ~= entity2 then
 				if hasFocus then DisableNUI() end
 				break
 			elseif not hasFocus and IsDisabledControlPressed(0, 24) then
@@ -76,7 +76,6 @@ end
 local CheckBones = function(coords, entity, min, max, bonelist)
 	local closestBone, closestDistance, closestPos, closestBoneName = -1, 20
 	for k, v in pairs(bonelist) do
-		local coords = coords
 		if Bones[v] then
 			local boneId = GetEntityBoneIndexByName(entity, v)
 			local bonePos = GetWorldPositionOfEntityBone(entity, boneId)
@@ -98,7 +97,7 @@ end
 
 function EnableTarget()
 	if success or not IsControlEnabled(0, 24) then return end
-	if not targetActive then 
+	if not targetActive then
 		targetActive = true
 		SendNUIMessage({response = "openTarget"})
 
@@ -123,7 +122,7 @@ function EnableTarget()
 			if entityType > 0 then
 
 				-- Owned entity targets
-				if NetworkGetEntityIsNetworked(entity) then 
+				if NetworkGetEntityIsNetworked(entity) then
 					local data = Entities[NetworkGetNetworkIdFromEntity(entity)]
 					if data then
 						CheckEntity(hit, data, entity, #(playerCoords - coords))
@@ -142,8 +141,8 @@ function EnableTarget()
 					if closestBone and #(coords - closestPos) <= data.distance then
 						local send_options = {}
 						for _, data in pairs(data.options) do
-							if CheckOptions(data, entity) then 
-								local slot = #send_options + 1 
+							if CheckOptions(data, entity) then
+								local slot = #send_options + 1
 								send_options[slot] = data
 								send_options[slot].entity = entity
 							end
@@ -181,7 +180,7 @@ function EnableTarget()
 				if not success then
 					local data = Types[entityType]
 					if data then CheckEntity(hit, data, entity, #(playerCoords - coords)) end
-				end	
+				end
 			else sleep = sleep + 20 end
 			if not success then
 				-- Zone targets
@@ -191,7 +190,7 @@ function EnableTarget()
 						local send_options = {}
 						for _, data in pairs(zone.targetoptions.options) do
 							if CheckOptions(data, entity, distance) then
-								local slot = #send_options + 1 
+								local slot = #send_options + 1
 								send_options[slot] = data
 								send_options[slot].entity = entity
 							end
@@ -203,7 +202,7 @@ function EnableTarget()
 							while targetActive do
 								playerCoords = GetEntityCoords(playerPed)
 								_, coords = RaycastCamera(hit)
-								if not zone:isPointInside(coords) or #(playerCoords - zone.center) > zone.targetoptions.distance then 
+								if not zone:isPointInside(coords) or #(playerCoords - zone.center) > zone.targetoptions.distance then
 									if hasFocus then DisableNUI() end
 									break
 								elseif not hasFocus and IsDisabledControlPressed(0, 24) then
@@ -291,7 +290,7 @@ end
 exports("AddTargetBone", AddTargetBone)
 
 AddTargetEntity = function(entity, parameters)
-	local entity = NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity) or false
+	entity = NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity) or false
 	if entity then
 		local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 		if not Entities[entity] then Entities[entity] = {} end
@@ -344,7 +343,7 @@ end
 exports("RemoveTargetModel", RemoveTargetModel)
 
 RemoveTargetEntity = function(entity, labels)
-	local entity = NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity) or false
+	entity = NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity) or false
 	if entity then
 		for k, v in pairs(labels) do
 			if Entities[entity] then
@@ -419,8 +418,6 @@ if Config.Debug then
 				distance = 3.0
 			})
 		end
-
-
 	end)
 
 	AddPed({
