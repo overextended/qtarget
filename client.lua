@@ -1,15 +1,4 @@
-local Bones    = Load('client/bones')
-local Types    = {{}, {}, {}}
-local Players  = {}
-local Entities = {}
-local Models   = {}
-local Zones    = {}
-local Screen   = {}
-
-local hasFocus = false
-local success  = false
-local sendData = {}
-local playerPed
+local screen   = {}
 
 ---------------------------------------
 ---Source: https://github.com/citizenfx/lua/blob/luaglm-dev/cfx/libs/scripts/examples/scripting_gta.lua
@@ -33,14 +22,16 @@ local function ScreenPositionToCameraRay()
     return pos, glm_rayPicking(
         q * glm_forward,
         q * glm_up,
-        glm_rad(Screen.fov),
-        Screen.ratio,
+        glm_rad(screen.fov),
+        screen.ratio,
         0.10000, -- GetFinalRenderedCamNearClip(),
         10000.0, -- GetFinalRenderedCamFarClip(),
         0, 0
     )
 end
 ---------------------------------------
+
+local playerPed
 
 local function RaycastCamera(flag)
 	local rayPos, rayDir = ScreenPositionToCameraRay()
@@ -57,6 +48,8 @@ local function RaycastCamera(flag)
 end
 exports('raycast', RaycastCamera)
 
+local hasFocus = false
+
 local function DisableNUI()
 	SetNuiFocus(false, false)
 	SetNuiFocusKeepInput(false)
@@ -71,6 +64,9 @@ local function EnableNUI()
 		hasFocus = true
 	end
 end
+
+local success  = false
+local sendData = {}
 
 local function LeaveTarget()
 	table.wipe(sendData)
@@ -121,6 +117,7 @@ local function CheckEntity(hit, data, entity, distance)
 	end
 end
 
+local Bones = Load('client/bones')
 local function CheckBones(coords, entity, bonelist)
 	local closestBone = -1
 	local closestDistance = 20
@@ -139,6 +136,12 @@ local function CheckBones(coords, entity, bonelist)
 	if closestBone ~= -1 then return closestBone, closestPos, closestBoneName
 	else return false end
 end
+
+local Types    = {{}, {}, {}}
+local Players  = {}
+local Entities = {}
+local Models   = {}
+local Zones    = {}
 
 local function EnableTarget()
 	if success or not IsControlEnabled(0, 24) then return end
@@ -161,8 +164,8 @@ local function EnableTarget()
 		end)
 
 		playerPed = PlayerPedId()
-		Screen.ratio = GetAspectRatio(true)
-		Screen.fov = GetFinalRenderedCamFov()
+		screen.ratio = GetAspectRatio(true)
+		screen.fov = GetFinalRenderedCamFov()
 		local curFlag = 30
 
 		while targetActive do
@@ -246,10 +249,11 @@ local function EnableTarget()
 					local distance = #(playerCoords - zone.center)
 					if zone:isPointInside(coords) and distance <= zone.targetoptions.distance then
 						local nuiData
+						local slot = 0
 						for _, data in pairs(zone.targetoptions.options) do
 							if CheckOptions(data, entity, distance) then
 								if not nuiData then nuiData = {} end
-								local slot = #sendData + 1
+								slot += 1
 								sendData[slot] = data
 								sendData[slot].entity = entity
 								nuiData[slot] = {
@@ -316,7 +320,7 @@ RegisterNUICallback('closeTarget', function(data, cb)
 	hasFocus = false
 end)
 
-RegisterKeyMapping('+playerTarget', '[qtarget] Enable targeting~', 'keyboard', 'LMENU')
+RegisterKeyMapping('+playerTarget', 'Enable targeting~', 'keyboard', 'LMENU')
 RegisterCommand('+playerTarget', EnableTarget, false)
 RegisterCommand('-playerTarget', DisableTarget, false)
 TriggerEvent('chat:removeSuggestion', '/+playerTarget')
