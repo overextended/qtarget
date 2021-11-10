@@ -28,12 +28,12 @@ Config.Framework = false
 -------------------------------------------------------------------------------
 -- Functions
 -------------------------------------------------------------------------------
+local type = type
 local JobCheck
 local GangCheck
-local type = type
+local ItemCount
 
 do
-	local CountItems
 	if Config.Framework == 'ESX' then
 		local ESX = exports['es_extended']:getSharedObject()
 

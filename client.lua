@@ -93,9 +93,6 @@ local function CheckEntity(hit, data, entity, distance)
 			else sendDistance[data.distance] = false end
 		end
 		if next(sendData) then
-			for _, v in pairs(nuiData) do
-				for k, v in pairs(v) do print(k, v, nuidata) end
-			end
 			success = true
 			SendNUIMessage({response = 'validTarget', data = nuiData})
 			while targetActive do
