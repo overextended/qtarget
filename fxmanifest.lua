@@ -1,14 +1,19 @@
-fx_version 'cerulean'
-game 'gta5'
+--[[ FX Information ]]--
+fx_version   'cerulean'
+-- use_fxv2_oal 'yes'	Pending fix for vector results (https://forum.cfx.re/t/use-fxv2-oal-lua54-break-raycast-vector-results/4772649)
+lua54        'yes'
+game         'gta5'
 
-author 'Linden, Noms'
-description 'Optimised rewrite of bt-target'
-repository 'https://github.com/QuantusRP/qtarget'
-version '1.3.0'
-lua54 'yes'
+--[[ Resource Information ]]--
+name         'qtarget'
+author       'Linden, Noms'
+version      '2.0.0'
+repository   'https://github.com/overextended/qtarget'
+description  'An optimised targetting solution, based on bt-target'
 
+--[[ Manifest ]]--
 dependencies {
-	"PolyZone"
+	'PolyZone'
 }
 
 ui_page 'html/index.html'
@@ -19,11 +24,12 @@ client_scripts {
 	'@PolyZone/EntityZone.lua',
 	'@PolyZone/CircleZone.lua',
 	'@PolyZone/ComboZone.lua',
-	'client/main.lua'
+	'init.lua'
 }
 
 files {
-	'config.lua',
+	'client/*.lua',
+	'client.lua',
 	'html/index.html',
 	'html/css/style.css',
 	'html/js/script.js'
