@@ -30,6 +30,7 @@ Config.Framework = false
 -------------------------------------------------------------------------------
 local JobCheck
 local GangCheck
+local type = type
 
 do
 	local CountItems
@@ -90,11 +91,11 @@ do
 
 		JobCheck = function(job)
 			if type(job) == 'table' then
-				job = job[ESX.PlayerData.job.name]
-				if ESX.PlayerData.job.grade >= job then
+				job = job[PlayerData.job.name]
+				if PlayerData.job.grade >= job then
 					return true
 				end
-			elseif job == ESX.PlayerData.job.name then
+			elseif job == PlayerData.job.name then
 				return true
 			end
 			return false
@@ -102,11 +103,11 @@ do
 
 		GangCheck = function(job)
 			if type(job) == 'table' then
-				job = job[ESX.PlayerData.job.name]
-				if ESX.PlayerData.job.grade >= job then
+				job = job[PlayerData.job.name]
+				if PlayerData.job.grade >= job then
 					return true
 				end
-			elseif job == ESX.PlayerData.job.name then
+			elseif job == PlayerData.job.name then
 				return true
 			end
 			return false
