@@ -71,6 +71,10 @@ do
 			ESX.PlayerData.job = job
 		end)
 
+		RegisterNetEvent('esx:onPlayerLogout', function()
+			table.wipe(ESX.PlayerData)
+		end)
+
 	elseif Config.Compatibility == 'QB' then
 		local QBCore = exports['qb-core']:GetCoreObject()
 		local PlayerData = QBCore.Functions.GetPlayerData()
