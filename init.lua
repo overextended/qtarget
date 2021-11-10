@@ -29,6 +29,7 @@ Config.Framework = false
 -- Functions
 -------------------------------------------------------------------------------
 local JobCheck
+local GangCheck
 
 do
 	local CountItems
@@ -71,20 +72,83 @@ do
 		end)
 
 	elseif Config.Compatibility == 'QB' then
-		-- todo
+		local QBCore = exports['qb-core']:GetCoreObject()
+		local PlayerData = QBCore.Functions.GetPlayerData()
 
-	else
+		ItemCount = function(item)
+			for _, v in pairs(PlayerData.items) do
+				if v.name == item then
+					return v.amount
+				end
+			end
+			return 0
+		end
+
+		JobCheck = function(job)
+			if type(job) == 'table' then
+				job = job[ESX.PlayerData.job.name]
+				if ESX.PlayerData.job.grade >= job then
+					return true
+				end
+			elseif job == ESX.PlayerData.job.name then
+				return true
+			end
+			return false
+		end
+
+		GangCheck = function(job)
+			if type(job) == 'table' then
+				job = job[ESX.PlayerData.job.name]
+				if ESX.PlayerData.job.grade >= job then
+					return true
+				end
+			elseif job == ESX.PlayerData.job.name then
+				return true
+			end
+			return false
+		end
+
+		RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
+			PlayerData = QBCore.Functions.GetPlayerData()
+		end)
+
+		RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
+			table.wipe(PlayerData)
+		end)
+
+		RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
+			PlayerData.job = JobInfo
+		end)
+
+		RegisterNetEvent('QBCore:Client:OnGangUpdate', function(GangInfo)
+			PlayerData.gang = GangInfo
+		end)
+
+		RegisterNetEvent('QBCore:Client:SetPlayerData', function(val)
+			PlayerData = val
+		end)
+	end
+
+	if not JobCheck then
 		JobCheck = function()
 			return true
 		end
 	end
+
+	if not GangCheck then
+		GangCheck = function()
+			return true
+		end
+	end
+
 end
 
 function CheckOptions(data, entity, distance)
 	if data.distance and distance > data.distance then return nil end
-	if data.required_item and ItemCount(data.required_item) < 1 then return nil end
-	if data.canInteract and not data.canInteract(entity) then return nil end
 	if data.job and not JobCheck(data.job) then return nil end
+	if data.gang and not JobCheck(data.job) then return nil end
+	if data.item and ItemCount(data.item) < 1 then return nil end
+	if data.canInteract and not data.canInteract(entity, distance, data) then return nil end
 	return true
 end
 
