@@ -75,23 +75,27 @@ local function LeaveTarget()
 end
 
 local function CheckEntity(hit, data, entity, distance)
-	local send_distance = {}
-	local nuiData
+	local sendDistance = {}
 	if next(data) then
-		for _, option in pairs(data) do
-			if CheckOptions(option, entity, distance) then
+		local nuiData
+		local slot = 0
+		for _, data in pairs(data) do
+			if CheckOptions(data, entity, distance) then
 				if not nuiData then nuiData = {} end
-				local slot = #sendData + 1
-				sendData[slot] = option
+				slot += 1
+				sendData[slot] = data
 				sendData[slot].entity = entity
 				nuiData[slot] = {
 					icon = data.icon,
 					label = data.label
 				}
-				send_distance[option.distance] = true
-			else send_distance[option.distance] = false end
+				sendDistance[data.distance] = true
+			else sendDistance[data.distance] = false end
 		end
-		if next(nuiData) then
+		if next(sendData) then
+			for _, v in pairs(nuiData) do
+				for k, v in pairs(v) do print(k, v, nuidata) end
+			end
 			success = true
 			SendNUIMessage({response = 'validTarget', data = nuiData})
 			while targetActive do
@@ -104,7 +108,7 @@ local function CheckEntity(hit, data, entity, distance)
 				elseif not hasFocus and IsDisabledControlPressed(0, 24) then
 					EnableNUI()
 				else
-					for k, v in pairs(send_distance) do
+					for k, v in pairs(sendDistance) do
 						if (v == false and distance < k) or (v == true and distance > k) then
 							return CheckEntity(hit, data, entity, distance)
 						end
@@ -195,10 +199,11 @@ local function EnableTarget()
 					if next(data) then
 						if closestBone and #(coords - closestPos) <= data.distance then
 							local nuiData
+							local slot = 0
 							for _, data in pairs(data.options) do
 								if CheckOptions(data, entity) then
 									if not nuiData then nuiData = {} end
-									local slot = #sendData + 1
+									slot += 1
 									sendData[slot] = data
 									sendData[slot].entity = entity
 									nuiData[slot] = {
