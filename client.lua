@@ -251,7 +251,7 @@ local function EnableTarget()
 			if not success then
 				-- Zone targets
 				for _,zone in pairs(Zones) do
-					local distance = #(playerCoords - zone.center)
+					local distance = #(playerCoords - coords)
 					if zone:isPointInside(coords) and distance <= zone.targetoptions.distance then
 						local nuiData
 						local slot = 0
@@ -273,7 +273,7 @@ local function EnableTarget()
 							while targetActive do
 								playerCoords = GetEntityCoords(playerPed)
 								_, coords = RaycastCamera(hit)
-								if not zone:isPointInside(coords) or #(playerCoords - zone.center) > zone.targetoptions.distance then
+								if not zone:isPointInside(coords) or #(playerCoords - coords) > zone.targetoptions.distance then
 									if hasFocus then DisableNUI() end
 									break
 								elseif not hasFocus and IsDisabledControlPressed(0, 24) then
