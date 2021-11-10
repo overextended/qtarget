@@ -14,7 +14,7 @@ end
 -- Settings
 -------------------------------------------------------------------------------
 
-Config   = {}
+Config = {}
 
 -- It's possible to interact with entities through walls so this should be low
 Config.MaxDistance = 7.0
