@@ -43,7 +43,7 @@ $(document).on("mousedown", (event) => {
   $(".target-wrapper").hide();
   switch (event.which) {
     case 1: {
-      $.post("https://qtarget/selectTarget", JSON.stringify(element.id + 1));
+      $.post("https://qtarget/selectTarget", JSON.stringify(Number(element.id) + 1));
       break;
     }
     case 3: {
