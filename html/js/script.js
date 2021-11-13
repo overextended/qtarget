@@ -34,7 +34,8 @@ $(document).on('mousedown', (event) => {
   $('.target-wrapper').hide();
   switch (event.which) {
     case 1: {
-      $.post('https://qtarget/selectTarget', JSON.stringify(Number(event.target.id)));
+      const id = event.target.id
+      if (id) $.post('https://qtarget/selectTarget', JSON.stringify(Number(id)));
       break;
     }
     case 3: {
