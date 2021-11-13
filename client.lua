@@ -92,7 +92,7 @@ local function CheckEntity(hit, data, entity, distance)
 				sendDistance[data.distance] = true
 			else sendDistance[data.distance] = false end
 		end
-		if next(sendData) then
+		if nuiData then
 			success = true
 			SendNUIMessage({response = 'validTarget', data = nuiData})
 			while targetActive do
@@ -113,8 +113,8 @@ local function CheckEntity(hit, data, entity, distance)
 				end
 				Wait(20)
 			end
-			LeaveTarget()
 		end
+		LeaveTarget()
 	end
 end
 
@@ -209,7 +209,7 @@ local function EnableTarget()
 									}
 								end
 							end
-							if next(nuiData) then
+							if nuiData then
 								success = true
 								SendNUIMessage({response = 'validTarget', data = nuiData})
 
@@ -264,7 +264,7 @@ local function EnableTarget()
 								}
 							end
 						end
-						if next(nuiData) then
+						if nuiData then
 							success = true
 							SendNUIMessage({response = 'validTarget', data = nuiData})
 							while targetActive do
@@ -306,7 +306,7 @@ end
 
 RegisterNUICallback('selectTarget', function(option)
 	hasFocus = false
-	local data = sendData[tonumber(option)]
+	local data = sendData[option]
 	CreateThread(function()
 		Wait(0)
 		if data.action ~= nil then
