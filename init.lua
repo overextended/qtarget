@@ -55,7 +55,7 @@ do
 		JobCheck = function(job)
 			if type(job) == 'table' then
 				job = job[ESX.PlayerData.job.name]
-				if ESX.PlayerData.job.grade >= job then
+				if job and ESX.PlayerData.job.grade >= job then
 					return true
 				end
 			elseif job == ESX.PlayerData.job.name then
