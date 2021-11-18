@@ -14,7 +14,7 @@ window.addEventListener('message', function (event) {
     Object.values(item.data).forEach((item, index) => {
       index++;
       $('.target-label').append(
-        `<div class='target-item' id='${index}' <li><i class='${item.icon} fa-fw fa-pull-left target-icon'></i>${item.label}</li></div>`
+        `<div class='target-item' id='${index}'><i class='${item.icon} fa-fw fa-pull-left target-icon'></i>${item.label}</div>`
       );
       $(`#target-${index}`).hover((e) => {
         $(`#target-${index}`).css('color', e.type === 'mouseenter' ? 'rgb(98, 135, 236)' : 'white');
