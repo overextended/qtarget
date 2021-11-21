@@ -30,7 +30,7 @@ exports.qtarget:AddTargetEntity(entity, {
 
 ##### Options can be removed by calling the remove export, with all labels as entries in an array.
 ```lua
-exports.qtarget:RemoveTargetEntity({
+exports.qtarget:RemoveTargetEntity(entity, {
 	'action 1', 'action 2'
 })
 ```
