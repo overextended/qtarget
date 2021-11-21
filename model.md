@@ -30,7 +30,7 @@ exports.qtarget:AddTargetModel({218085040, 666561306}, {
 
 ##### Options can be removed by calling the remove export, with all labels as entries in an array.
 ```lua
-exports.qtarget:RemoveTargetModel({
+exports.qtarget:RemoveTargetModel(models, {
 	'action 1', 'action 2'
 })
 ```
