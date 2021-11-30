@@ -20,7 +20,7 @@ exports.qtarget:AddTargetModel({218085040, 666561306}, {
 		{
 			event = "eventname",
 			icon = "fas fa-box-circle-check",
-			label = "action 2"
+			label = "action 2",
 			num = 2
 		},
 	},
