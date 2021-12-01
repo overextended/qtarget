@@ -37,7 +37,7 @@ title: Documentation
 ## Custom Parameters
 ##### You can pass any information that you desire through the export. Once the event or function is triggered it will receive all parameters as data.
 ```lua
-exports['qtarget']:AddTargetModel({690372739}, {
+exports.qtarget:AddTargetModel({690372739}, {
     options = {
         {
             event = "coffee:buy",

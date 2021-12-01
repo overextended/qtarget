@@ -21,7 +21,7 @@ exports.qtarget:Player({
 		{
 			event = "eventname",
 			icon = "fas fa-box-circle-check",
-			label = "action 2"
+			label = "action 2",
 			num = 2
 		},
 	},
