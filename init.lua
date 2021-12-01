@@ -29,9 +29,18 @@ Config.Framework = false
 -- Functions
 -------------------------------------------------------------------------------
 local type = type
-local JobCheck
-local GangCheck
-local ItemCount
+
+local JobCheck = function()
+	return true
+end
+
+local GangCheck = function()
+	return true
+end
+
+local ItemCount = function()
+	return true
+end
 
 do
 	if Config.Framework == 'ESX' then
@@ -76,7 +85,7 @@ do
 			table.wipe(ESX.PlayerData)
 		end)
 
-	elseif Config.Compatibility == 'QB' then
+	elseif Config.Framework == 'QB' then
 		local QBCore = exports['qb-core']:GetCoreObject()
 		local PlayerData = QBCore.Functions.GetPlayerData()
 
@@ -133,27 +142,14 @@ do
 			PlayerData = val
 		end)
 	end
-
-	if not JobCheck then
-		JobCheck = function()
-			return true
-		end
-	end
-
-	if not GangCheck then
-		GangCheck = function()
-			return true
-		end
-	end
-
 end
 
 function CheckOptions(data, entity, distance)
-	if data.distance and distance > data.distance then return nil end
-	if data.job and not JobCheck(data.job) then return nil end
-	if data.gang and not JobCheck(data.job) then return nil end
-	if data.item and ItemCount(data.item) < 1 then return nil end
-	if data.canInteract and not data.canInteract(entity, distance, data) then return nil end
+	if data.distance and distance > data.distance then return false end
+	if data.job and not JobCheck(data.job) then return false end
+	if data.gang and not JobCheck(data.job) then return false end
+	if data.item and ItemCount(data.item) < 1 then return false end
+	if data.canInteract and not data.canInteract(entity, distance, data) then return false end
 	return true
 end
 
