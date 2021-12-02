@@ -114,6 +114,10 @@ do
 			return false
 		end
 
+		CitizenCheck = function(citizenid)
+			return (citizenid == PlayerData.citizenid or citizenid[PlayerData.citizenid])
+		end
+
 		RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
 			PlayerData = QBCore.Functions.GetPlayerData()
 		end)
@@ -141,6 +145,7 @@ function CheckOptions(data, entity, distance)
 	if data.job and not JobCheck(data.job) then return false end
 	if data.gang and not GangCheck(data.gang) then return false end
 	if data.item and ItemCount(data.item) < 1 then return false end
+	if data.citizenid and not CitizenCheck(data.citizenid) then return false end
 	if data.canInteract and not data.canInteract(entity, distance, data) then return false end
 	return true
 end
