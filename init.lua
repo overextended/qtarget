@@ -96,7 +96,7 @@ do
 				if PlayerData.job.grade >= job then
 					return true
 				end
-			elseif job == PlayerData.job.name then
+			elseif job == (PlayerData.job.name or 'all') then
 				return true
 			end
 			return false
@@ -108,7 +108,7 @@ do
 				if PlayerData.gang.grade >= gang then
 					return true
 				end
-			elseif gang == PlayerData.gang.name then
+			elseif gang == (PlayerData.gang.name or 'all') then
 				return true
 			end
 			return false
