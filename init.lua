@@ -102,13 +102,13 @@ do
 			return false
 		end
 
-		GangCheck = function(job)
-			if type(job) == 'table' then
-				job = job[PlayerData.job.name]
-				if PlayerData.job.grade >= job then
+		GangCheck = function(gang)
+			if type(gang) == 'table' then
+				gang = gang[PlayerData.gang.name]
+				if PlayerData.gang.grade >= gang then
 					return true
 				end
-			elseif job == PlayerData.job.name then
+			elseif gang == PlayerData.gang.name then
 				return true
 			end
 			return false
@@ -139,7 +139,7 @@ end
 function CheckOptions(data, entity, distance)
 	if data.distance and distance > data.distance then return false end
 	if data.job and not JobCheck(data.job) then return false end
-	if data.gang and not JobCheck(data.job) then return false end
+	if data.gang and not GangCheck(data.gang) then return false end
 	if data.item and ItemCount(data.item) < 1 then return false end
 	if data.canInteract and not data.canInteract(entity, distance, data) then return false end
 	return true
