@@ -1,8 +1,9 @@
 function Load(name)
-	local chunk = LoadResourceFile('qtarget', ('%s.lua'):format(name))
+	local resourceName = GetCurrentResourceName()
+	local chunk = LoadResourceFile(resourceName, ('%s.lua'):format(name))
 	if chunk then
 		local err
-		chunk, err = load(chunk, ('@@%s.lua'):format(name), 't')
+		chunk, err = load(chunk, ('@@%s/%s.lua'):format(resourceName, name), 't')
 		if err then
 			error(('\n^1 %s'):format(err), 0)
 		end
@@ -28,19 +29,10 @@ Config.Framework = false
 -------------------------------------------------------------------------------
 -- Functions
 -------------------------------------------------------------------------------
-local type = type
-
-local JobCheck = function()
-	return true
-end
-
-local GangCheck = function()
-	return true
-end
-
-local ItemCount = function()
-	return true
-end
+local function JobCheck() return true end
+local function GangCheck() return true end
+local function ItemCount() return true end
+local function CitizenCheck() return true end
 
 do
 	if Config.Framework == 'ESX' then
