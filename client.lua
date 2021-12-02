@@ -74,6 +74,8 @@ local function LeaveTarget()
 	SendNUIMessage({response = 'leftTarget'})
 end
 
+local CheckOptions = CheckOptions
+
 local function CheckEntity(hit, data, entity, distance)
 	local sendDistance = {}
 	if next(data) then

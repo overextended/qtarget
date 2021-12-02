@@ -34,7 +34,25 @@ local function GangCheck() return true end
 local function ItemCount() return true end
 local function CitizenCheck() return true end
 
-do
+CreateThread(function()
+	if not Config.Framework then
+		local framework = 'es_extended'
+		local state = GetResourceState(framework)
+
+		if state == 'missing' then
+			framework = 'qb-core'
+			state = GetResourceState(framework)
+		end
+
+		if state ~= 'missing' then
+			if state ~= ('started' or 'starting') then
+				local timeout = 0
+				repeat Wait(0) timecount += 1 until (GetResourceState(framework) == 'started' or timeout > 100)
+				Config.Framework == framework == 'es_extended' and 'ESX' or 'QB'
+			end
+		end
+	end
+
 	if Config.Framework == 'ESX' then
 		local ESX = exports['es_extended']:getSharedObject()
 
@@ -138,17 +156,17 @@ do
 			PlayerData = val
 		end)
 	end
-end
 
-function CheckOptions(data, entity, distance)
-	if data.distance and distance > data.distance then return false end
-	if data.job and not JobCheck(data.job) then return false end
-	if data.gang and not GangCheck(data.gang) then return false end
-	if data.item and ItemCount(data.item) < 1 then return false end
-	if data.citizenid and not CitizenCheck(data.citizenid) then return false end
-	if data.canInteract and not data.canInteract(entity, distance, data) then return false end
-	return true
-end
+	function CheckOptions(data, entity, distance)
+		if data.distance and distance > data.distance then return false end
+		if data.job and not JobCheck(data.job) then return false end
+		if data.gang and not GangCheck(data.gang) then return false end
+		if data.item and ItemCount(data.item) < 1 then return false end
+		if data.citizenid and not CitizenCheck(data.citizenid) then return false end
+		if data.canInteract and not data.canInteract(entity, distance, data) then return false end
+		return true
+	end
 
-Load('client')
-Load = nil
+	Load('client')
+	Load = nil
+end)
