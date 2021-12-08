@@ -47,8 +47,11 @@ CreateThread(function()
 		if state ~= 'missing' then
 			if state ~= ('started' or 'starting') then
 				local timeout = 0
-				repeat Wait(0) timecount += 1 until (GetResourceState(framework) == 'started' or timeout > 100)
-				Config.Framework == framework == 'es_extended' and 'ESX' or 'QB'
+				repeat
+					Wait(0)
+					timecount += 1
+				until (GetResourceState(framework) == 'started' or timeout > 100)
+				Config.Framework = (framework == 'es_extended') and 'ESX' or 'QB'
 			end
 		end
 	end
