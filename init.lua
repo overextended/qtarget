@@ -49,7 +49,7 @@ CreateThread(function()
 				local timeout = 0
 				repeat
 					Wait(0)
-					timecount += 1
+					timeout += 1
 				until (GetResourceState(framework) == 'started' or timeout > 100)
 				Config.Framework = (framework == 'es_extended') and 'ESX' or 'QB'
 			end
