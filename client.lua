@@ -56,6 +56,8 @@ local function DisableNUI()
 	hasFocus = false
 end
 
+local targetActive = false
+
 local function EnableNUI()
 	if targetActive and not hasFocus then
 		SetCursorLocation(0.5, 0.5)
@@ -67,6 +69,8 @@ end
 
 local success  = false
 local sendData = {}
+local sendDistance = {}
+local nuiData = {}
 
 local function LeaveTarget()
 	table.wipe(sendData)
@@ -74,16 +78,15 @@ local function LeaveTarget()
 	SendNUIMessage({response = 'leftTarget'})
 end
 
-local CheckOptions = CheckOptions
+local CheckOptions
 
 local function CheckEntity(hit, data, entity, distance)
-	local sendDistance = {}
 	if next(data) then
-		local nuiData
+		table.wipe(sendDistance)
+		table.wipe(nuiData)
 		local slot = 0
 		for _, data in pairs(data) do
 			if CheckOptions(data, entity, distance) then
-				if not nuiData then nuiData = {} end
 				slot += 1
 				sendData[slot] = data
 				sendData[slot].entity = entity
@@ -94,7 +97,7 @@ local function CheckEntity(hit, data, entity, distance)
 				sendDistance[data.distance] = true
 			else sendDistance[data.distance] = false end
 		end
-		if nuiData then
+		if nuiData[1] then
 			success = true
 			SendNUIMessage({response = 'validTarget', data = nuiData})
 			while targetActive do
@@ -120,7 +123,7 @@ local function CheckEntity(hit, data, entity, distance)
 	end
 end
 
-local Bones = Load('client/bones')
+local Bones = Load('bones')
 local function CheckBones(coords, entity, bonelist)
 	local closestBone = -1
 	local closestDistance = 20
@@ -147,8 +150,9 @@ local Models   = {}
 local Zones    = {}
 
 local function EnableTarget()
-	if success or not IsControlEnabled(0, 24) then return end
-	if not targetActive then
+	if success or not IsControlEnabled(0, 24) or IsNuiFocused() then return end
+	if not CheckOptions then CheckOptions = _G.CheckOptions end
+	if not targetActive and CheckOptions then
 		targetActive = true
 		SendNUIMessage({response = 'openTarget'})
 
@@ -197,11 +201,10 @@ local function EnableTarget()
 					local data = Bones[closestBoneName]
 					if next(data) then
 						if closestBone and #(coords - closestPos) <= data.distance then
-							local nuiData
+							table.wipe(nuiData)
 							local slot = 0
 							for _, data in pairs(data.options) do
 								if CheckOptions(data, entity) then
-									if not nuiData then nuiData = {} end
 									slot += 1
 									sendData[slot] = data
 									sendData[slot].entity = entity
@@ -211,7 +214,7 @@ local function EnableTarget()
 									}
 								end
 							end
-							if nuiData then
+							if nuiData[1] then
 								success = true
 								SendNUIMessage({response = 'validTarget', data = nuiData})
 
@@ -252,11 +255,10 @@ local function EnableTarget()
 				for _,zone in pairs(Zones) do
 					local distance = #(playerCoords - coords)
 					if zone:isPointInside(coords) and distance <= zone.targetoptions.distance then
-						local nuiData
+						table.wipe(nuiData)
 						local slot = 0
 						for _, data in pairs(zone.targetoptions.options) do
 							if CheckOptions(data, entity, distance) then
-								if not nuiData then nuiData = {} end
 								slot += 1
 								sendData[slot] = data
 								sendData[slot].entity = entity
@@ -266,7 +268,7 @@ local function EnableTarget()
 								}
 							end
 						end
-						if nuiData then
+						if nuiData[1] then
 							success = true
 							SendNUIMessage({response = 'validTarget', data = nuiData})
 							while targetActive do
@@ -330,7 +332,14 @@ RegisterCommand('-playerTarget', DisableTarget, false)
 TriggerEvent('chat:removeSuggestion', '/+playerTarget')
 TriggerEvent('chat:removeSuggestion', '/-playerTarget')
 
---Exports
+
+
+
+
+-------------------------------------------------------------------------------
+-- Exports
+-------------------------------------------------------------------------------
+
 local function AddCircleZone(name, center, radius, options, targetoptions)
 	Zones[name] = CircleZone:Create(center, radius, options)
 	Zones[name].targetoptions = targetoptions
@@ -356,15 +365,23 @@ local function AddTargetBone(bones, parameters)
 end
 exports('AddTargetBone', AddTargetBone)
 
+local function SetOptions(table, distance, options)
+	for _, v in pairs(options) do
+		if v.required_item then
+			v.item = v.required_item
+			v.required_item = nil
+		end
+		if not v.distance or v.distance > distance then v.distance = distance end
+		table[v.label] = v
+	end
+end
+
 local function AddTargetEntity(entity, parameters)
 	entity = NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity) or false
 	if entity then
 		local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 		if not Entities[entity] then Entities[entity] = {} end
-		for k, v in pairs(options) do
-			if not v.distance or v.distance > distance then v.distance = distance end
-			Entities[entity][v.label] = v
-		end
+		SetOptions(Entities[entity], distance, options)
 	end
 end
 exports('AddTargetEntity', AddTargetEntity)
@@ -378,12 +395,9 @@ exports('AddEntityZone', AddEntityZone)
 local function AddTargetModel(models, parameters)
 	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 	for _, model in pairs(models) do
-		if type(model) == 'string' then model = GetHashKey(model) end
+		if type(model) == 'string' then model = joaat(model) end
 		if not Models[model] then Models[model] = {} end
-		for k, v in pairs(options) do
-			if not v.distance or v.distance > distance then v.distance = distance end
-			Models[model][v.label] = v
-		end
+		SetOptions(Models[model], distance, options)
 	end
 end
 exports('AddTargetModel', AddTargetModel)
@@ -399,8 +413,8 @@ exports('RemoveZone', RemoveZone)
 
 local function RemoveTargetModel(models, labels)
 	for _, model in pairs(models) do
-		if type(model) == 'string' then model = GetHashKey(model) end
-		for k, v in pairs(labels) do
+		if type(model) == 'string' then model = joaat(model) end
+		for _, v in pairs(labels) do
 			if Models[model] then
 				Models[model][v] = nil
 			end
@@ -423,10 +437,7 @@ exports('RemoveTargetEntity', RemoveTargetEntity)
 
 local function AddType(type, parameters)
 	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
-	for _, v in pairs(options) do
-		if not v.distance or v.distance > distance then v.distance = distance end
-		Types[type][v.label] = v
-	end
+	SetOptions(Types[type], distance, options)
 end
 
 local function AddPed(parameters) AddType(1, parameters) end
@@ -440,10 +451,7 @@ exports('Object', AddObject)
 
 local function AddPlayer(parameters)
 	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
-	for _, v in pairs(options) do
-		if not v.distance or v.distance > distance then v.distance = distance end
-		Players[v.label] = v
-	end
+	SetOptions(Players, distance, options)
 end
 exports('Player', AddPlayer)
 
@@ -463,7 +471,7 @@ local function RemoveObject(labels) RemoveType(3, labels) end
 exports('RemoveObject', RemoveObject)
 
 local function RemovePlayer(labels)
-	for k, v in pairs(labels) do
+	for _, v in pairs(labels) do
 		Players[v] = nil
 	end
 end
