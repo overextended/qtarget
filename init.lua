@@ -1,9 +1,9 @@
 function Load(name)
 	local resourceName = GetCurrentResourceName()
-	local chunk = LoadResourceFile(resourceName, ('%s.lua'):format(name))
+	local chunk = LoadResourceFile(resourceName, ('data/%s.lua'):format(name))
 	if chunk then
 		local err
-		chunk, err = load(chunk, ('@@%s/%s.lua'):format(resourceName, name), 't')
+		chunk, err = load(chunk, ('@@%s/data/%s.lua'):format(resourceName, name), 't')
 		if err then
 			error(('\n^1 %s'):format(err), 0)
 		end
@@ -166,7 +166,4 @@ CreateThread(function()
 		if data.canInteract and not data.canInteract(entity, distance, data) then return false end
 		return true
 	end
-
-	Load('client')
-	Load = nil
 end)

@@ -14,3 +14,7 @@ indent_style = space
 [*.lua]
 indent_size = 4
 indent_style = tab
+
+[*.md]
+indent_size = 4
+indent_style = tab

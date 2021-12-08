@@ -24,12 +24,12 @@ client_scripts {
 	'@PolyZone/EntityZone.lua',
 	'@PolyZone/CircleZone.lua',
 	'@PolyZone/ComboZone.lua',
-	'init.lua'
+	'init.lua',
+	'client.lua',
 }
 
 files {
-	'client/*.lua',
-	'client.lua',
+	'data/*.lua',
 	'html/index.html',
 	'html/css/style.css',
 	'html/js/script.js'
