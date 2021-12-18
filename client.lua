@@ -251,10 +251,20 @@ local function EnableTarget()
 				end
 			else sleep += 20 end
 			if not success then
-				-- Zone targets
-				for _,zone in pairs(Zones) do
+				-- ADD CLOSEST ZONE SUPPORT
+				local closestDis, closestZone = 1000.0
+				for b,zone in pairs(Zones) do
 					local distance = #(playerCoords - coords)
-					if zone:isPointInside(coords) and distance <= zone.targetoptions.distance then
+					if zone:isPointInside(coords) and distance <= zone.targetoptions.distance and distance < closestDis then
+						closestDis = distance
+						closestZone = zone
+					end
+				end
+				-- Zone targets
+				-- for _,zone in pairs(Zones) do
+					-- local distance = #(playerCoords - coords)
+					if closestZone then
+						local zone = Zones[closestZone]
 						table.wipe(nuiData)
 						local slot = 0
 						for _, data in pairs(zone.targetoptions.options) do
@@ -291,7 +301,7 @@ local function EnableTarget()
 							break
 						end
 					end
-				end
+				-- end
 			else LeaveTarget() end
 			Wait(sleep)
 		end
