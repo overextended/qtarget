@@ -71,19 +71,20 @@ local success  = false
 local sendData = {}
 local sendDistance = {}
 local nuiData = {}
+local table_wipe = table.wipe
+local pairs = pairs
+local CheckOptions
 
 local function LeaveTarget()
-	table.wipe(sendData)
+	table_wipe(sendData)
 	success = false
 	SendNUIMessage({response = 'leftTarget'})
 end
 
-local CheckOptions
-
 local function CheckEntity(hit, data, entity, distance)
 	if next(data) then
-		table.wipe(sendDistance)
-		table.wipe(nuiData)
+		table_wipe(sendDistance)
+		table_wipe(nuiData)
 		local slot = 0
 		for _, data in pairs(data) do
 			if CheckOptions(data, entity, distance) then
@@ -201,7 +202,7 @@ local function EnableTarget()
 					local data = Bones[closestBoneName]
 					if next(data) then
 						if closestBone and #(coords - closestPos) <= data.distance then
-							table.wipe(nuiData)
+							table_wipe(nuiData)
 							local slot = 0
 							for _, data in pairs(data.options) do
 								if CheckOptions(data, entity) then
@@ -265,7 +266,7 @@ local function EnableTarget()
 					-- local distance = #(playerCoords - coords)
 					if closestZone then
 						local zone = Zones[closestZone]
-						table.wipe(nuiData)
+					table_wipe(nuiData)
 						local slot = 0
 						for _, data in pairs(zone.targetoptions.options) do
 							if CheckOptions(data, entity, distance) then
