@@ -170,14 +170,14 @@ CreateThread(function()
 
 		local PlayerData = vRP.getUserId({source})
 
-		ItemCount = function(item)
-			-- I'm still going to investigate how it works in vrp
-			--for _, v in pairs(PlayerData.items) do
-				--if v.name == item then
-					--return v.amount
-				--end
-			--end
-			--return 0
+		ItemCount = function(user_id, idname)
+			local data = vRP.getUserDataTable({user_id})
+			for _, v in pairs(data.inventory) do
+				if v.name == idname then
+					return v.amount
+				end
+			end
+			return 0
 		end
 
 		JobCheck = function(job)
