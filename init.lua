@@ -23,7 +23,7 @@ Config.MaxDistance = 7.0
 -- Enable debug options and distance preview
 Config.Debug = false
 
--- Supported values: ESX, QB, false
+-- Supported values: ESX, QB, vRP, false
 Config.Framework = false
 
 -------------------------------------------------------------------------------
@@ -42,6 +42,9 @@ CreateThread(function()
 		if state == 'missing' then
 			framework = 'qb-core'
 			state = GetResourceState(framework)
+		elseif state == 'missing' then
+			framework = 'vrp'
+			state = GetResourceState(framework)
 		end
 
 		if state ~= 'missing' then
@@ -52,7 +55,7 @@ CreateThread(function()
 					timeout += 1
 				until (GetResourceState(framework) == 'started' or timeout > 100)
 			end
-			Config.Framework = (framework == 'es_extended') and 'ESX' or 'QB'
+			Config.Framework = (framework == 'es_extended') and 'ESX' or 'QB' or 'vRP'
 		end
 	end
 
@@ -158,6 +161,36 @@ CreateThread(function()
 		RegisterNetEvent('QBCore:Client:SetPlayerData', function(val)
 			PlayerData = val
 		end)
+			
+	elseif Config.Framework == 'vRP' then
+		local Tunnel = module("vrp", "lib/Tunnel")
+		local Proxy = module("vrp", "lib/Proxy")
+
+		vRP = Proxy.getInterface("vRP")
+
+		local PlayerData = vRP.getUserId({source})
+
+		ItemCount = function(item)
+			-- I'm still going to investigate how it works in vrp
+			--for _, v in pairs(PlayerData.items) do
+				--if v.name == item then
+					--return v.amount
+				--end
+			--end
+			--return 0
+		end
+
+		JobCheck = function(job)
+			if type(job) == 'table' then
+				job = job[vRP.hasGroup({PlayerData, job})]
+				if vRP.hasPermission({PlayerData, grade}) >= job then
+					return true
+				end
+			elseif job == (vRP.hasGroup({PlayerData, job}) or 'all') then
+				return true
+			end
+			return false
+		end
 	end
 
 	function CheckOptions(data, entity, distance)
