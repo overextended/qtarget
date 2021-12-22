@@ -59,7 +59,8 @@ CreateThread(function()
 	if Config.Framework == 'ESX' then
 		local ESX = exports['es_extended']:getSharedObject()
 
-		if GetResourceState('ox_inventory') ~= 'unknown' then
+        local resState = GetResourceState('ox_inventory')
+        if resState ~= 'missing' and resState ~= 'unknown' then
 			ItemCount = function(item)
 				return exports.ox_inventory:Search(2, item)
 			end
