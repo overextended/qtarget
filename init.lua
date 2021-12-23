@@ -156,7 +156,7 @@ CreateThread(function()
 			PlayerData.gang = GangInfo
 		end)
 
-		RegisterNetEvent('QBCore:Client:SetPlayerData', function(val)
+		RegisterNetEvent('QBCore:Player:SetPlayerData', function(val)
 			PlayerData = val
 		end)
 	end
