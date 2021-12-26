@@ -219,7 +219,7 @@ local function EnableTarget()
 									SendNUIMessage({response = 'validTarget', data = nuiData})
 
 									while targetActive do
-										local _, coords, entity2 = RaycastCamera(hit, GetEntityCoords(playerPed))
+										local _, coords, distance, entity2 = RaycastCamera(hit, GetEntityCoords(playerPed))
 										if hit and entity == entity2 then
 											local closestBone2, closestPos2 = CheckBones(coords, entity, Bones.Vehicle)
 
