@@ -277,7 +277,7 @@ local function EnableTarget()
 							success = true
 							SendNUIMessage({response = 'validTarget', data = nuiData})
 							while targetActive do
-								_, coords, distance, _, _ = RaycastCamera(hit, GetEntityCoords(playerPed))
+								local _, coords, distance, _, _ = RaycastCamera(hit, GetEntityCoords(playerPed))
 								if not closestZone:isPointInside(coords) or distance > closestZone.targetoptions.distance then
 									if hasFocus then DisableNUI() end
 									break
@@ -290,7 +290,7 @@ local function EnableTarget()
 						else
 							repeat
 								Wait(20)
-								_, coords, entity2 = RaycastCamera(hit)
+								local _, coords, distance, entity2 = RaycastCamera(hit)
 							until not targetActive or entity ~= entity2 or not closestZone:isPointInside(coords)
 						end
 					else sleep += 20 end
