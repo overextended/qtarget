@@ -30,9 +30,15 @@ local function ScreenPositionToCameraRay()
     )
 end
 ---------------------------------------
-
 local playerPed
 
+---@param flag number
+---@param playerCoords vector
+---@return number flag
+---@return vector coords
+---@return number distance
+---@return number entity
+---@return number entity_type
 local function RaycastCamera(flag, playerCoords)
 	if not playerPed then playerPed = PlayerPedId() end
 	local rayPos, rayDir = ScreenPositionToCameraRay()
@@ -40,7 +46,7 @@ local function RaycastCamera(flag, playerCoords)
 	local rayHandle = StartShapeTestLosProbe(rayPos.x, rayPos.y, rayPos.z, destination.x, destination.y, destination.z, flag or -1, playerPed, 0)
 	while true do
 		Wait(0)
-		local result, hit, endCoords, _, entityHit = GetShapeTestResult(rayHandle)
+		local result, _, endCoords, _, entityHit = GetShapeTestResult(rayHandle)
 		-- todo: add support for materialHash
 		if result ~= 1 then
 			local distance = playerCoords and #(playerCoords - endCoords)
@@ -83,6 +89,10 @@ local function LeaveTarget()
 	SendNUIMessage({response = 'leftTarget'})
 end
 
+---@param hit number
+---@param data table
+---@param entity number
+---@param distance number
 local function CheckEntity(hit, data, entity, distance)
 	if next(data) then
 		table_wipe(sendDistance)
@@ -125,6 +135,13 @@ local function CheckEntity(hit, data, entity, distance)
 end
 
 local Bones = Load('bones')
+
+---@param coords vector
+---@param entity number
+---@param bonelist table
+---@return boolean | number
+---@return number?
+---@return string?
 local function CheckBones(coords, entity, bonelist)
 	local closestBone = -1
 	local closestDistance = 20
@@ -290,7 +307,7 @@ local function EnableTarget()
 						else
 							repeat
 								Wait(20)
-								local _, coords, distance, entity2 = RaycastCamera(hit)
+								local _, coords, _, entity2 = RaycastCamera(hit)
 							until not targetActive or entity ~= entity2 or not closestZone:isPointInside(coords)
 						end
 					else sleep += 20 end
@@ -325,7 +342,7 @@ RegisterNUICallback('selectTarget', function(option)
 
 end)
 
-RegisterNUICallback('closeTarget', function(data, cb)
+RegisterNUICallback('closeTarget', function()
 	hasFocus = false
 end)
 
