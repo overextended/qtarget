@@ -81,7 +81,7 @@ CreateThread(function()
 				if job and ESX.PlayerData.job.grade >= job then
 					return true
 				end
-			elseif job == ESX.PlayerData.job.name then
+			elseif job == ESX.PlayerData.job.name or job == 'all' then
 				return true
 			end
 			return false
@@ -118,7 +118,7 @@ CreateThread(function()
 				if PlayerData.job.grade >= job then
 					return true
 				end
-			elseif job == (PlayerData.job.name or 'all') then
+			elseif job == PlayerData.job.name or job == 'all' then
 				return true
 			end
 			return false
@@ -130,7 +130,7 @@ CreateThread(function()
 				if PlayerData.gang.grade >= gang then
 					return true
 				end
-			elseif gang == (PlayerData.gang.name or 'all') then
+			elseif gang == PlayerData.gang.name or gang == 'all' then
 				return true
 			end
 			return false
