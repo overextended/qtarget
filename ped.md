@@ -7,7 +7,7 @@ exports.qtarget:Ped(parameters)
 ```lua
 AddEventHandler('eventname', function(data)
 	print(data.label, data.num, data.entity)
-end
+end)
 
 exports.qtarget:Ped({
 	options = {
