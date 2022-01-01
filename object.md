@@ -7,7 +7,7 @@ exports.qtarget:Object(parameters)
 ```lua
 AddEventHandler('eventname', function(data)
 	print(data.label, data.num, data.entity)
-end
+end)
 
 exports.qtarget:Object({
 	options = {
