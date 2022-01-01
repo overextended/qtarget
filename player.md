@@ -8,7 +8,7 @@ Registers the defined options to display on all players.
 ```lua
 AddEventHandler('eventname', function(data)
 	print(data.label, data.num, data.entity)
-end
+end)
 
 exports.qtarget:Player({
 	options = {
