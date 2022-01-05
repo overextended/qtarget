@@ -31,7 +31,7 @@ Config.Framework = false
 -------------------------------------------------------------------------------
 local function JobCheck() return true end
 local function GangCheck() return true end
-local function ItemCount() return true end
+local function ItemCheck() return true end
 local function CitizenCheck() return true end
 
 CreateThread(function()
@@ -61,17 +61,49 @@ CreateThread(function()
 
         local resState = GetResourceState('ox_inventory')
         if resState ~= 'missing' and resState ~= 'unknown' then
-			ItemCount = function(item)
-				return exports.ox_inventory:Search(2, item)
+			ItemCheck = function(item)
+				if type(item) == 'table' then 
+					local inventory = exports.ox_inventory:Search(2, item)
+					if inventory then
+						for name, count in pairs(inventory) do
+							for items, j in pairs(item) do
+								if items == name then
+									if count < j then 
+										return false
+									end
+								end
+							end
+						end
+						return true
+					end
+					return false
+				else
+					return exports.ox_inventory:Search(2, item) > 0
+				end
 			end
 		else
-			ItemCount = function(item)
-				for _, v in pairs(ESX.GetPlayerData().inventory) do
-					if v.name == item then
-						return v.count
+			ItemCheck = function(item)
+				if type(item) == 'table' then
+					for items, j in pairs(item) do
+						local itemQuantity = 0
+						for _, v in pairs(ESX.GetPlayerData().inventory) do
+							if v.name == items then
+								itemQuantity = itemQuantity + v.count
+							end
+						end
+						if itemQuantity < j then 
+							return false
+						end
 					end
+					return true
+				else
+					for _, v in pairs(ESX.GetPlayerData().inventory) do
+						if v.name == item then
+							return v.count > 0
+						end
+					end
+					return false
 				end
-				return 0
 			end
 		end
 
@@ -103,13 +135,28 @@ CreateThread(function()
 		local QBCore = exports['qb-core']:GetCoreObject()
 		local PlayerData = QBCore.Functions.GetPlayerData()
 
-		ItemCount = function(item)
-			for _, v in pairs(PlayerData.items) do
-				if v.name == item then
-					return v.amount
+		ItemCheck = function(item)
+			if type(item) == 'table' then
+				for items, j in pairs(item) do
+					local itemQuantity = 0
+					for _, v in pairs(PlayerData.items) do
+						if v.name == items then
+							itemQuantity = itemQuantity + v.amount
+						end
+					end
+					if itemQuantity < j then 
+						return false
+					end
 				end
+				return true
+			else
+				for _, v in pairs(PlayerData.items) do
+					if v.name == item then
+						return v.amount > 0
+					end
+				end
+				return false
 			end
-			return 0
 		end
 
 		JobCheck = function(job)
@@ -165,7 +212,7 @@ CreateThread(function()
 		if data.distance and distance > data.distance then return false end
 		if data.job and not JobCheck(data.job) then return false end
 		if data.gang and not GangCheck(data.gang) then return false end
-		if data.item and ItemCount(data.item) < 1 then return false end
+		if data.item and not ItemCheck(data.item) then return false end
 		if data.citizenid and not CitizenCheck(data.citizenid) then return false end
 		if data.canInteract and not data.canInteract(entity, distance, data) then return false end
 		return true
