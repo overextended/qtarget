@@ -183,6 +183,7 @@ local function EnableTarget()
 				DisablePlayerFiring(playerId, true)
 				DisableControlAction(0, 25, true)
 				DisableControlAction(0, 37, true)
+				DisableControlAction(0, 142, true)
 				Wait(0)
 			until targetActive == false
 		end)
