@@ -28,5 +28,5 @@ exports.qtarget:("nancy", npc, {
 ##### Remove the zone after usage.
 
 ```lua
-exports.qtarget:RemoveZone('nancy', {'hospital:checkInNancy'})
+exports.qtarget:RemoveZone('nancy')
 ```
