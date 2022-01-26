@@ -4,7 +4,7 @@ exports.qtarget:AddEntityZone(name, targetentity, options, targetoptions)
 ```
 ##### Creates a polyzonebox around the entity, registers the defined options to display when targetting the surface of the entity.
 ```lua
-exports.qtarget:("nancy", npc, {
+exports.qtarget:AddEntityZone("nancy", npc, {
     name="nancy",
     debugPoly=false,
     useZ = true
