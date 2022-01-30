@@ -13,9 +13,9 @@ end)
 exports.qtarget:AddTargetBone({'boot'},{
 	options = {
 		{
-			event = "eventname",
-			icon = "fas fa-box-circle-check",
-			label = "action 1",
+			event = "get:intrunk",
+			icon = "fas fa-truck-loading",
+			label = "Get in Trunk",
 			num = 1
 		},
 		{
