@@ -6,9 +6,6 @@ exports.qtarget:AddTargetBone(bones, parameters)
 ###### Bones can be found in qtarget/data/bones.lua
 
 ```lua
-AddEventHandler('eventname', function(data)
-	print(data.label, data.num, data.entity)
-end)
 
 exports.qtarget:AddTargetBone({'boot'},{
 	options = {
@@ -29,4 +26,4 @@ exports.qtarget:AddTargetBone({'boot'},{
 })
 ```
 
-##### There isnt an export to delete targetbones yet.
+##### An export to delete target bones doesnt exist (yet maybe)
