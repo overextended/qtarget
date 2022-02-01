@@ -20,7 +20,7 @@ title: Documentation
 | job | string | 'police' |
 | job | table | {['police'] = 0, ['ambulance'] = 0} |
 | distance | float | 4.0 |
-| required_item | string | 'water' |
+| item | string | 'water' |
 | canInteract | function | function(entity) return DoesEntityExist(entity) end |
 
 ## canInteract
