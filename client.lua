@@ -110,6 +110,11 @@ local function CheckEntity(hit, data, entity, distance)
 				sendDistance[data.distance] = true
 			else sendDistance[data.distance] = false end
 		end
+
+		-- Sort both arrays so stuff doesn't get mixed up
+		table.sort(sendData, function(a,b) return a.label < b.label end)
+		table.sort(nuiData, function(a,b) return a.label < b.label end)
+
 		if nuiData[1] then
 			success = true
 			SendNUIMessage({response = 'validTarget', data = nuiData})
