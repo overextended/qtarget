@@ -11,6 +11,7 @@ window.addEventListener('message', function (event) {
   } else if (item.response == 'validTarget') {
     $('.target-label').html('');
 
+    item.data.sort((a, b) => a.label.localeCompare(b.label))
     Object.values(item.data).forEach((item, index) => {
       index++;
       $('.target-label').append(
