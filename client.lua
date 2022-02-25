@@ -201,6 +201,11 @@ local function EnableTarget()
 			if distance <= Config.MaxDistance then
 				if entityType > 0 then
 
+					-- Local(non-net) entity targets
+					if Entities[entity] then
+						CheckEntity(hit, Entities[entity], entity, #(playerCoords - coords))
+					end
+
 					-- Owned entity targets
 					if NetworkGetEntityIsNetworked(entity) then
 						local data = Entities[NetworkGetNetworkIdFromEntity(entity)]
@@ -398,7 +403,8 @@ local function SetOptions(table, distance, options)
 end
 
 local function AddTargetEntity(entity, parameters)
-	entity = NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity) or false
+	if NetworkGetEntityIsNetworked(entity) then entity = NetworkGetNetworkIdFromEntity(entity) end -- Allow non-networked entities to be targeted
+	-- entity = NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity) or false
 	if entity then
 		local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 		if not Entities[entity] then Entities[entity] = {} end
@@ -445,7 +451,8 @@ end
 exports('RemoveTargetModel', RemoveTargetModel)
 
 local function RemoveTargetEntity(entity, labels)
-	entity = NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity) or false
+	if NetworkGetEntityIsNetworked(entity) then entity = NetworkGetNetworkIdFromEntity(entity) end -- Allow non-networked entities to be targeted
+	-- entity = NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity) or false
 	if entity then
 		for _, v in pairs(labels) do
 			if Entities[entity] then
