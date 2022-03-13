@@ -203,20 +203,23 @@ local function EnableTarget()
 
 					-- Local(non-net) entity targets
 					if Entities[entity] then
-						CheckEntity(hit, Entities[entity], entity, #(playerCoords - coords))
+            CheckAllOptions(hit, Entities[entity], entity, distance, 1, coords)
+						-- CheckEntity(hit, Entities[entity], entity, distance)
 					end
 
 					-- Owned entity targets
 					if NetworkGetEntityIsNetworked(entity) then
 						local data = Entities[NetworkGetNetworkIdFromEntity(entity)]
 						if data then
-							CheckEntity(hit, data, entity, distance)
+              CheckAllOptions(hit, data, entity, distance, 1, coords)
+							-- CheckEntity(hit, data, entity, distance)
 						end
 					end
 
 					-- Player targets
 					if entityType == 1 and IsPedAPlayer(entity) then
-						CheckEntity(hit, Players, entity, distance)
+            CheckAllOptions(hit, Players, entity, distance, 2, coords)
+						-- CheckEntity(hit, Players, entity, distance)
 
 					-- Vehicle bones
 					elseif entityType == 2 and distance <= 1.1 then
@@ -263,16 +266,21 @@ local function EnableTarget()
 					-- Entity targets
 					else
 						local data = Models[GetEntityModel(entity)]
-						if data then CheckEntity(hit, data, entity, distance) end
+						if data then
+              CheckAllOptions(hit, data, entity, distance, 4, coords)
+              -- CheckEntity(hit, data, entity, distance)
+            end
 					end
 
 					-- Generic targets
 					if not success then
 						local data = Types[entityType]
-						if data then CheckEntity(hit, data, entity, distance) end
+						if data then
+              CheckAllOptions(hit, data, entity, distance, 5, coords)
+              -- CheckEntity(hit, data, entity, distance)
+            end
 					end
 				else sleep += 20 end
-
 				if not success then
 					local closestDis, closestZone
 					for _, zone in pairs(Zones) do
@@ -283,39 +291,40 @@ local function EnableTarget()
 					end
 
 					if closestZone then
-						table_wipe(nuiData)
-						local slot = 0
-						for _, data in pairs(closestZone.targetoptions.options) do
-							if CheckOptions(data, entity, distance) then
-								slot += 1
-								sendData[slot] = data
-								sendData[slot].entity = entity
-								nuiData[slot] = {
-									icon = data.icon,
-									label = data.label
-								}
-							end
-						end
-						if nuiData[1] then
-							success = true
-							SendNUIMessage({response = 'validTarget', data = nuiData})
-							while targetActive do
-								local _, coords, distance, _, _ = RaycastCamera(hit, GetEntityCoords(playerPed))
-								if not closestZone:isPointInside(coords) or distance > closestZone.targetoptions.distance then
-									if hasFocus then DisableNUI() end
-									break
-								elseif not hasFocus and IsDisabledControlPressed(0, 24) then
-									EnableNUI()
-								end
-								Wait(20)
-							end
-							LeaveTarget()
-						else
-							repeat
-								Wait(20)
-								local _, coords, _, entity2 = RaycastCamera(hit)
-							until not targetActive or entity ~= entity2 or not closestZone:isPointInside(coords)
-						end
+            CheckAllOptions(hit, closestZone.targetoptions.options, entity, distance, 6, coords)
+						-- table_wipe(nuiData)
+						-- local slot = 0
+						-- for _, data in pairs(closestZone.targetoptions.options) do
+							-- if CheckOptions(data, entity, distance) then
+								-- slot += 1
+								-- sendData[slot] = data
+								-- sendData[slot].entity = entity
+								-- nuiData[slot] = {
+									-- icon = data.icon,
+									-- label = data.label
+								-- }
+							-- end
+						-- end
+						-- if nuiData[1] then
+							-- success = true
+							-- SendNUIMessage({response = 'validTarget', data = nuiData})
+							-- while targetActive do
+								-- local _, coords, distance, _, _ = RaycastCamera(hit, GetEntityCoords(playerPed))
+								-- if not closestZone:isPointInside(coords) or distance > closestZone.targetoptions.distance then
+									-- if hasFocus then DisableNUI() end
+									-- break
+								-- elseif not hasFocus and IsDisabledControlPressed(0, 24) then
+									-- EnableNUI()
+								-- end
+								-- Wait(20)
+							-- end
+							-- LeaveTarget()
+						-- else
+							-- repeat
+								-- Wait(20)
+								-- local _, coords, _, entity2 = RaycastCamera(hit)
+							-- until not targetActive or entity ~= entity2 or not closestZone:isPointInside(coords)
+						-- end
 					else sleep += 20 end
 				else LeaveTarget() end
 			else sleep += 20 end
@@ -331,6 +340,285 @@ local function DisableTarget()
 		SetNuiFocus(false, false)
 		SetNuiFocusKeepInput(false)
 		targetActive = false
+	end
+end
+
+---@param hit number
+---@param data table
+---@param entity number
+---@param distance number
+function CheckAllOptions(hit, val, entity, distance, tier, point)
+	if next(val) then
+		table_wipe(sendDistance)
+		table_wipe(nuiData)
+		local slot = 0
+    local closestDis, closestZone
+    if tier == 1 then
+      for _, data in pairs(val) do
+        if CheckOptions(data, entity, distance) then
+          slot += 1
+          sendData[slot] = data
+          sendData[slot].entity = entity
+          nuiData[slot] = {
+            icon = data.icon,
+            label = data.label
+          }
+          sendDistance[data.distance] = true
+        else sendDistance[data.distance] = false end
+      end
+      local eType = GetEntityType(entity)
+      if eType == 1 and IsPedAPlayer(entity) then
+        for _, data in pairs(Players) do
+          if CheckOptions(data, entity, distance) then
+            slot += 1
+            sendData[slot] = data
+            sendData[slot].entity = entity
+            nuiData[slot] = {
+              icon = data.icon,
+              label = data.label
+            }
+            sendDistance[data.distance] = true
+          else sendDistance[data.distance] = false end
+        end
+      end
+      local eMod = GetEntityModel(entity)
+      if Models[eMod] then
+        val = Models[eMod]
+        for _, data in pairs(val) do
+          if CheckOptions(data, entity, distance) then
+            slot += 1
+            sendData[slot] = data
+            sendData[slot].entity = entity
+            nuiData[slot] = {
+              icon = data.icon,
+              label = data.label
+            }
+            sendDistance[data.distance] = true
+          else sendDistance[data.distance] = false end
+        end
+      end
+      if Types[eType] then
+        val = Types[eType]
+        for _, data in pairs(val) do
+          if CheckOptions(data, entity, distance) then
+            slot += 1
+            sendData[slot] = data
+            sendData[slot].entity = entity
+            nuiData[slot] = {
+              icon = data.icon,
+              label = data.label
+            }
+            sendDistance[data.distance] = true
+          else sendDistance[data.distance] = false end
+        end
+      end
+      for _, zone in pairs(Zones) do
+        if distance < (closestDis or Config.MaxDistance) and distance <= zone.targetoptions.distance and zone:isPointInside(point) then
+          closestDis = distance
+          closestZone = zone
+        end
+        if distance <= zone.targetoptions.distance and zone:isPointInside(point) then
+          for _, data in pairs(zone.targetoptions.options) do
+            if CheckOptions(data, entity, distance) then
+              slot += 1
+              sendData[slot] = data
+              sendData[slot].entity = entity
+              nuiData[slot] = {
+                icon = data.icon,
+                label = data.label
+              }
+            end
+          end
+        end
+      end
+    elseif tier == 2 then
+      for _, data in pairs(val) do
+        if CheckOptions(data, entity, distance) then
+          slot += 1
+          sendData[slot] = data
+          sendData[slot].entity = entity
+          nuiData[slot] = {
+            icon = data.icon,
+            label = data.label
+          }
+          sendDistance[data.distance] = true
+        else sendDistance[data.distance] = false end
+      end
+      if Models[GetEntityModel(entity)] then
+        val = Models[GetEntityModel(entity)]
+        for _, data in pairs(val) do
+          if CheckOptions(data, entity, distance) then
+            slot += 1
+            sendData[slot] = data
+            sendData[slot].entity = entity
+            nuiData[slot] = {
+              icon = data.icon,
+              label = data.label
+            }
+            sendDistance[data.distance] = true
+          else sendDistance[data.distance] = false end
+        end
+      end
+      if Types[GetEntityType(entity)] then
+        val = Types[GetEntityType(entity)]
+        for _, data in pairs(val) do
+          if CheckOptions(data, entity, distance) then
+            slot += 1
+            sendData[slot] = data
+            sendData[slot].entity = entity
+            nuiData[slot] = {
+              icon = data.icon,
+              label = data.label
+            }
+            sendDistance[data.distance] = true
+          else sendDistance[data.distance] = false end
+        end
+      end
+      for _, zone in pairs(Zones) do
+        if distance < (closestDis or Config.MaxDistance) and distance <= zone.targetoptions.distance and zone:isPointInside(point) then
+          closestDis = distance
+          closestZone = zone
+        end
+        if distance <= zone.targetoptions.distance and zone:isPointInside(point) then
+          for _, data in pairs(zone.targetoptions.options) do
+            if CheckOptions(data, entity, distance) then
+              slot += 1
+              sendData[slot] = data
+              sendData[slot].entity = entity
+              nuiData[slot] = {
+                icon = data.icon,
+                label = data.label
+              }
+            end
+          end
+        end
+      end
+    elseif tier == 4 then
+      for _, data in pairs(val) do
+        if CheckOptions(data, entity, distance) then
+          slot += 1
+          sendData[slot] = data
+          sendData[slot].entity = entity
+          nuiData[slot] = {
+            icon = data.icon,
+            label = data.label
+          }
+          sendDistance[data.distance] = true
+        else sendDistance[data.distance] = false end
+      end
+      if Types[GetEntityType(entity)] then
+        val = Types[GetEntityType(entity)]
+        for _, data in pairs(val) do
+          if CheckOptions(data, entity, distance) then
+            slot += 1
+            sendData[slot] = data
+            sendData[slot].entity = entity
+            nuiData[slot] = {
+              icon = data.icon,
+              label = data.label
+            }
+            sendDistance[data.distance] = true
+          else sendDistance[data.distance] = false end
+        end
+      end
+      for _, zone in pairs(Zones) do
+        if distance < (closestDis or Config.MaxDistance) and distance <= zone.targetoptions.distance and zone:isPointInside(point) then
+          closestDis = distance
+          closestZone = zone
+        end
+        if distance <= zone.targetoptions.distance and zone:isPointInside(point) then
+          for _, data in pairs(zone.targetoptions.options) do
+            if CheckOptions(data, entity, distance) then
+              slot += 1
+              sendData[slot] = data
+              sendData[slot].entity = entity
+              nuiData[slot] = {
+                icon = data.icon,
+                label = data.label
+              }
+            end
+          end
+        end
+      end
+    elseif tier == 5 then
+      for _, data in pairs(val) do
+        if CheckOptions(data, entity, distance) then
+          slot += 1
+          sendData[slot] = data
+          sendData[slot].entity = entity
+          nuiData[slot] = {
+            icon = data.icon,
+            label = data.label
+          }
+          sendDistance[data.distance] = true
+        else sendDistance[data.distance] = false end
+      end
+      for _, zone in pairs(Zones) do
+        if distance < (closestDis or Config.MaxDistance) and distance <= zone.targetoptions.distance and zone:isPointInside(point) then
+          closestDis = distance
+          closestZone = zone
+        end
+        if distance <= zone.targetoptions.distance and zone:isPointInside(point) then
+          for _, data in pairs(zone.targetoptions.options) do
+            if CheckOptions(data, entity, distance) then
+              slot += 1
+              sendData[slot] = data
+              sendData[slot].entity = entity
+              nuiData[slot] = {
+                icon = data.icon,
+                label = data.label
+              }
+            end
+          end
+        end
+      end
+    elseif tier == 6 then
+      for _, zone in pairs(Zones) do
+        if distance < (closestDis or Config.MaxDistance) and distance <= zone.targetoptions.distance and zone:isPointInside(point) then
+          closestDis = distance
+          closestZone = zone
+        end
+        if distance <= zone.targetoptions.distance and zone:isPointInside(point) then
+          for _, data in pairs(zone.targetoptions.options) do
+            if CheckOptions(data, entity, distance) then
+              slot += 1
+              sendData[slot] = data
+              sendData[slot].entity = entity
+              nuiData[slot] = {
+                icon = data.icon,
+                label = data.label
+              }
+            end
+          end
+        end
+      end
+    end
+    if nuiData[1] then
+      success = true
+      SendNUIMessage({response = 'validTarget', data = nuiData})
+      while targetActive do
+        local _, coords, distance, entity2, _ = RaycastCamera(hit, GetEntityCoords(playerPed))
+        if (entity ~= entity2) or (not closestZone:isPointInside(coords) or distance > closestZone.targetoptions.distance) then
+          if hasFocus then DisableNUI() end
+          break
+        elseif not hasFocus and IsDisabledControlPressed(0, 24) then
+          EnableNUI()
+				else
+					for k, v in pairs(sendDistance) do
+						if (v == false and distance < k) or (v == true and distance > k) then
+							return CheckEntity(hit, data, entity, distance)
+						end
+					end
+				end
+        Wait(20)
+      end
+    -- else
+      -- repeat
+        -- Wait(20)
+        -- local _, coords, _, entity2 = RaycastCamera(hit)
+      -- until not targetActive or entity ~= entity2 or not closestZone:isPointInside(coords)
+    end
+    LeaveTarget()
 	end
 end
 
@@ -507,3 +795,80 @@ exports('RemovePlayer', RemovePlayer)
 
 
 if Config.Debug then Load('debug') end
+local checkouttest = {
+  icon = "fas fa-shopping-cart",
+  label = "Checkout",
+  options = {
+    {
+      label = "Checkout",
+      name  = "checkout"
+    }
+  },
+}
+local categorytest = {
+  icon = "fas fa-door-open",
+  label = "Category",
+  options = {
+    {
+      label = "Open",
+      name  = "shop"
+    }
+  },
+}
+local entitytest = {
+  icon = "fas fa-volume-up",
+  label = "Speak",
+  options = {
+    {
+      label = "Talk",
+      name  = "talk"
+    }
+  },
+}
+local modeltest = {
+  icon = "fas fa-hand-rock",
+  label = "Fight",
+  options = {
+    {
+      label = "Fight",
+      name  = "fight"
+    }
+  },
+}
+
+--[[
+
+-- GROSS test for DISGUSTING getall function
+
+Citizen.CreateThread(function()
+  local safeTab = {options = {}, distance = 3.0}
+  for b,z in pairs(checkouttest.options) do
+    table.insert(safeTab.options, {pName = 'checkout', event = 'TargetCallback:'..checkouttest.label..'Interact', icon = checkouttest.icon, label = z.label, name = z.name})
+  end
+  exports['qtarget']:AddCircleZone('checkout', vector3(180.57, -1041.67, 29.31), 3.0, {name = 'checkout', useZ = true}, safeTab)
+  Citizen.Wait(10000)
+  safeTab = {options = {}, distance = 3.0}
+  for b,z in pairs(categorytest.options) do
+    table.insert(safeTab.options, {pName = 'category', event = 'TargetCallback:'..categorytest.label..'Interact', icon = categorytest.icon, label = z.label, name = z.name})
+  end
+  exports['qtarget']:AddCircleZone('category', vector3(180.57, -1041.67, 29.31), 3.0, {name = 'category', useZ = true}, safeTab)
+  local model = `a_m_y_business_02`
+  while not HasModelLoaded(model) do RequestModel(model); Wait(10); end
+  local tped = CreatePed(2, model, vector3(180.57, -1041.67, 29.31), 0.0, true, true)
+  safeTab = {options = {}, distance = 3.0}
+  for b,z in pairs(entitytest.options) do
+    table.insert(safeTab.options, {pName = 'entity', event = 'TargetCallback:'..entitytest.label..'Interact', icon = entitytest.icon, label = z.label, name = z.name})
+  end
+  exports['qtarget']:AddTargetEntity(tped, safeTab)
+  SetModelAsNoLongerNeeded(model)
+  model = `a_f_m_bevhills_01`
+  while not HasModelLoaded(model) do RequestModel(model); Wait(10); end
+  local tped = CreatePed(2, model, vector3(180.57, -1041.67, 29.31), 0.0, true, true)
+  safeTab = {options = {}, distance = 3.0}
+  for b,z in pairs(modeltest.options) do
+    table.insert(safeTab.options, {pName = 'entity', event = 'TargetCallback:'..modeltest.label..'Interact', icon = modeltest.icon, label = z.label, name = z.name})
+  end
+  exports['qtarget']:AddTargetModel({model}, safeTab)
+  SetModelAsNoLongerNeeded(model)
+end)
+]]
