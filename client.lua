@@ -347,6 +347,8 @@ end
 ---@param data table
 ---@param entity number
 ---@param distance number
+---@param tier number
+---@param point vec3
 function CheckAllOptions(hit, val, entity, distance, tier, point)
 	if next(val) then
 		table_wipe(sendDistance)
@@ -795,6 +797,12 @@ exports('RemovePlayer', RemovePlayer)
 
 
 if Config.Debug then Load('debug') end
+
+
+--[[
+
+-- GROSS TEST for getalloptions function
+
 local checkouttest = {
   icon = "fas fa-shopping-cart",
   label = "Checkout",
@@ -835,10 +843,6 @@ local modeltest = {
     }
   },
 }
-
---[[
-
--- GROSS test for DISGUSTING getall function
 
 Citizen.CreateThread(function()
   local safeTab = {options = {}, distance = 3.0}
