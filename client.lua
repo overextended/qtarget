@@ -350,6 +350,7 @@ end
 ---@param tier number
 ---@param point vec3
 function CheckAllOptions(hit, val, entity, distance, tier, point)
+  print(tier, point)
 	if next(val) then
 		table_wipe(sendDistance)
 		table_wipe(nuiData)
@@ -600,7 +601,7 @@ function CheckAllOptions(hit, val, entity, distance, tier, point)
       SendNUIMessage({response = 'validTarget', data = nuiData})
       while targetActive do
         local _, coords, distance, entity2, _ = RaycastCamera(hit, GetEntityCoords(playerPed))
-        if (entity ~= entity2) or (not closestZone:isPointInside(coords) or distance > closestZone.targetoptions.distance) then
+        if (entity ~= entity2) or (closestZone and (not closestZone:isPointInside(coords) or distance > closestZone.targetoptions.distance)) then
           if hasFocus then DisableNUI() end
           break
         elseif not hasFocus and IsDisabledControlPressed(0, 24) then
@@ -798,10 +799,52 @@ exports('RemovePlayer', RemovePlayer)
 
 if Config.Debug then Load('debug') end
 
-
 --[[
-
 -- GROSS TEST for getalloptions function
+
+
+-- Debug dumpters to fix getting stuck on models not in a zone
+local dumpsters = {218085040, 666561306, -58485588, -206690185, 1511880420, 682791951}
+
+exports['qtarget']:AddTargetModel(dumpsters, {
+    options = {
+        {
+            event = 'stv-dumpster:SearchDumpster',
+            icon = 'fas fa-dumpster',
+            label = 'Search Dumpster'
+        },
+    },
+    job = {'all'},
+    distance = 1.5
+})
+
+RegisterNetEvent('stv-dumpster:SearchDumpster')
+AddEventHandler('stv-dumpster:SearchDumpster', function()
+    local pos = GetEntityCoords(PlayerPedId())
+
+    -- If it cannot search in the dumpster simply return 0, so that the code more ahead does not come executed
+    if not canSearch then
+        return
+    end
+
+    for i = 1, #dumpsters do
+        local dumpster = GetClosestObjectOfType(pos.x, pos.y, pos.z, 1.0, dumpsters[i], false, false, false)
+
+        if dumpster ~= 0 then
+            -- If has already been searched
+            if searched[dumpster] then
+                exports['mythic_notify']:DoHudText('error', 'This dumpster has already been searched')
+            else -- If is new
+                exports['mythic_notify']:DoHudText('inform', 'You begin to search the dumpster')
+                
+                StartSearching(dumpster)
+                searched[dumpster] = true
+            end
+
+            break -- We have already found the dumpster, so we stop the loop to not waste resources
+        end
+    end
+end)
 
 local checkouttest = {
   icon = "fas fa-shopping-cart",
