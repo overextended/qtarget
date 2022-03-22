@@ -1,16 +1,15 @@
-local exports = exports.qtarget
+local currentResourceName = GetCurrentResourceName()
+local targeting = exports[currentResourceName]
 
-AddEventHandler('qtarget:debug', function(data)
-	print( 'Entity: '..data.entity..'', 'Type: '..GetEntityType(data.entity)..'' )
+AddEventHandler(currentResourceName..':debug', function(data)
+	print('Entity: '..data.entity, 'Model: '..GetEntityModel(data.entity), 'Type: '..GetEntityType(data.entity))
 	if data.remove then
-		exports:RemoveTargetEntity(data.entity, {
-			'HelloWorld'
-		})
+		targeting:RemoveTargetEntity(data.entity, 'HelloWorld')
 	else
-		exports:AddTargetEntity(data.entity, {
+		targeting:AddTargetEntity(data.entity, {
 			options = {
 				{
-					event = 'qtarget:debug',
+					event = currentResourceName..':debug',
 					icon = 'fas fa-box-circle-check',
 					label = 'HelloWorld',
 					remove = true
@@ -22,10 +21,10 @@ AddEventHandler('qtarget:debug', function(data)
 
 end)
 
-exports:Ped({
+targeting:Ped({
 	options = {
 		{
-			event = 'qtarget:debug',
+			event = currentResourceName..':debug',
 			icon = 'fas fa-male',
 			label = '(Debug) Ped',
 		},
@@ -33,10 +32,10 @@ exports:Ped({
 	distance = Config.MaxDistance
 })
 
-exports:Vehicle({
+targeting:Vehicle({
 	options = {
 		{
-			event = 'qtarget:debug',
+			event = currentResourceName..':debug',
 			icon = 'fas fa-car',
 			label = '(Debug) Vehicle',
 		},
@@ -44,10 +43,10 @@ exports:Vehicle({
 	distance = Config.MaxDistance
 })
 
-exports:Object({
+targeting:Object({
 	options = {
 		{
-			event = 'qtarget:debug',
+			event = currentResourceName..':debug',
 			icon = 'fas fa-cube',
 			label = '(Debug) Object',
 		},
@@ -55,10 +54,10 @@ exports:Object({
 	distance = Config.MaxDistance
 })
 
-exports:Player({
+targeting:Player({
 	options = {
 		{
-			event = 'qtarget:debug',
+			event = currentResourceName..':debug',
 			icon = 'fas fa-cube',
 			label = '(Debug) Player',
 		},
