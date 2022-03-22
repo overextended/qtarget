@@ -225,7 +225,7 @@ local function EnableTarget()
 					elseif entityType == 2 and distance <= 1.1 then
 						local closestBone, closestPos, closestBoneName = CheckBones(coords, entity, Bones.Vehicle)
 						local data = Bones[closestBoneName]
-						if next(data) then
+						if data and next(data) then
 							if closestBone and #(coords - closestPos) <= data.distance then
 								table_wipe(nuiData)
 								local slot = 0
