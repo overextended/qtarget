@@ -20,8 +20,26 @@ Config = {}
 -- It's possible to interact with entities through walls so this should be low
 Config.MaxDistance = 7.0
 
--- Enable debug options and distance preview
+-- Enable debug options
 Config.Debug = false
+
+-- Enable default options (Toggling vehicle doors)
+Config.EnableDefaultOptions = true
+
+-- Whether to have the target as a toggle or not
+Config.Toggle = false
+
+-- Enable outlines around the entity you're looking at
+Config.EnableOutline = false
+
+-- The color of the outline in rgb, the first value is red, the second value is green and the last value is blue. Here is a link to a color picker to get these values: https://htmlcolorcodes.com/color-picker/
+Config.OutlineColor = {255, 255, 255}
+
+-- Control for key press detection on the context menu, it's the Left Mouse Button by default, controls are found here https://docs.fivem.net/docs/game-references/controls/
+Config.MenuControlKey = 237
+
+-- Key to open the target eye, here you can find all the names: https://docs.fivem.net/docs/game-references/input-mapper-parameter-ids/keyboard/
+Config.OpenKey = 'LMENU' -- Left Alt
 
 -- Supported values: ESX, QB, false
 Config.Framework = false
@@ -29,6 +47,7 @@ Config.Framework = false
 -------------------------------------------------------------------------------
 -- Functions
 -------------------------------------------------------------------------------
+
 local function JobCheck() return true end
 local function GangCheck() return true end
 local function ItemCount() return true end
@@ -45,14 +64,14 @@ CreateThread(function()
 		end
 
 		if state ~= 'missing' then
-			if state ~= ('started' or 'starting') then
+			if state ~= 'started' then
 				local timeout = 0
 				repeat
-					Wait(0)
 					timeout += 1
-				until (GetResourceState(framework) == 'started' or timeout > 100)
+					Wait(0)
+				until GetResourceState(framework) == 'started' or timeout > 100
 			end
-			Config.Framework = (framework == 'es_extended') and 'ESX' or 'QB'
+			Config.Framework = framework == 'es_extended' and 'ESX' or 'QB'
 		end
 	end
 
@@ -81,7 +100,7 @@ CreateThread(function()
 				if job and ESX.PlayerData.job.grade >= job then
 					return true
 				end
-			elseif job == ESX.PlayerData.job.name or job == 'all' then
+			elseif job == 'all' or job == ESX.PlayerData.job.name then
 				return true
 			end
 			return false
@@ -118,7 +137,7 @@ CreateThread(function()
 				if PlayerData.job.grade.level >= job then
 					return true
 				end
-			elseif job == PlayerData.job.name or job == 'all' then
+			elseif job == 'all' or job == PlayerData.job.name then
 				return true
 			end
 			return false
@@ -130,14 +149,14 @@ CreateThread(function()
 				if PlayerData.gang.grade.level >= gang then
 					return true
 				end
-			elseif gang == PlayerData.gang.name or gang == 'all' then
+			elseif job == 'all' or gang == PlayerData.gang.name then
 				return true
 			end
 			return false
 		end
 
 		CitizenCheck = function(citizenid)
-			return (citizenid == PlayerData.citizenid or citizenid[PlayerData.citizenid])
+			return citizenid == PlayerData.citizenid or citizenid[PlayerData.citizenid]
 		end
 
 		RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()

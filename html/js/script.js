@@ -30,17 +30,31 @@ window.addEventListener('message', function (event) {
 });
 
 $(document).on('mousedown', (event) => {
-  $('.target-label').html('');
-  $('.target-wrapper').hide();
   switch (event.which) {
     case 1: {
       const id = event.target.id
-      if (id) $.post('https://qtarget/selectTarget', JSON.stringify(Number(id)));
+      if (id) $.post(`https://${GetParentResourceName()}/selectTarget`, JSON.stringify(Number(id)));
+      $('.target-label').html('');
+      $('.target-wrapper').hide();
       break;
     }
     case 3: {
-      $.post('https://qtarget/closeTarget');
+      $.post(`https://${GetParentResourceName()}/leftTarget`);
+      $('.target-label').html('');
+      $('.target-eye').css('color', 'black');
       break;
+    }
+  }
+});
+
+$(document).on('keydown', (event) => {
+  switch (event.key) {
+    case 'Escape':
+    case 'Backspace': {
+      $.post(`https://${GetParentResourceName()}/closeTarget`);
+      $('.target-label').html('');
+      $('.target-wrapper').hide();
+      $('.target-eye').css('color', 'black');
     }
   }
 });
