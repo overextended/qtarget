@@ -350,7 +350,6 @@ end
 ---@param tier number
 ---@param point vec3
 function CheckAllOptions(hit, val, entity, distance, tier, point)
-  print(tier, point)
 	if next(val) then
 		table_wipe(sendDistance)
 		table_wipe(nuiData)
