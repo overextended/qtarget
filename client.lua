@@ -1,5 +1,6 @@
 local screen = {}
 local Config = Config
+local listSprite = {}
 
 ---------------------------------------
 --- Source: https://github.com/citizenfx/lua/blob/luaglm-dev/cfx/libs/scripts/examples/scripting_gta.lua
@@ -345,11 +346,28 @@ local function EnableTarget()
 				end
 			else sleep += 20 end
 			if not success then
-				local closestDis, closestZone
+				local closestDis, closestZone, pedcoords
+				if Config.DrawSprite then pedcoords = GetEntityCoords(PlayerPedId()) end
 				for _, zone in pairs(Zones) do
-					if distance < (closestDis or Config.MaxDistance) and distance <= zone.targetoptions.distance and zone:isPointInside(coords) then
-						closestDis = distance
-						closestZone = zone
+					if Config.DrawSprite then distance = GetDistanceBetweenCoords(pedcoords.x, pedcoords.y, pedcoords.z, zone.center.x, zone.center.y, zone.center.z, true) end
+					if distance < (closestDis or Config.MaxDistance) and distance <= zone.targetoptions.distance then
+						if Config.DrawSprite and not listSprite[_] then
+							listSprite[_] = true
+							CreateThread(function()
+								while not HasStreamedTextureDictLoaded("shared") do Wait(10) RequestStreamedTextureDict("shared", true) end
+								while targetActive do
+									Wait(1)
+										SetDrawOrigin(zone.center.x, zone.center.y, zone.center.z, 0)
+										DrawSprite("shared", "emptydot_32", 0, 0, 0.02, 0.035, 0, 255,255,255, 255.0)
+								end
+								listSprite[_] = false
+							end)
+						end
+						if zone:isPointInside(coords) then
+							closestDis = distance
+							closestZone = zone
+						end
+						
 					end
 				end
 				if closestZone then
