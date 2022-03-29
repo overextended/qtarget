@@ -256,7 +256,7 @@ local function EnableTarget()
 
 				-- Local(non-net) entity targets
 				if Entities[entity] then
-					CheckEntity(hit, Entities[entity], entity, #(playerCoords - coords))
+					CheckEntity(hit, Entities[entity], entity, distance)
 				end
 
 				-- Owned entity targets
