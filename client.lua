@@ -273,14 +273,14 @@ local function EnableTarget()
 
 				-- Vehicle bones
 				elseif entityType == 2 then
-					local closestBone, closestPos, closestBoneName = CheckBones(coords, entity, Bones.Vehicle)
+					local closestBone, _, closestBoneName = CheckBones(coords, entity, Bones.Vehicle)
 					local data = Bones.Options[closestBoneName]
 					if data and next(data) and closestBone then
 						table_wipe(sendDistance)
 						table_wipe(nuiData)
 						local slot = 0
 						for _, data in pairs(data) do
-							if CheckOptions(data, entity, #(coords - closestPos)) then
+							if CheckOptions(data, entity, distance) then
 								slot += 1
 								sendData[slot] = data
 								sendData[slot].entity = entity
@@ -299,7 +299,6 @@ local function EnableTarget()
 								local _, _, dist, entity2 = RaycastCamera(hit, GetEntityCoords(playerPed))
 								if entity == entity2 then
 									local closestBone2 = CheckBones(coords, entity, Bones.Vehicle)
-
 									if closestBone ~= closestBone2 then
 										LeaveTarget()
 										DrawOutlineEntity(entity, false)
