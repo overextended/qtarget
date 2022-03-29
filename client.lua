@@ -31,6 +31,8 @@ local function ScreenPositionToCameraRay()
 end
 ---------------------------------------
 local playerPed
+local GetEntityCoords = GetEntityCoords
+local Wait = Wait
 
 ---@param flag number
 ---@param playerCoords vector
@@ -41,20 +43,20 @@ local playerPed
 ---@return number entity_type
 local function RaycastCamera(flag, playerCoords)
 	if not playerPed then playerPed = PlayerPedId() end
+	if not playerCoords then playerCoords = GetEntityCoords(playerPed) end
+
 	local rayPos, rayDir = ScreenPositionToCameraRay()
 	local destination = rayPos + 10000 * rayDir
 	local rayHandle = StartShapeTestLosProbe(rayPos.x, rayPos.y, rayPos.z, destination.x, destination.y, destination.z, flag or -1, playerPed, 0)
+
 	while true do
 		local result, _, endCoords, _, entityHit = GetShapeTestResult(rayHandle)
-		if Config.Debug then
-			DrawLine(playerCoords.x, playerCoords.y, playerCoords.z, destination.x, destination.y, destination.z, 255, 0, 255, 255)
-			DrawLine(destination.x, destination.y, destination.z, endCoords.x, endCoords.y, endCoords.z, 255, 0, 255, 255)
-		end
-		-- todo: add support for materialHash
+
 		if result ~= 1 then
 			local distance = playerCoords and #(playerCoords - endCoords)
-			return flag, endCoords, distance, entityHit, entityHit and GetEntityType(entityHit) or 0
+			return endCoords, distance, entityHit, entityHit and GetEntityType(entityHit) or 0
 		end
+
 		Wait(0)
 	end
 end
@@ -119,11 +121,13 @@ end
 
 exports('DrawOutlineEntity', DrawOutlineEntity)
 
----@param hit number
+local IsDisabledControlPressed = IsDisabledControlPressed
+
+---@param flag number
 ---@param data table
 ---@param entity number
 ---@param distance number
-local function CheckEntity(hit, data, entity, distance)
+local function CheckEntity(flag, data, entity, distance)
 	if not next(data) then return end
 	table_wipe(sendDistance)
 	table_wipe(nuiData)
@@ -149,7 +153,7 @@ local function CheckEntity(hit, data, entity, distance)
 	SendNUIMessage({response = 'validTarget', data = nuiData})
 	DrawOutlineEntity(entity, true)
 	while targetActive and success do
-		local _, _, dist, entity2, _ = RaycastCamera(hit, GetEntityCoords(playerPed))
+		local _, dist, entity2, _ = RaycastCamera(flag)
 		if entity ~= entity2 then
 			LeaveTarget()
 			DrawOutlineEntity(entity, false)
@@ -175,6 +179,8 @@ end
 exports('CheckEntity', CheckEntity)
 
 local Bones = Load('bones')
+local GetEntityBoneIndexByName = GetEntityBoneIndexByName
+local GetWorldPositionOfEntityBone = GetWorldPositionOfEntityBone
 
 ---@param coords vector
 ---@param entity number
@@ -209,67 +215,67 @@ local Models   = {}
 local Zones    = {}
 local allowTarget = true
 
+local SetPauseMenuActive = SetPauseMenuActive
+local DisableAllControlActions = DisableAllControlActions
+local EnableControlAction = EnableControlAction
+local NetworkGetEntityIsNetworked = NetworkGetEntityIsNetworked
+local NetworkGetNetworkIdFromEntity = NetworkGetNetworkIdFromEntity
+local GetEntityModel = GetEntityModel
+local IsPedAPlayer = IsPedAPlayer
+
 local function EnableTarget()
 	if not allowTarget or success or (Config.Framework == 'QB' and not LocalPlayer.state.isLoggedIn) or IsNuiFocused() then return end
 	if not CheckOptions then CheckOptions = _ENV.CheckOptions end
 	if targetActive or not CheckOptions then return end
+
 	targetActive = true
-	SendNUIMessage({response = 'openTarget'})
-	CreateThread(function()
-		local playerId = PlayerId()
-		repeat
-			SetPauseMenuActive(false)
-			if hasFocus then
-				DisableControlAction(0, 1, true)
-				DisableControlAction(0, 2, true)
-			end
-			DisablePlayerFiring(playerId, true)
-			DisableControlAction(0, 24, true)
-			DisableControlAction(0, 25, true)
-			DisableControlAction(0, 37, true)
-			DisableControlAction(0, 47, true)
-			DisableControlAction(0, 58, true)
-			DisableControlAction(0, 68, true)
-			DisableControlAction(0, 69, true)
-			DisableControlAction(0, 70, true)
-			DisableControlAction(0, 114, true)
-			DisableControlAction(0, 140, true)
-			DisableControlAction(0, 141, true)
-			DisableControlAction(0, 142, true)
-			DisableControlAction(0, 143, true)
-			DisableControlAction(0, 257, true)
-			DisableControlAction(0, 263, true)
-			DisableControlAction(0, 264, true)
-			Wait(0)
-		until not targetActive
-	end)
 	playerPed = PlayerPedId()
 	screen.ratio = GetAspectRatio(true)
 	screen.fov = GetFinalRenderedCamFov()
-	local curFlag = 30
+
+	SendNUIMessage({response = 'openTarget'})
+	CreateThread(function()
+		repeat
+			SetPauseMenuActive(false)
+			DisableAllControlActions(0)
+			EnableControlAction(0, 30, true)
+			EnableControlAction(0, 31, true)
+
+			if not hasFocus then
+				EnableControlAction(0, 1, true)
+				EnableControlAction(0, 2, true)
+			end
+
+			Wait(0)
+		until not targetActive
+	end)
+
+	local flag
+
 	while targetActive do
 		local sleep = 0
-		local hit, coords, distance, entity, entityType = RaycastCamera(curFlag, GetEntityCoords(playerPed))
-		if curFlag == 30 then curFlag = -1 else curFlag = 30 end
+		if flag == 30 then flag = -1 else flag = 30 end
+
+		local coords, distance, entity, entityType = RaycastCamera(flag)
 		if distance <= Config.MaxDistance then
 			if entityType > 0 then
 
 				-- Local(non-net) entity targets
 				if Entities[entity] then
-					CheckEntity(hit, Entities[entity], entity, distance)
+					CheckEntity(flag, Entities[entity], entity, distance)
 				end
 
 				-- Owned entity targets
 				if NetworkGetEntityIsNetworked(entity) then
 					local data = Entities[NetworkGetNetworkIdFromEntity(entity)]
-					if data then CheckEntity(hit, data, entity, distance) end
+					if data then CheckEntity(flag, data, entity, distance) end
 				end
 
 				-- Player and Ped targets
 				if entityType == 1 then
 					local data = Models[GetEntityModel(entity)]
 					if IsPedAPlayer(entity) then data = Players end
-					if data and next(data) then CheckEntity(hit, data, entity, distance) end
+					if data and next(data) then CheckEntity(flag, data, entity, distance) end
 
 				-- Vehicle bones
 				elseif entityType == 2 then
@@ -296,7 +302,7 @@ local function EnableTarget()
 							SendNUIMessage({response = 'validTarget', data = nuiData})
 							DrawOutlineEntity(entity, true)
 							while targetActive and success do
-								local _, _, dist, entity2 = RaycastCamera(hit, GetEntityCoords(playerPed))
+								local _, dist, entity2 = RaycastCamera(flag)
 								if entity == entity2 then
 									local closestBone2 = CheckBones(coords, entity, Bones.Vehicle)
 									if closestBone ~= closestBone2 then
@@ -328,19 +334,19 @@ local function EnableTarget()
 					else
 						-- Vehicle Model targets
 						local data = Models[GetEntityModel(entity)]
-						if data then CheckEntity(hit, data, entity, distance) end
+						if data then CheckEntity(flag, data, entity, distance) end
 					end
 
 				-- Entity targets
 				else
 					local data = Models[GetEntityModel(entity)]
-					if data then CheckEntity(hit, data, entity, distance) end
+					if data then CheckEntity(flag, data, entity, distance) end
 				end
 
 				-- Generic targets
 				if not success then
 					local data = Types[entityType]
-					if data then CheckEntity(hit, data, entity, distance) end
+					if data then CheckEntity(flag, data, entity, distance) end
 				end
 			else sleep += 20 end
 			if not success then
@@ -370,7 +376,7 @@ local function EnableTarget()
 						SendNUIMessage({response = 'validTarget', data = nuiData})
 						DrawOutlineEntity(entity, true)
 						while targetActive and success do
-							local _, coords, distance = RaycastCamera(hit, GetEntityCoords(playerPed))
+							local coords, distance = RaycastCamera(flag)
 							if not closestZone:isPointInside(coords) or distance > closestZone.targetoptions.distance then
 								LeaveTarget()
 								DrawOutlineEntity(entity, false)
@@ -386,7 +392,7 @@ local function EnableTarget()
 					else
 						repeat
 							Wait(20)
-							local _, coords, _, entity2 = RaycastCamera(hit)
+							local coords, _, entity2 = RaycastCamera(flag)
 						until not targetActive or entity ~= entity2 or not closestZone:isPointInside(coords)
 					end
 				else sleep += 20 end
