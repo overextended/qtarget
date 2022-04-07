@@ -32,8 +32,8 @@ Config.Toggle = false
 -- Enable outlines around the entity you're looking at
 Config.EnableOutline = false
 
--- The color of the outline in rgb, the first value is red, the second value is green and the last value is blue. Here is a link to a color picker to get these values: https://htmlcolorcodes.com/color-picker/
-Config.OutlineColor = {255, 255, 255}
+-- The color of the outline in rgb, the first value is red, the second value is green, the third value is blue and the last value is alpha. Here is a link to a color picker to get these values: https://htmlcolorcodes.com/color-picker/
+Config.OutlineColor = {255, 255, 255, 255}
 
 -- Control for key press detection on the context menu, it's the Left Mouse Button by default, controls are found here https://docs.fivem.net/docs/game-references/controls/
 Config.MenuControlKey = 237
