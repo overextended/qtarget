@@ -29,6 +29,10 @@ Config.EnableDefaultOptions = true
 -- Whether to have the target as a toggle or not
 Config.Toggle = false
 
+-- Draw sprite on location
+Config.DrawSprite = false
+Config.DrawDistance = 10.0
+
 -- Enable outlines around the entity you're looking at
 Config.EnableOutline = false
 
