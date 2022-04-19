@@ -29,14 +29,22 @@ Config.EnableDefaultOptions = true
 -- Whether to have the target as a toggle or not
 Config.Toggle = false
 
--- Draw sprite on location
+-- Draw a Sprite on the center of a PolyZone to hint where it's located
 Config.DrawSprite = false
+
+-- The default distance to draw the Sprite
 Config.DrawDistance = 10.0
+
+-- The color of the sprite in rgb, the first value is red, the second value is green, the third value is blue and the last value is alpha (opacity). Here is a link to a color picker to get these values: https://htmlcolorcodes.com/color-picker/
+Config.DrawColor = {255, 255, 255, 255}
+
+-- The color of the sprite in rgb when the PolyZone is targeted, the first value is red, the second value is green, the third value is blue and the last value is alpha (opacity). Here is a link to a color picker to get these values: https://htmlcolorcodes.com/color-picker/
+Config.SuccessDrawColor = {98, 135, 236, 255}
 
 -- Enable outlines around the entity you're looking at
 Config.EnableOutline = false
 
--- The color of the outline in rgb, the first value is red, the second value is green, the third value is blue and the last value is alpha. Here is a link to a color picker to get these values: https://htmlcolorcodes.com/color-picker/
+-- The color of the outline in rgb, the first value is red, the second value is green, the third value is blue and the last value is alpha (opacity). Here is a link to a color picker to get these values: https://htmlcolorcodes.com/color-picker/
 Config.OutlineColor = {255, 255, 255, 255}
 
 -- Control for key press detection on the context menu, it's the Left Mouse Button by default, controls are found here https://docs.fivem.net/docs/game-references/controls/
@@ -45,7 +53,7 @@ Config.MenuControlKey = 237
 -- Key to open the target eye, here you can find all the names: https://docs.fivem.net/docs/game-references/input-mapper-parameter-ids/keyboard/
 Config.OpenKey = 'LMENU' -- Left Alt
 
--- Supported values: ESX, QB, false
+-- Supported values: 'ESX', 'QB', false
 Config.Framework = false
 
 -------------------------------------------------------------------------------

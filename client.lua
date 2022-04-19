@@ -232,16 +232,30 @@ local RequestStreamedTextureDict = RequestStreamedTextureDict
 local function DrawTarget()
 	CreateThread(function()
 		while not HasStreamedTextureDictLoaded("shared") do Wait(10) RequestStreamedTextureDict("shared", true) end
-		local wait
+		local sleep
+		local r, g, b, a
 		while targetActive do
-			wait = 500
+			sleep = 500
 			for _, zone in pairs(listSprite) do
-				wait = 0
+				sleep = 0
+
+				r = zone.targetoptions.drawColor?[1] or Config.DrawColor[1]
+				g = zone.targetoptions.drawColor?[2] or Config.DrawColor[2]
+				b = zone.targetoptions.drawColor?[3] or Config.DrawColor[3]
+				a = zone.targetoptions.drawColor?[4] or Config.DrawColor[4]
+
+				if zone.success then
+					r = zone.targetoptions.successDrawColor?[1] or Config.SuccessDrawColor[1]
+					g = zone.targetoptions.successDrawColor?[2] or Config.SuccessDrawColor[2]
+					b = zone.targetoptions.successDrawColor?[3] or Config.SuccessDrawColor[3]
+					a = zone.targetoptions.successDrawColor?[4] or Config.SuccessDrawColor[4]
+				end
+
 				SetDrawOrigin(zone.center.x, zone.center.y, zone.center.z, 0)
-				DrawSprite("shared", "emptydot_32", 0, 0, 0.02, 0.035, 0, 255,255,255, 255.0)
+				DrawSprite("shared", "emptydot_32", 0, 0, 0.02, 0.035, 0, r, g, b, a)
 				ClearDrawOrigin()
 			end
-			Wait(wait)
+			Wait(sleep)
 		end
 		listSprite = {}
 	end)
@@ -407,6 +421,7 @@ local function EnableTarget()
 					if next(nuiData) then
 						success = true
 						SendNUIMessage({response = 'validTarget', data = nuiData})
+						listSprite[closestZone.name].success = true
 						DrawOutlineEntity(entity, true)
 						while targetActive and success do
 							local coords, distance = RaycastCamera(flag)
@@ -419,6 +434,9 @@ local function EnableTarget()
 								DrawOutlineEntity(entity, false)
 							end
 							Wait(0)
+						end
+						if listSprite[closestZone.name] then -- Check for when the targetActive is false and it removes the zone from listSprite
+							listSprite[closestZone.name].success = false
 						end
 						LeaveTarget()
 						DrawOutlineEntity(entity, false)
