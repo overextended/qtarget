@@ -223,6 +223,11 @@ local NetworkGetEntityIsNetworked = NetworkGetEntityIsNetworked
 local NetworkGetNetworkIdFromEntity = NetworkGetNetworkIdFromEntity
 local GetEntityModel = GetEntityModel
 local IsPedAPlayer = IsPedAPlayer
+local SetDrawOrigin = SetDrawOrigin
+local DrawSprite = DrawSprite
+local ClearDrawOrigin = ClearDrawOrigin
+local HasStreamedTextureDictLoaded = HasStreamedTextureDictLoaded
+local RequestStreamedTextureDict = RequestStreamedTextureDict
 
 local function DrawTarget()
 	CreateThread(function()
