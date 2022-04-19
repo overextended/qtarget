@@ -827,7 +827,12 @@ exports("UpdateObject", function(label, data) Types[3][label] = data end)
 
 exports("UpdatePlayer", function(label, data) Players[label] = data end)
 
-exports("AllowTargeting", function(bool) allowTarget = bool end)
+exports("AllowTargeting", function(bool)
+	allowTarget = bool
+	if not allowTarget then
+		DisableTarget(true)
+	end
+end)
 
 -- Debug Option
 
