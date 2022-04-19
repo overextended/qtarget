@@ -421,7 +421,9 @@ local function EnableTarget()
 					if next(nuiData) then
 						success = true
 						SendNUIMessage({response = 'validTarget', data = nuiData})
-						listSprite[closestZone.name].success = true
+						if Config.DrawSprite then
+							listSprite[closestZone.name].success = true
+						end
 						DrawOutlineEntity(entity, true)
 						while targetActive and success do
 							local coords, distance = RaycastCamera(flag)
@@ -435,7 +437,7 @@ local function EnableTarget()
 							end
 							Wait(0)
 						end
-						if listSprite[closestZone.name] then -- Check for when the targetActive is false and it removes the zone from listSprite
+						if Config.DrawSprite and listSprite[closestZone.name] then -- Check for when the targetActive is false and it removes the zone from listSprite
 							listSprite[closestZone.name].success = false
 						end
 						LeaveTarget()
