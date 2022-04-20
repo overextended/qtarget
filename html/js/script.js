@@ -11,16 +11,17 @@ window.addEventListener('message', function (event) {
   } else if (item.response == 'validTarget') {
     $('.target-label').html('');
 
-    Object.values(item.data).forEach((item, index) => {
-      index++;
+    for (const index in item.data) {
+      const numberTest = Number(index);
+      if (!isNaN(numberTest)) index = numberTest + 1;
       $('.target-label').append(
-        `<div class='target-item' id='${index}'><i class='${item.icon} fa-fw fa-pull-left target-icon'></i>${item.label}</div>`
+        `<div class='target-item' id='${index}'><i class='${item.data[index].icon} fa-fw fa-pull-left target-icon'></i>${item.data[index].label}</div>`
       );
       $(`#target-${index}`).hover((e) => {
         $(`#target-${index}`).css('color', e.type === 'mouseenter' ? 'rgb(98, 135, 236)' : 'white');
       });
       $('#' + index).css('padding-top', '0.75vh');
-    });
+    }
 
     $('.target-eye').css('color', 'rgba(255, 255, 255, 0.8)');
   } else if (item.response == 'leftTarget') {
@@ -32,8 +33,8 @@ window.addEventListener('message', function (event) {
 $(document).on('mousedown', (event) => {
   switch (event.which) {
     case 1: {
-      const id = event.target.id
-      if (id) $.post(`https://${GetParentResourceName()}/selectTarget`, JSON.stringify(Number(id)));
+      const id = event.target.id;
+      if (id) $.post(`https://${GetParentResourceName()}/selectTarget`, JSON.stringify(id));
       $('.target-label').html('');
       $('.target-wrapper').hide();
       break;

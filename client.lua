@@ -101,6 +101,7 @@ end
 
 exports('LeaveTarget', LeaveTarget)
 
+---@param forcedisable boolean
 local function DisableTarget(forcedisable)
 	if (not targetActive and hasFocus and not Config.Toggle) or not forcedisable then return end
 	SetNuiFocus(false, false)
@@ -122,6 +123,36 @@ end
 
 exports('DrawOutlineEntity', DrawOutlineEntity)
 
+---@param datatable table
+---@param entity number
+---@param distance number
+---@param isZone boolean
+---@return number | string
+local function SetupOptions(datatable, entity, distance, isZone)
+	if not isZone then table_wipe(sendDistance) end
+	table_wipe(nuiData)
+	local slot = 0
+	for index, data in pairs(datatable) do
+		if CheckOptions(data, entity, distance) then
+			slot = data.num or index
+			sendData[slot] = data
+			sendData[slot].entity = entity
+			nuiData[slot] = {
+				icon = data.icon,
+				label = data.label
+			}
+			if not isZone then
+				sendDistance[data.distance] = true
+			end
+		else
+			if not isZone then
+				sendDistance[data.distance] = false
+			end
+		end
+	end
+	return slot
+end
+
 local IsDisabledControlPressed = IsDisabledControlPressed
 
 ---@param flag number
@@ -130,21 +161,7 @@ local IsDisabledControlPressed = IsDisabledControlPressed
 ---@param distance number
 local function CheckEntity(flag, data, entity, distance)
 	if not next(data) then return end
-	table_wipe(sendDistance)
-	table_wipe(nuiData)
-	local slot = 0
-	for _, data in pairs(data) do
-		if CheckOptions(data, entity, distance) then
-			slot += 1
-			sendData[slot] = data
-			sendData[slot].entity = entity
-			nuiData[slot] = {
-				icon = data.icon,
-				label = data.label
-			}
-			sendDistance[data.distance] = true
-		else sendDistance[data.distance] = false end
-	end
+	SetupOptions(data, entity, distance)
 	if not next(nuiData) then
 		LeaveTarget()
 		DrawOutlineEntity(entity, false)
@@ -321,21 +338,7 @@ local function EnableTarget()
 					local closestBone, _, closestBoneName = CheckBones(coords, entity, Bones.Vehicle)
 					local data = Bones.Options[closestBoneName]
 					if data and next(data) and closestBone then
-						table_wipe(sendDistance)
-						table_wipe(nuiData)
-						local slot = 0
-						for _, data in pairs(data) do
-							if CheckOptions(data, entity, distance) then
-								slot += 1
-								sendData[slot] = data
-								sendData[slot].entity = entity
-								nuiData[slot] = {
-									icon = data.icon,
-									label = data.label
-								}
-								sendDistance[data.distance] = true
-							else sendDistance[data.distance] = false end
-						end
+						SetupOptions(data, entity, distance)
 						if next(nuiData) then
 							success = true
 							SendNUIMessage({response = 'validTarget', data = nuiData})
@@ -404,19 +407,7 @@ local function EnableTarget()
 					end
 				end
 				if closestZone then
-					table_wipe(nuiData)
-					local slot = 0
-					for _, data in pairs(closestZone.targetoptions.options) do
-						if CheckOptions(data, entity, distance) then
-							slot += 1
-							sendData[slot] = data
-							sendData[slot].entity = entity
-							nuiData[slot] = {
-								icon = data.icon,
-								label = data.label
-							}
-						end
-					end
+					SetupOptions(closestZone.targetoptions.options, entity, distance, true)
 					if next(nuiData) then
 						success = true
 						SendNUIMessage({response = 'validTarget', data = nuiData})
@@ -526,6 +517,12 @@ end
 -- Exports
 -------------------------------------------------------------------------------
 
+---@param name string
+---@param center vector3
+---@param radius number
+---@param options table
+---@param targetoptions table
+---@return CircleZone
 local function AddCircleZone(name, center, radius, options, targetoptions)
 	local centerType = type(center)
 	center = (centerType == 'table' or centerType == 'vector4') and vec3(center.x, center.y, center.z) or center
@@ -536,6 +533,13 @@ local function AddCircleZone(name, center, radius, options, targetoptions)
 end
 exports('AddCircleZone', AddCircleZone)
 
+---@param name string
+---@param center vector3
+---@param length number
+---@param width number
+---@param options table
+---@param targetoptions table
+---@return BoxZone
 local function AddBoxZone(name, center, length, width, options, targetoptions)
 	local centerType = type(center)
 	center = (centerType == 'table' or centerType == 'vector4') and vec3(center.x, center.y, center.z) or center
@@ -546,6 +550,11 @@ local function AddBoxZone(name, center, length, width, options, targetoptions)
 end
 exports('AddBoxZone', AddBoxZone)
 
+---@param name string
+---@param points table
+---@param options table
+---@param targetoptions table
+---@return PolyZone
 local function AddPolyZone(name, points, options, targetoptions)
 	local _points = {}
 	local pointsType = type(points[1])
@@ -561,6 +570,10 @@ local function AddPolyZone(name, points, options, targetoptions)
 end
 exports('AddPolyZone', AddPolyZone)
 
+---@param zones table
+---@param options table
+---@param targetoptions table
+---@return ComboZone
 local function AddComboZone(zones, options, targetoptions)
 	Zones[options.name] = ComboZone:Create(zones, options)
 	targetoptions.distance = targetoptions.distance or Config.MaxDistance
@@ -569,6 +582,11 @@ local function AddComboZone(zones, options, targetoptions)
 end
 exports("AddComboZone", AddComboZone)
 
+---@param name string
+---@param entity number
+---@param options table
+---@param targetoptions table
+---@return EntityZone
 local function AddEntityZone(name, entity, options, targetoptions)
 	Zones[name] = EntityZone:Create(entity, options)
 	targetoptions.distance = targetoptions.distance or Config.MaxDistance
@@ -578,6 +596,7 @@ end
 
 exports("AddEntityZone", AddEntityZone)
 
+---@param name string
 local function RemoveZone(name)
 	if not Zones[name] then return end
 	if Zones[name].destroy then Zones[name]:destroy() end
@@ -585,6 +604,9 @@ local function RemoveZone(name)
 end
 exports('RemoveZone', RemoveZone)
 
+---@param tbl table
+---@param distance number
+---@param options table
 local function SetOptions(tbl, distance, options)
 	for _, v in pairs(options) do
 		if v.required_item then
@@ -596,6 +618,8 @@ local function SetOptions(tbl, distance, options)
 	end
 end
 
+---@param bones table | string
+---@param parameters table
 local function AddTargetBone(bones, parameters)
 	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 	if type(bones) == 'table' then
@@ -610,6 +634,8 @@ local function AddTargetBone(bones, parameters)
 end
 exports('AddTargetBone', AddTargetBone)
 
+---@param bones table | string
+---@param labels table | string
 local function RemoveTargetBone(bones, labels)
 	if type(bones) == 'table' then
 		for _, bone in pairs(bones) do
@@ -641,6 +667,8 @@ local function RemoveTargetBone(bones, labels)
 end
 exports("RemoveTargetBone", RemoveTargetBone)
 
+---@param entities table | number
+---@param parameters table
 local function AddTargetEntity(entities, parameters)
 	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 	if type(entities) == 'table' then
@@ -657,6 +685,8 @@ local function AddTargetEntity(entities, parameters)
 end
 exports('AddTargetEntity', AddTargetEntity)
 
+---@param entities table | number
+---@param labels table | string
 local function RemoveTargetEntity(entities, labels)
 	if type(entities) == 'table' then
 		for _, entity in pairs(entities) do
@@ -690,6 +720,8 @@ local function RemoveTargetEntity(entities, labels)
 end
 exports('RemoveTargetEntity', RemoveTargetEntity)
 
+---@param models table | string | number
+---@param parameters table
 local function AddTargetModel(models, parameters)
 	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 	if type(models) == 'table' then
@@ -706,6 +738,8 @@ local function AddTargetModel(models, parameters)
 end
 exports('AddTargetModel', AddTargetModel)
 
+---@param models table | string | number
+---@param labels table | string
 local function RemoveTargetModel(models, labels)
 	if type(models) == 'table' then
 		for _, model in pairs(models) do
@@ -739,26 +773,34 @@ local function RemoveTargetModel(models, labels)
 end
 exports('RemoveTargetModel', RemoveTargetModel)
 
+---@param type number
+---@param parameters table
 local function AddType(type, parameters)
 	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 	SetOptions(Types[type], distance, options)
 end
 
+---@param parameters table
 local function AddPed(parameters) AddType(1, parameters) end
 exports('Ped', AddPed)
 
+---@param parameters table
 local function AddVehicle(parameters) AddType(2, parameters) end
 exports('Vehicle', AddVehicle)
 
+---@param parameters table
 local function AddObject(parameters) AddType(3, parameters) end
 exports('Object', AddObject)
 
+---@param parameters table
 local function AddPlayer(parameters)
 	local distance, options = parameters.distance or Config.MaxDistance, parameters.options
 	SetOptions(Players, distance, options)
 end
 exports('Player', AddPlayer)
 
+---@param typ number
+---@param labels table | string
 local function RemoveType(typ, labels)
 	if type(labels) == 'table' then
 		for _, v in pairs(labels) do
@@ -769,15 +811,19 @@ local function RemoveType(typ, labels)
 	end
 end
 
+---@param labels table | string
 local function RemovePed(labels) RemoveType(1, labels) end
 exports('RemovePed', RemovePed)
 
+---@param labels table | string
 local function RemoveVehicle(labels) RemoveType(2, labels) end
 exports('RemoveVehicle', RemoveVehicle)
 
+---@param labels table | string
 local function RemoveObject(labels) RemoveType(3, labels) end
 exports('RemoveObject', RemoveObject)
 
+---@param labels table | string
 local function RemovePlayer(labels)
 	if type(labels) == 'table' then
 		for _, v in pairs(labels) do
