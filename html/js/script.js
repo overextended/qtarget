@@ -11,11 +11,12 @@ window.addEventListener('message', function (event) {
   } else if (item.response == 'validTarget') {
     $('.target-label').html('');
 
-    for (const index in item.data) {
+    for (let index in item.data) {
+      const itemData = item.data[index];
       const numberTest = Number(index);
       if (!isNaN(numberTest)) index = numberTest + 1;
       $('.target-label').append(
-        `<div class='target-item' id='${index}'><i class='${item.data[index].icon} fa-fw fa-pull-left target-icon'></i>${item.data[index].label}</div>`
+        `<div class='target-item' id='${index}'><i class='${itemData.icon} fa-fw fa-pull-left target-icon'></i>${itemData.label}</div>`
       );
       $(`#target-${index}`).hover((e) => {
         $(`#target-${index}`).css('color', e.type === 'mouseenter' ? 'rgb(98, 135, 236)' : 'white');

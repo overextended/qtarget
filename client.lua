@@ -447,6 +447,7 @@ local function EnableTarget()
 end
 
 RegisterNUICallback('selectTarget', function(option)
+	option = tonumber(option) or option
 	SetNuiFocus(false, false)
 	SetNuiFocusKeepInput(false)
 	Wait(100)
