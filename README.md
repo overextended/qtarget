@@ -14,7 +14,7 @@
 - Update the option list when moving towards or away from a target with variable distances on their options
 - Support for entity bones with built-in tables for opening vehicle doors
 - Support checking for job, items, or specific entities
-- Utilize the `canInteract` function for advanced checks to show or hide an option based on any trigger
+- Utilise the `canInteract` function for advanced checks to show or hide an option based on any trigger
 - Improved support when using `ox_inventory`
 
 ## Preface
