@@ -12,7 +12,7 @@
 - Define distance on a per-option or overall basis when triggering qtarget function exports
 - Ability to redefine or remove options and add new options without replacing old ones
 - Update the option list when moving towards or away from a target with variable distances on their options
-- Support for entity bones with built-in tables for opening vehicle doors
+- Support for entity bones, with built-in tables for opening vehicle doors
 - Support checking for job, items, or specific entities
 - Utilise the `canInteract` function for advanced checks to show or hide an option based on any trigger
 - Improved support when using `ox_inventory`
