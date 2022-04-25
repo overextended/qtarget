@@ -12,15 +12,17 @@ window.addEventListener('message', function (event) {
     $('.target-label').html('');
 
     for (let [index, itemData] of Object.entries(item.data)) {
-      const numberTest = Number(index);
+      if (itemData !== null) {
+        const numberTest = Number(index);
 
-      if (!isNaN(numberTest)) index = numberTest + 1;
-
-      $('.target-label').append(
-        `<div class='target-item' id='${index}'><i class='${itemData.icon} fa-fw fa-pull-left target-icon'></i>${itemData.label}</div>`
-      );
-
-      $(`#${index}`).css('padding-top', '0.75vh');
+        if (!isNaN(numberTest)) index = numberTest + 1;
+  
+        $('.target-label').append(
+          `<div class='target-item' id='${index}'><i class='${itemData.icon} fa-fw fa-pull-left target-icon'></i>${itemData.label}</div>`
+        );
+  
+        $(`#${index}`).css('padding-top', '0.75vh');
+      }
     }
 
     $('.target-eye').css('color', 'rgba(255, 255, 255, 0.8)');
