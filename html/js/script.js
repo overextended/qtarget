@@ -13,14 +13,12 @@ window.addEventListener('message', function (event) {
 
     for (let [index, itemData] of Object.entries(item.data)) {
       if (itemData !== null) {
-        const numberTest = Number(index);
+        index += 1;
 
-        if (!isNaN(numberTest)) index = numberTest + 1;
-  
         $('.target-label').append(
           `<div class='target-item' id='${index}'><i class='${itemData.icon} fa-fw fa-pull-left target-icon'></i>${itemData.label}</div>`
         );
-  
+
         $(`#${index}`).css('padding-top', '0.75vh');
       }
     }
