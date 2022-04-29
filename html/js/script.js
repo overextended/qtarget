@@ -13,7 +13,7 @@ window.addEventListener('message', function (event) {
 
     for (let [index, itemData] of Object.entries(item.data)) {
       if (itemData !== null) {
-        index += 1;
+        index = Number(index) + 1;
 
         $('.target-label').append(
           `<div class='target-item' id='${index}'><i class='${itemData.icon} fa-fw fa-pull-left target-icon'></i>${itemData.label}</div>`
