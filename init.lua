@@ -125,6 +125,7 @@ CreateThread(function()
 							end
 						end
 					end
+					return false
 				else
 					return exports.ox_inventory:Search('count', items) >= 1
 				end
