@@ -62,7 +62,7 @@ Config.Framework = false
 
 local function JobCheck() return true end
 local function GangCheck() return true end
-local function ItemCount() return true end
+local function ItemCheck() return true end
 local function CitizenCheck() return true end
 
 CreateThread(function()
@@ -92,17 +92,74 @@ CreateThread(function()
 
         local resState = GetResourceState('ox_inventory')
         if resState ~= 'missing' and resState ~= 'unknown' then
-			ItemCount = function(item)
-				return exports.ox_inventory:Search(2, item)
+			ItemCheck = function(items)
+				if type(items) == 'table' then
+					local finalcount = 0
+					local count = 0
+					local itemArray = {}
+					local isArray = table.type(items) == 'array'
+					for _ in pairs(items) do finalcount += 1 end
+					if isArray then
+						itemArray = items
+					else
+						for k in pairs(items) do
+							itemArray[#itemArray + 1] = k
+						end
+					end
+
+					local returnedItems = exports.ox_inventory:Search('count', itemArray)
+
+					if returnedItems then
+						for name, itemCount in pairs(returnedItems) do
+							if isArray then -- Table expected in this format {'itemName1', 'itemName2', 'etc'}
+								if itemCount >= 1 then
+									count += 1
+								end
+							else -- Table expected in this format {['itemName'] = amount}
+								if itemCount >= items[name] then
+									count += 1
+								end
+							end
+							if count == finalcount then -- This is to make sure it checks all items in the table instead of only one of the items
+								return true
+							end
+						end
+					end
+				else
+					return exports.ox_inventory:Search('count', items) >= 1
+				end
 			end
 		else
-			ItemCount = function(item)
-				for _, v in pairs(ESX.GetPlayerData().inventory) do
-					if v.name == item then
-						return v.count
+			ItemCheck = function(items)
+				local isTable = type(items) == 'table'
+				local isArray = isTable and table.type(items) == 'array' or false
+				local finalcount = 0
+				local count = 0
+				if isTable then for _ in pairs(items) do finalcount += 1 end end
+				for _, v in pairs(ESX.PlayerData.inventory) do
+					if isTable then
+						if isArray then -- Table expected in this format {'itemName1', 'itemName2', 'etc'}
+							for _, item in pairs(items) do
+								if v.name == item and v.count >= 1 then
+									count += 1
+								end
+							end
+						else -- Table expected in this format {['itemName'] = amount}
+							local itemAmount = items[v.name]
+							if itemAmount and v.count >= itemAmount then
+								count += 1
+							end
+						end
+						if count == finalcount then -- This is to make sure it checks all items in the table instead of only one of the items
+							return true
+						end
+					else -- When items is a string
+						if v.name == items then
+							return v.count >= 1
+						end
 					end
 				end
-				return 0
+				return false
 			end
 		end
 
@@ -130,17 +187,46 @@ CreateThread(function()
 			table.wipe(ESX.PlayerData)
 		end)
 
+		AddEventHandler('esx:setPlayerData', function(key, val)
+			if GetInvokingResource() == 'es_extended' then
+				ESX.PlayerData[key] = val
+			end
+		end)
+
 	elseif Config.Framework == 'QB' then
 		local QBCore = exports['qb-core']:GetCoreObject()
 		local PlayerData = QBCore.Functions.GetPlayerData()
 
-		ItemCount = function(item)
+		ItemCheck = function(items)
+			local isTable = type(items) == 'table'
+			local isArray = isTable and table.type(items) == 'array' or false
+			local finalcount = 0
+			local count = 0
+			if isTable then for _ in pairs(items) do finalcount += 1 end end
 			for _, v in pairs(PlayerData.items) do
-				if v.name == item then
-					return v.amount
+				if isTable then
+					if isArray then -- Table expected in this format {'itemName1', 'itemName2', 'etc'}
+						for _, item in pairs(items) do
+							if v and v.name == item then
+								count += 1
+							end
+						end
+					else -- Table expected in this format {['itemName'] = amount}
+						local itemAmount = items[v.name]
+						if itemAmount and v and v.amount >= itemAmount then
+							count += 1
+						end
+					end
+					if count == finalcount then -- This is to make sure it checks all items in the table instead of only one of the items
+						return true
+					end
+				else -- When items is a string
+					if v and v.name == items then
+						return true
+					end
 				end
 			end
-			return 0
+			return false
 		end
 
 		JobCheck = function(job)
@@ -196,7 +282,7 @@ CreateThread(function()
 		if data.distance and distance > data.distance then return false end
 		if data.job and not JobCheck(data.job) then return false end
 		if data.gang and not GangCheck(data.gang) then return false end
-		if data.item and ItemCount(data.item) < 1 then return false end
+		if data.item and not ItemCheck(data.item) then return false end
 		if data.citizenid and not CitizenCheck(data.citizenid) then return false end
 		if data.canInteract and not data.canInteract(entity, distance, data) then return false end
 		return true
