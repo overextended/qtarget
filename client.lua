@@ -459,9 +459,9 @@ RegisterNUICallback('selectTarget', function(option, cb)
 		Wait(0)
 		if data.action then
 			data.action(data.entity)
-      cb({status = 'success'})
+      		cb({status = 'success'})
 		elseif data.event then
-      cb({status = 'success'})
+      		cb({status = 'success'})
 			if data.type == "client" then
 				TriggerEvent(data.event, data)
 			elseif data.type == "server" then
@@ -474,7 +474,7 @@ RegisterNUICallback('selectTarget', function(option, cb)
 				TriggerEvent(data.event, data)
 			end
 		else
-      cb({status = 'error'})
+      		cb({status = 'error'})
 			error("No trigger setup")
 		end
 	end)
