@@ -1,10 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400&display=swap');
 
 
-.target-wrapper {
-	display: none;
-}
-
 .target-eye {
 	position: absolute;
 	top: 50%;
@@ -17,7 +13,7 @@
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	margin-left: 2vh;
+	margin-left: 3vh;
 	margin-top: -1.35vh;
 }
 
@@ -37,18 +33,30 @@
 	color: #355c83;
 }
 
+.target-eye-active {
+	color: #355c83;
+}
+
+.target-eye-default {
+	color: #000;
+}
+
 .target-item {
 	background: linear-gradient(90deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.6) 66%, rgba(0,0,0,0) 100%);
 	border: 0px;
 	border-left: 0.2vh solid #355c83;
 	border-radius: 0.2vh;
-	margin-bottom: 0.2vh;
 	width: 25vh;
+	margin-bottom: 0.50vh;
+	display: flex;
+	align-items: center;
 	padding-left: 1vh;
 	height: 2.16vh;
+	transition: all 0.15s ease-in-out;
 }
 
 .target-item:hover {
-	background: linear-gradient(90deg, rgba(10,10,10,0.7) 0%, rgba(10,10,10,0.6) 66%, rgba(10,10,10,0) 100%);
+	background: linear-gradient(90deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.6) 66%, rgba(0,0,0,0) 100%);
 	border-left: 0.2vh solid #3a658f;
+	transform: scale(1.05);
 }
