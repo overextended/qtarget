@@ -29,6 +29,6 @@ client_scripts {
 files {
 	'data/*.lua',
 	'html/index.html',
-	'html/css/style.css',
-	'html/js/script.js'
+	'html/css/*.css',
+	'html/js/*.js'
 }

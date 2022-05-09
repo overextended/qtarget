@@ -446,7 +446,7 @@ local function EnableTarget()
 	DisableTarget(false)
 end
 
-RegisterNUICallback('selectTarget', function(option)
+RegisterNUICallback('selectTarget', function(option, cb)
 	option = tonumber(option) or option
 	SetNuiFocus(false, false)
 	SetNuiFocusKeepInput(false)
@@ -459,7 +459,9 @@ RegisterNUICallback('selectTarget', function(option)
 		Wait(0)
 		if data.action then
 			data.action(data.entity)
+      		cb({status = 'success'})
 		elseif data.event then
+      		cb({status = 'success'})
 			if data.type == "client" then
 				TriggerEvent(data.event, data)
 			elseif data.type == "server" then
@@ -472,6 +474,7 @@ RegisterNUICallback('selectTarget', function(option)
 				TriggerEvent(data.event, data)
 			end
 		else
+      		cb({status = 'error'})
 			error("No trigger setup")
 		end
 	end)
