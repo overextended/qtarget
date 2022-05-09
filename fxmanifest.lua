@@ -7,7 +7,7 @@ game         'gta5'
 --[[ Resource Information ]]--
 name         'qtarget'
 author       'Linden, Noms'
-version      '2.1.5'
+version      '2.1.6'
 repository   'https://github.com/overextended/qtarget'
 description  'An optimised targetting solution, based on bt-target'
 
