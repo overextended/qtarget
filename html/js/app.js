@@ -18,6 +18,7 @@ function main(){
                 const item = event.data
                 switch (item.response) {
                     case 'validTarget':
+                        this.target.splice(0, this.target.length);
                         for (let [index, itemData] of Object.entries(item.data)) {
                             if (itemData !== null) {
                                 this.target.push(itemData)
