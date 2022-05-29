@@ -4,8 +4,12 @@ function main(){
         eyeActive: false,
         target: [],
         executeTarget(id){
+            console.log(`[DEBUG] UI: Executing target ${id}`);
+            console.log(JSON.stringify(this.target[id], null, 2))
             if(this.target[id]){
-                postData(`selectTarget`, id + 1).then(data => {
+                const target = id + 1
+                console.log(`[DEBUG] UI: Sending target ${target}`);
+                postData(`selectTarget`, target).then(data => {
                     if (data.status == 'success') {
                         this.display = false;
                     }
@@ -18,6 +22,7 @@ function main(){
                 const item = event.data
                 switch (item.response) {
                     case 'validTarget':
+                        console.log(JSON.stringify(item.data, null, 2))
                         this.target.splice(0, this.target.length);
                         for (let [index, itemData] of Object.entries(item.data)) {
                             if (itemData !== null) {
@@ -25,6 +30,7 @@ function main(){
                             }
                           }
                         this.eyeActive = true;
+                        console.log(JSON.stringify(this.target, null, 2))
                         break;
                     case 'openTarget':
                         this.display = true;
