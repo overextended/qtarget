@@ -134,29 +134,28 @@ CreateThread(function()
 			ItemCheck = function(items)
 				local isTable = type(items) == 'table'
 				local isArray = isTable and table.type(items) == 'array' or false
-				local finalcount = 0
+				local totalItems = #items
 				local count = 0
-				if isTable then for _ in pairs(items) do finalcount += 1 end end
-				for _, v in pairs(ESX.PlayerData.inventory) do
+				local kvIndex = 2
+				if isTable and not isArray then
+					totalItems = 0
+					for _ in pairs(items) do totalItems += 1 end
+					kvIndex = 1
+				end
+				for _, itemData in pairs(ESX.PlayerData.inventory) do
 					if isTable then
-						if isArray then -- Table expected in this format {'itemName1', 'itemName2', 'etc'}
-							for _, item in pairs(items) do
-								if v.name == item and v.count >= 1 then
-									count += 1
-								end
-							end
-						else -- Table expected in this format {['itemName'] = amount}
-							local itemAmount = items[v.name]
-							if itemAmount and v.count >= itemAmount then
+						for k, v in pairs(items) do
+							local itemKV = {k, v}
+							if itemData.name == itemKV[kvIndex] and ((not isArray and itemData.count >= v) or (isArray and itemData.count > 0)) then
 								count += 1
 							end
 						end
-						if count == finalcount then -- This is to make sure it checks all items in the table instead of only one of the items
+						if count == totalItems then
 							return true
 						end
-					else -- When items is a string
-						if v.name == items then
-							return v.count >= 1
+					else -- Single item as string
+						if itemData.name == items and itemData.count > 0 then
+							return true
 						end
 					end
 				end
@@ -198,37 +197,7 @@ CreateThread(function()
 		local QBCore = exports['qb-core']:GetCoreObject()
 		local PlayerData = QBCore.Functions.GetPlayerData()
 
-		ItemCheck = function(items)
-			local isTable = type(items) == 'table'
-			local isArray = isTable and table.type(items) == 'array' or false
-			local finalcount = 0
-			local count = 0
-			if isTable then for _ in pairs(items) do finalcount += 1 end end
-			for _, v in pairs(PlayerData.items) do
-				if isTable then
-					if isArray then -- Table expected in this format {'itemName1', 'itemName2', 'etc'}
-						for _, item in pairs(items) do
-							if v and v.name == item then
-								count += 1
-							end
-						end
-					else -- Table expected in this format {['itemName'] = amount}
-						local itemAmount = items[v.name]
-						if itemAmount and v and v.amount >= itemAmount then
-							count += 1
-						end
-					end
-					if count == finalcount then -- This is to make sure it checks all items in the table instead of only one of the items
-						return true
-					end
-				else -- When items is a string
-					if v and v.name == items then
-						return true
-					end
-				end
-			end
-			return false
-		end
+		ItemCheck = QBCore.Functions.HasItem
 
 		JobCheck = function(job)
 			if type(job) == 'table' then

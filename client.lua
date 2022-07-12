@@ -83,7 +83,7 @@ local function EnableNUI()
 	hasFocus = true
 end
 
-local success  = false
+local success = false
 local sendData = {}
 local sendDistance = {}
 local nuiData = {}
@@ -643,29 +643,37 @@ exports('AddTargetBone', AddTargetBone)
 local function RemoveTargetBone(bones, labels)
 	if type(bones) == 'table' then
 		for _, bone in pairs(bones) do
-			if type(labels) == 'table' then
-				for _, v in pairs(labels) do
+			if labels then
+				if type(labels) == 'table' then
+					for _, v in pairs(labels) do
+						if Bones.Options[bone] then
+							Bones.Options[bone][v] = nil
+						end
+					end
+				elseif type(labels) == 'string' then
 					if Bones.Options[bone] then
-						Bones.Options[bone][v] = nil
+						Bones.Options[bone][labels] = nil
 					end
 				end
-			elseif type(labels) == 'string' then
-				if Bones.Options[bone] then
-					Bones.Options[bone][labels] = nil
-				end
+			else
+				Bones.Options[bone] = nil
 			end
 		end
 	else
-		if type(labels) == 'table' then
-			for _, v in pairs(labels) do
+		if labels then
+			if type(labels) == 'table' then
+				for _, v in pairs(labels) do
+					if Bones.Options[bones] then
+						Bones.Options[bones][v] = nil
+					end
+				end
+			elseif type(labels) == 'string' then
 				if Bones.Options[bones] then
-					Bones.Options[bones][v] = nil
+					Bones.Options[bones][labels] = nil
 				end
 			end
-		elseif type(labels) == 'string' then
-			if Bones.Options[bones] then
-				Bones.Options[bones][labels] = nil
-			end
+		else
+			Bones.Options[bones] = nil
 		end
 	end
 end
@@ -695,30 +703,38 @@ local function RemoveTargetEntity(entities, labels)
 	if type(entities) == 'table' then
 		for _, entity in pairs(entities) do
 			if NetworkGetEntityIsNetworked(entity) then entity = NetworkGetNetworkIdFromEntity(entity) end -- Allow non-networked entities to be targeted
-			if type(labels) == 'table' then
-				for _, v in pairs(labels) do
+			if labels then
+				if type(labels) == 'table' then
+					for _, v in pairs(labels) do
+						if Entities[entity] then
+							Entities[entity][v] = nil
+						end
+					end
+				elseif type(labels) == 'string' then
 					if Entities[entity] then
-						Entities[entity][v] = nil
+						Entities[entity][labels] = nil
 					end
 				end
-			elseif type(labels) == 'string' then
-				if Entities[entity] then
-					Entities[entity][labels] = nil
-				end
+			else
+				Entities[entity] = nil
 			end
 		end
 	elseif type(entities) == 'number' then
 		if NetworkGetEntityIsNetworked(entities) then entities = NetworkGetNetworkIdFromEntity(entities) end -- Allow non-networked entities to be targeted
-		if type(labels) == 'table' then
-			for _, v in pairs(labels) do
+		if labels then
+			if type(labels) == 'table' then
+				for _, v in pairs(labels) do
+					if Entities[entities] then
+						Entities[entities][v] = nil
+					end
+				end
+			elseif type(labels) == 'string' then
 				if Entities[entities] then
-					Entities[entities][v] = nil
+					Entities[entities][labels] = nil
 				end
 			end
-		elseif type(labels) == 'string' then
-			if Entities[entities] then
-				Entities[entities][labels] = nil
-			end
+		else
+			Entities[entities] = nil
 		end
 	end
 end
@@ -748,30 +764,38 @@ local function RemoveTargetModel(models, labels)
 	if type(models) == 'table' then
 		for _, model in pairs(models) do
 			if type(model) == 'string' then model = joaat(model) end
-			if type(labels) == 'table' then
-				for k, v in pairs(labels) do
+			if labels then
+				if type(labels) == 'table' then
+					for k, v in pairs(labels) do
+						if Models[model] then
+							Models[model][v] = nil
+						end
+					end
+				elseif type(labels) == 'string' then
 					if Models[model] then
-						Models[model][v] = nil
+						Models[model][labels] = nil
 					end
 				end
-			elseif type(labels) == 'string' then
-				if Models[model] then
-					Models[model][labels] = nil
-				end
+			else
+				Models[model] = nil
 			end
 		end
 	else
 		if type(models) == 'string' then models = joaat(models) end
-		if type(labels) == 'table' then
-			for k, v in pairs(labels) do
+		if labels then
+			if type(labels) == 'table' then
+				for _, v in pairs(labels) do
+					if Models[models] then
+						Models[models][v] = nil
+					end
+				end
+			elseif type(labels) == 'string' then
 				if Models[models] then
-					Models[models][v] = nil
+					Models[models][labels] = nil
 				end
 			end
-		elseif type(labels) == 'string' then
-			if Models[models] then
-				Models[models][labels] = nil
-			end
+		else
+			Models[models] = nil
 		end
 	end
 end
@@ -806,12 +830,16 @@ exports('Player', AddPlayer)
 ---@param typ number
 ---@param labels table | string
 local function RemoveType(typ, labels)
-	if type(labels) == 'table' then
-		for _, v in pairs(labels) do
-			Types[typ][v] = nil
+	if labels then
+		if type(labels) == 'table' then
+			for _, v in pairs(labels) do
+				Types[typ][v] = nil
+			end
+		elseif type(labels) == 'string' then
+			Types[typ][labels] = nil
 		end
-	elseif type(labels) == 'string' then
-		Types[typ][labels] = nil
+	else
+		Types[typ] = {}
 	end
 end
 
@@ -829,12 +857,16 @@ exports('RemoveObject', RemoveObject)
 
 ---@param labels table | string
 local function RemovePlayer(labels)
-	if type(labels) == 'table' then
-		for _, v in pairs(labels) do
-			Players[v] = nil
+	if labels then
+		if type(labels) == 'table' then
+			for _, v in pairs(labels) do
+				Players[v] = nil
+			end
+		elseif type(labels) == 'string' then
+			Players[labels] = nil
 		end
-	elseif type(labels) == 'string' then
-		Players[labels] = nil
+	else
+		Players = {}
 	end
 end
 exports('RemovePlayer', RemovePlayer)
@@ -865,7 +897,12 @@ exports("GetPlayer", function(label) return Players[label] end)
 
 exports("UpdateType", function(type, label, data) Types[type][label] = data end)
 
-exports("UpdateZone", function(name, data) Zones[name] = data end)
+local function UpdateZoneOptions (name, targetoptions)
+	targetoptions.distance = targetoptions.distance or Config.MaxDistance
+	Zones[name].targetoptions = targetoptions
+end
+
+exports("UpdateZoneOptions", UpdateZoneOptions)
 
 exports("UpdateTargetBone", function(bone, label, data) Bones.Options[bone][label] = data end)
 
@@ -883,9 +920,8 @@ exports("UpdatePlayer", function(label, data) Players[label] = data end)
 
 exports("AllowTargeting", function(bool)
 	allowTarget = bool
-	if not allowTarget then
-		DisableTarget(true)
-	end
+	if allowTarget then return end
+	DisableTarget(true)
 end)
 
 -- Debug Option

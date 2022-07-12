@@ -23,7 +23,7 @@
 ## Credits
 - Primary development by [@thelindat](https://github.com/thelindat) and [@OfficialNoms](https://github.com/OfficialNoms)
 - Inspired by, and based on, including using javascript from: [bt-target](https://github.com/brentN5/bt-target) by [@brentN5](https://github.com/brentN5)
-- Motivation by the entire [Linden's discord](https://discord.gg/4V6VwvBEzQ) communtiy.
+- Motivation by the entire [Linden's discord](https://discord.gg/mEM6eYdXPm) communtiy.
 
 ## Issues
 Please use the GitHub issues system to report issues. 
