@@ -897,7 +897,12 @@ exports("GetPlayer", function(label) return Players[label] end)
 
 exports("UpdateType", function(type, label, data) Types[type][label] = data end)
 
-exports("UpdateZone", function(name, data) Zones[name] = data end)
+local function UpdateZoneOptions (name, targetoptions)
+	targetoptions.distance = targetoptions.distance or Config.MaxDistance
+	Zones[name].targetoptions = targetoptions
+end
+
+exports("UpdateZoneOptions", function(name, targetoptions) UpdateZoneOptions(name, targetoptions) end)
 
 exports("UpdateTargetBone", function(bone, label, data) Bones.Options[bone][label] = data end)
 
