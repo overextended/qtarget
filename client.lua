@@ -902,7 +902,7 @@ local function UpdateZoneOptions (name, targetoptions)
 	Zones[name].targetoptions = targetoptions
 end
 
-exports("UpdateZoneOptions", function(name, targetoptions) UpdateZoneOptions(name, targetoptions) end)
+exports("UpdateZoneOptions", UpdateZoneOptions)
 
 exports("UpdateTargetBone", function(bone, label, data) Bones.Options[bone][label] = data end)
 
