@@ -337,6 +337,7 @@ local function EnableTarget()
 				elseif entityType == 2 then
 					local closestBone, _, closestBoneName = CheckBones(coords, entity, Bones.Vehicle)
 					local data = Bones.Options[closestBoneName]
+					
 					if data and next(data) and closestBone then
 						SetupOptions(data, entity, distance)
 						if next(nuiData) then
@@ -344,9 +345,10 @@ local function EnableTarget()
 							SendNUIMessage({response = 'validTarget', data = nuiData})
 							DrawOutlineEntity(entity, true)
 							while targetActive and success do
-								local _, dist, entity2 = RaycastCamera(flag)
+								local coords2, dist, entity2 = RaycastCamera(flag)
 								if entity == entity2 then
-									local closestBone2 = CheckBones(coords, entity, Bones.Vehicle)
+									local closestBone2 = CheckBones(coords2, entity, Bones.Vehicle)
+
 									if closestBone ~= closestBone2 then
 										LeaveTarget()
 										DrawOutlineEntity(entity, false)
@@ -897,7 +899,12 @@ exports("GetPlayer", function(label) return Players[label] end)
 
 exports("UpdateType", function(type, label, data) Types[type][label] = data end)
 
-exports("UpdateZone", function(name, data) Zones[name] = data end)
+local function UpdateZoneOptions (name, targetoptions)
+	targetoptions.distance = targetoptions.distance or Config.MaxDistance
+	Zones[name].targetoptions = targetoptions
+end
+
+exports("UpdateZoneOptions", UpdateZoneOptions) -- (name, targetoptions) end)
 
 exports("UpdateTargetBone", function(bone, label, data) Bones.Options[bone][label] = data end)
 
