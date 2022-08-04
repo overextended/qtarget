@@ -47,14 +47,19 @@ local function RaycastCamera(flag, playerCoords)
 	if not playerCoords then playerCoords = GetEntityCoords(playerPed) end
 
 	local rayPos, rayDir = ScreenPositionToCameraRay()
-	local destination = rayPos + 10000 * rayDir
-	local rayHandle = StartShapeTestLosProbe(rayPos.x, rayPos.y, rayPos.z, destination.x, destination.y, destination.z, flag or -1, playerPed, 0)
+	local destination = rayPos + 16 * rayDir
+	local rayHandle = StartShapeTestLosProbe(rayPos.x, rayPos.y, rayPos.z, destination.x, destination.y, destination.z, flag or -1, playerPed, 7)
 
 	while true do
 		local result, _, endCoords, _, entityHit = GetShapeTestResult(rayHandle)
 
 		if result ~= 1 then
 			local distance = playerCoords and #(playerCoords - endCoords)
+
+			if flag == 30 and entityHit then
+				entityHit = HasEntityClearLosToEntity(entityHit, playerPed, 7) and entityHit
+			end
+
 			return endCoords, distance, entityHit, entityHit and GetEntityType(entityHit) or 0
 		end
 
@@ -306,7 +311,7 @@ local function EnableTarget()
 		until not targetActive
 	end)
 
-	local flag
+	local flag = 30
 
 	while targetActive do
 		local sleep = 0
@@ -337,7 +342,7 @@ local function EnableTarget()
 				elseif entityType == 2 then
 					local closestBone, _, closestBoneName = CheckBones(coords, entity, Bones.Vehicle)
 					local data = Bones.Options[closestBoneName]
-					
+
 					if data and next(data) and closestBone then
 						SetupOptions(data, entity, distance)
 						if next(nuiData) then
