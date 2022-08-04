@@ -511,13 +511,15 @@ if Config.Toggle then
 		if targetActive then
 			DisableTarget(true)
 		else
-			EnableTarget()
+			CreateThread(EnableTarget)
 		end
 	end, false)
 	RegisterKeyMapping("playerTarget", "Toggle targeting~", "keyboard", Config.OpenKey)
 	TriggerEvent('chat:removeSuggestion', '/playerTarget')
 else
-	RegisterCommand('+playerTarget', EnableTarget, false)
+	RegisterCommand('+playerTarget', function()
+		CreateThread(EnableTarget)
+	end, false)
 	RegisterCommand('-playerTarget', DisableTarget, false)
 	RegisterKeyMapping("+playerTarget", "Enable targeting~", "keyboard", Config.OpenKey)
 	TriggerEvent('chat:removeSuggestion', '/+playerTarget')
