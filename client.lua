@@ -60,7 +60,13 @@ local function RaycastCamera(flag, playerCoords)
 				entityHit = HasEntityClearLosToEntity(entityHit, playerPed, 7) and entityHit
 			end
 
-			return endCoords, distance, entityHit, entityHit and GetEntityType(entityHit) or 0
+			local entityType = entityHit and GetEntityType(entityHit)
+
+			if entityType == 0 and pcall(GetEntityModel, entityHit) then
+				entityType = 3
+			end
+
+			return endCoords, distance, entityHit, entityType or 0
 		end
 
 		Wait(0)
