@@ -34,11 +34,16 @@ end
 local playerPed
 local GetEntityCoords = GetEntityCoords
 local Wait = Wait
+local pcall = pcall
+local HasEntityClearLosToEntity = HasEntityClearLosToEntity
+local GetEntityType = GetEntityType
+local StartShapeTestLosProbe = StartShapeTestLosProbe
+local GetShapeTestResult = GetShapeTestResult
+local PlayerPedId = PlayerPedId
 
 ---@param flag number
----@param playerCoords vector
----@return number flag
----@return vector coords
+---@param playerCoords vector3
+---@return vector3 coords
 ---@return number distance
 ---@return number entity
 ---@return number entity_type
@@ -172,7 +177,7 @@ local IsDisabledControlPressed = IsDisabledControlPressed
 ---@param distance number
 local function CheckEntity(flag, data, entity, distance)
 	if not next(data) then return end
-	SetupOptions(data, entity, distance)
+	SetupOptions(data, entity, distance, false)
 	if not next(nuiData) then
 		LeaveTarget()
 		DrawOutlineEntity(entity, false)
@@ -211,7 +216,7 @@ local Bones = Load('bones')
 local GetEntityBoneIndexByName = GetEntityBoneIndexByName
 local GetWorldPositionOfEntityBone = GetWorldPositionOfEntityBone
 
----@param coords vector
+---@param coords vector3
 ---@param entity number
 ---@param bonelist table
 ---@return boolean | number
@@ -350,7 +355,7 @@ local function EnableTarget()
 					local data = Bones.Options[closestBoneName]
 
 					if data and next(data) and closestBone then
-						SetupOptions(data, entity, distance)
+						SetupOptions(data, entity, distance, false)
 						if next(nuiData) then
 							success = true
 							SendNUIMessage({response = 'validTarget', data = nuiData})
@@ -888,57 +893,137 @@ exports('RemovePlayer', RemovePlayer)
 
 -- Misc. Exports
 
-exports("IsTargetActive", function() return targetActive end)
+local function IsTargetActive() return targetActive end
+exports("IsTargetActive", IsTargetActive)
 
-exports("IsTargetSuccess", function() return success end)
+local function IsTargetSuccess() return success end
+exports("IsTargetSuccess", IsTargetSuccess)
 
-exports("GetType", function(type, label) return Types[type][label] end)
+local function GetType(type, label) return Types[type][label] end
+exports("GetType", GetType)
 
-exports("GetZone", function(name) return Zones[name] end)
+local function GetZone(name) return Zones[name] end
+exports("GetZone", GetZone)
 
-exports("GetTargetBone", function(bone) return Bones.Options[bone][label] end)
+local function GetTargetBone(bone, label) return Bones.Options[bone][label] end
+exports("GetTargetBone", GetTargetBone)
 
-exports("GetTargetEntity", function(entity, label) return Entities[entity][label] end)
+local function GetTargetEntity(entity, label) return Entities[entity][label] end
+exports("GetTargetEntity", GetTargetEntity)
 
-exports("GetTargetModel", function(model, label) return Models[model][label] end)
+local function GetTargetModel(model, label) return Models[model][label] end
+exports("GetTargetModel", GetTargetModel)
 
-exports("GetPed", function(label) return Types[1][label] end)
+local function GetPed(label) return Types[1][label] end
+exports("GetPed", GetPed)
 
-exports("GetVehicle", function(label) return Types[2][label] end)
+local function GetVehicle(label) return Types[2][label] end
+exports("GetVehicle", GetVehicle)
 
-exports("GetObject", function(label) return Types[3][label] end)
+local function GetObject(label) return Types[3][label] end
+exports("GetObject", GetObject)
 
-exports("GetPlayer", function(label) return Players[label] end)
+local function GetPlayer(label) return Players[label] end
+exports("GetPlayer", GetPlayer)
 
-exports("UpdateType", function(type, label, data) Types[type][label] = data end)
+local function UpdateType(type, label, data) Types[type][label] = data end
+exports("UpdateType", UpdateType)
 
 local function UpdateZoneOptions (name, targetoptions)
 	targetoptions.distance = targetoptions.distance or Config.MaxDistance
 	Zones[name].targetoptions = targetoptions
 end
-
 exports("UpdateZoneOptions", UpdateZoneOptions) -- (name, targetoptions) end)
 
-exports("UpdateTargetBone", function(bone, label, data) Bones.Options[bone][label] = data end)
+local function UpdateTargetBone(bone, label, data) Bones.Options[bone][label] = data end
+exports("UpdateTargetBone", UpdateTargetBone)
 
-exports("UpdateTargetEntity", function(entity, label, data) Entities[entity][label] = data end)
+local function UpdateTargetEntity(entity, label, data) Entities[entity][label] = data end
+exports("UpdateTargetEntity", UpdateTargetEntity)
 
-exports("UpdateTargetModel", function(model, label, data) Models[model][label] = data end)
+local function UpdateTargetModel(model, label, data) Models[model][label] = data end
+exports("UpdateTargetModel", UpdateTargetModel)
 
-exports("UpdatePed", function(label, data) Types[1][label] = data end)
+local function UpdatePed(label, data) Types[1][label] = data end
+exports("UpdatePed", UpdatePed)
 
-exports("UpdateVehicle", function(label, data) Types[2][label] = data end)
+local function UpdateVehicle(label, data) Types[2][label] = data end
+exports("UpdateVehicle", UpdateVehicle)
 
-exports("UpdateObject", function(label, data) Types[3][label] = data end)
+local function UpdateObject(label, data) Types[3][label] = data end
+exports("UpdateObject", UpdateObject)
 
-exports("UpdatePlayer", function(label, data) Players[label] = data end)
+local function UpdatePlayer(label, data) Players[label] = data end
+exports("UpdatePlayer", UpdatePlayer)
 
-exports("AllowTargeting", function(bool)
+local function AllowTargeting(bool)
 	allowTarget = bool
+
 	if allowTarget then return end
+
 	DisableTarget(true)
-end)
+end
+exports("AllowTargeting", AllowTargeting)
 
 -- Debug Option
 
 if Config.Debug then Load('debug') end
+
+-- qb-target interoperability
+
+local qb_targetExports = {
+	["RaycastCamera"] = RaycastCamera,
+	["DisableNUI"] = DisableNUI,
+	["LeftTarget"] = LeaveTarget,
+	["DisableTarget"] = DisableTarget,
+	["DrawOutlineEntity"] = DrawOutlineEntity,
+	["CheckEntity"] = CheckEntity,
+	["CheckBones"] = CheckBones,
+	["AddCircleZone"] = AddCircleZone,
+	["AddBoxZone"] = AddBoxZone,
+	["AddPolyZone"] = AddPolyZone,
+	["AddComboZone"] = AddComboZone,
+	["AddEntityZone"] = AddEntityZone,
+	["RemoveZone"] = RemoveZone,
+	["AddTargetBone"] = AddTargetBone,
+	["RemoveTargetBone"] = RemoveTargetBone,
+	["AddTargetEntity"] = AddTargetEntity,
+	["RemoveTargetEntity"] = RemoveTargetEntity,
+	["AddTargetModel"] = AddTargetModel,
+	["RemoveTargetModel"] = RemoveTargetModel,
+	["AddGlobalPed"] = AddPed,
+	["AddGlobalVehicle"] = AddVehicle,
+	["AddGlobalObject"] = AddObject,
+	["AddGlobalPlayer"] = AddPlayer,
+	["RemoveGlobalPed"] = RemovePed,
+	["RemoveGlobalVehicle"] = RemoveVehicle,
+	["RemoveGlobalObject"] = RemoveObject,
+	["RemoveGlobalPlayer"] = RemovePlayer,
+	["IsTargetActive"] = IsTargetActive,
+	["IsTargetSuccess"] = IsTargetSuccess,
+	["GetGlobalTypeData"] = GetType,
+	["GetZoneData"] = GetZone,
+	["GetTargetBoneData"] = GetTargetBone,
+	["GetTargetEntityData"] = GetTargetEntity,
+	["GetTargetModelData"] = GetTargetModel,
+	["GetGlobalPedData"] = GetPed,
+	["GetGlobalVehicleData"] = GetVehicle,
+	["GetGlobalObjectData"] = GetObject,
+	["GetGlobalPlayerData"] = GetPlayer,
+	["UpdateGlobalTypeData"] = UpdateType,
+	["UpdateZoneData"] = UpdateZoneOptions,
+	["UpdateTargetBoneData"] = UpdateTargetBone,
+	["UpdateTargetEntityData"] = UpdateTargetEntity,
+	["UpdateTargetModelData"] = UpdateTargetModel,
+	["UpdateGlobalPedData"] = UpdatePed,
+	["UpdateGlobalVehicleData"] = UpdateVehicle,
+	["UpdateGlobalObjectData"] = UpdateObject,
+	["UpdateGlobalPlayerData"] = UpdatePlayer,
+	["AllowTargeting"] = AllowTargeting
+}
+
+for exportName, func in pairs(qb_targetExports) do
+	AddEventHandler(('__cfx_export_qb-target_%s'):format(exportName), function(setCB)
+		setCB(func)
+	end)
+end
