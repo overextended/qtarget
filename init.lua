@@ -142,7 +142,7 @@ CreateThread(function()
 					for _ in pairs(items) do totalItems += 1 end
 					kvIndex = 1
 				end
-				for _, itemData in pairs(ESX.PlayerData.inventory) do
+				for _, itemData in pairs(ESX.GetPlayerData().inventory) do
 					if isTable then
 						for k, v in pairs(items) do
 							local itemKV = {k, v}
