@@ -1,12 +1,13 @@
 # Deprecated / unsupported
 
-qtarget has been largely unmaintained, receiving some occasional performance tweaks.
+qtarget has been largely unmaintained, receiving some occasional fixes and tweaks .
 There are issues with the ways many features were implemented, some from trying maintain compatibility with bt-target, but mostly janky patches on top of underlying flaws.
 
 Development on a replacement is ongoing at [ox_target](https://github.com/overextended/ox_target), which will try to implement _some_ compatibility; however it cannot cover everything and will not attempt to patch poor-design decisions.
 
 Some issues will be patched in qtarget if necessary, but it is dead (and should have been long ago).
 
+<br><br>
 
 <h2 align='center'><a href='https://overextended.github.io/qtarget/'>» Installation and Documentation «</a></h2>
 
