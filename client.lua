@@ -266,30 +266,32 @@ local function DrawTarget()
 	CreateThread(function()
 		while not HasStreamedTextureDictLoaded("shared") do Wait(10) RequestStreamedTextureDict("shared", true) end
 		local sleep
-		local r, g, b, a
 		while targetActive do
-			sleep = 500
-			for _, zone in pairs(listSprite) do
-				sleep = 0
+			sleep = next(listSprite) and 0 or 500
 
-				r = zone.targetoptions.drawColor?[1] or Config.DrawColor[1]
-				g = zone.targetoptions.drawColor?[2] or Config.DrawColor[2]
-				b = zone.targetoptions.drawColor?[3] or Config.DrawColor[3]
-				a = zone.targetoptions.drawColor?[4] or Config.DrawColor[4]
+			for _, zone in pairs(listSprite) do
+				local r, g, b, a
 
 				if zone.success then
 					r = zone.targetoptions.successDrawColor?[1] or Config.SuccessDrawColor[1]
 					g = zone.targetoptions.successDrawColor?[2] or Config.SuccessDrawColor[2]
 					b = zone.targetoptions.successDrawColor?[3] or Config.SuccessDrawColor[3]
 					a = zone.targetoptions.successDrawColor?[4] or Config.SuccessDrawColor[4]
+				else
+					r = zone.targetoptions.drawColor?[1] or Config.DrawColor[1]
+					g = zone.targetoptions.drawColor?[2] or Config.DrawColor[2]
+					b = zone.targetoptions.drawColor?[3] or Config.DrawColor[3]
+					a = zone.targetoptions.drawColor?[4] or Config.DrawColor[4]
 				end
 
 				SetDrawOrigin(zone.center.x, zone.center.y, zone.center.z, 0)
 				DrawSprite("shared", "emptydot_32", 0, 0, 0.02, 0.035, 0, r, g, b, a)
-				ClearDrawOrigin()
 			end
+
+			ClearDrawOrigin()
 			Wait(sleep)
 		end
+
 		listSprite = {}
 	end)
 end
@@ -429,7 +431,7 @@ local function EnableTarget()
 					if next(nuiData) then
 						success = true
 						SendNUIMessage({response = 'validTarget', data = nuiData})
-						if Config.DrawSprite then
+						if Config.DrawSprite and listSprite[closestZone.name] then
 							listSprite[closestZone.name].success = true
 						end
 						DrawOutlineEntity(entity, true)
